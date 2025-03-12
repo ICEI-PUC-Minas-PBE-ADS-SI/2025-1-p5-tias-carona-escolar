@@ -15,6 +15,7 @@ Diferentemente de aplicativos de carona tradicionais, este serviço será dedica
 * Guilherme Siqueira Ramos
 * Luísa Machado Antunes Santos
 * Otávio Gonçalves Rocha
+* Tiago Rafael Martins Cardoso
 * Vinicius Henrique Alves
 * Walyson Moises Barbosa
 
