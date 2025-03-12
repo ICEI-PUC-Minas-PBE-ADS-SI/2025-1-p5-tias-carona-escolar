@@ -4,22 +4,23 @@
 
 `DISCIPLINA: Trabalho Interdisciplinar Aplicações para Sustentabilidade`
 
-`Xº semestre/ANO`
+`5º semestre/2025`
 
-Escreva um ou dois parágrafos resumindo o objetivo do seu projeto.
+O projeto tem como objetivo criar um aplicativo web de carona escolar, facilitando a conexão entre alunos ou pais que dirigem até a escola e aqueles que necessitam de transporte. A plataforma permitirá que usuários ofereçam ou solicitem caronas com base em suas rotas diárias, promovendo economia e praticidade nos deslocamentos escolares.
+
+Diferentemente de aplicativos de carona tradicionais, este serviço será dedicado ao ambiente escolar, priorizando a segurança dos estudantes por meio de verificações de usuários e sistemas de avaliação. Além de proporcionar comodidade às famílias, o projeto contribuirá para a sustentabilidade e a mobilidade urbana, reduzindo o número de veículos em circulação e, consequentemente, o trânsito e a emissão de poluentes.
 
 ## Integrantes
 
-* Nome completo do aluno 1
-* Nome completo do aluno 2
-* Nome completo do aluno 3
-* Nome completo do aluno 4
-* Nome completo do aluno 5
-* Nome completo do aluno 6
+* Guilherme Siqueira Ramos
+* Luísa Machado Antunes Santos
+* Otávio Gonçalves Rocha
+* Vinicius Henrique Alves
+* Walyson Moises Barbosa
 
 ## Professor
 
-* Nome completo do(a) professor(a)
+* Amália Soares Vieira de Vasconcelos
 
 ## Instruções de utilização
 
