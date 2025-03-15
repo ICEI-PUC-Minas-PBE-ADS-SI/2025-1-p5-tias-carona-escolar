@@ -8,6 +8,15 @@ Apresente uma visão geral do que será abordado nesta parte do documento, enume
 
 ## Personas
 
+### 1. Maria, mãe de dois alunos
+Maria tem 38 anos e trabalha como enfermeira em tempo integral. Ela enfrenta dificuldades para conciliar sua rotina de trabalho com o transporte diário dos filhos para a escola. Maria busca uma solução segura e confiável que não apenas garanta a segurança das crianças, mas também ajude a economizar tempo e dinheiro. Suas principais necessidades incluem garantir que seus filhos cheguem à escola e voltem para casa com segurança, reduzir os custos com transporte individual e encontrar motoristas confiáveis para compartilhar caronas.
+
+### 2. João, aluno do ensino médio
+João tem 18 anos e está no último ano do ensino médio. Ele já possui habilitação para dirigir e mora perto da escola. João está disposto a oferecer caronas para colegas que morem em sua rota, ajudando-os e, ao mesmo tempo, reduzindo seus próprios custos com combustível. Ele busca uma plataforma fácil de usar que permita organizar as caronas de forma prática e segura, além de contribuir para a comunidade escolar.
+
+### 3. Carlos, pai voluntário
+Carlos tem 45 anos e trabalha como engenheiro. Ele é pai de um aluno da escola e já oferece caronas para outros estudantes que moram em sua rota. Carlos deseja uma forma mais organizada de gerenciar as caronas, garantindo a segurança dos passageiros e facilitando o planejamento de rotas e horários. Ele também quer contribuir para a redução do tráfego e da poluição na região, alinhando-se aos valores de sustentabilidade.
+
 Exemplo: _Pedro Paulo tem 26 anos, é arquiteto recém-formado e autônomo. Pensa em se desenvolver profissionalmente por meio de um mestrado fora do país, pois adora viajar, é solteiro e sempre quis fazer um intercâmbio. Está buscando uma agência que o ajude a encontrar universidades na Europa que aceitem alunos estrangeiros._
 
 Enumere e detalhe as personas da sua solução. Para tanto, baseie-se tanto nos documentos disponibilizados na disciplina e/ou nos seguintes links:
@@ -28,6 +37,10 @@ Com base na análise das personas, foram identificadas as seguintes histórias d
 
 |EU COMO... `PERSONA`| QUERO/PRECISO ... `FUNCIONALIDADE` |PARA ... `MOTIVO/VALOR`                 |
 |--------------------|------------------------------------|----------------------------------------|
+|Maria               | Cadastrar meus filhos como passageiros|Garantir que eles possam solicitar caronas com segurança.|
+|Maria               | Verificar a reputação dos motoristas|Saber se posso confiar neles para transportar meus filhos.|
+|João                | Oferecer caronas para colegas|Ajudar os outros e reduzir meus custos com combustível.|
+|Carlos              | Gerenciar minhas caronas oferecidas|Facilitar o planejamento de rotas e horários.|
 |Usuário do sistema  | Registrar minhas tarefas           | Não esquecer de fazê-las               |
 |Administrador       | Alterar permissões                 | Permitir que possam administrar contas |
 
