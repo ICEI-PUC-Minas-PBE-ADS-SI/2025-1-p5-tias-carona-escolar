@@ -1,19 +1,7 @@
 # Referências
 
-Inclua todas as referências (livros, artigos, sites, etc.) utilizadas no desenvolvimento do trabalho.
+SOUZA, Edson Alves de; SILVA, José Carlos dos Santos. MIOPER: Aplicativo Prestador de Serviços para Carona Compartilhada em Transporte Privado Escolar. Revista HTEC, [S.l.], v. 7, n. 1, p. 1-10, 2023. Disponível em: https://fateccruzeiro.edu.br/revista/index.php/htec/article/view/362, Acesso em: 13 mar. 2025.
 
-Exemplo:
+RIBEIRO, Andréia Couto; JESUS, Wellington Ferreira de. A trajetória histórica da política pública de transporte escolar: um olhar sob a assistência dos programas federais para a educação básica. Revista HISTEDBR On-line, Campinas, v. 15, n. 66, p. 1-15, 2016. Disponível em: https://www.periodicos.capes.gov.br/index.php/acervo/buscador.html?task=detalhes&source=all&id=W2325045711. Acesso em: 13 mar. 2025.
 
-- BENYON, David. **Interação humano-computador**. 2. ed. São Paulo: Pearson Prentice Hall, 2011.
-
-- CORMEN, Thomas H et al. **Algoritmos:** teoria e prática. 4. ed. Rio de Janeiro: GEN LTC, 2024.
- 
-- ELMASRI, Ramez; NAVATHE, Sham. **Sistemas de banco de dados**. 7. ed. São Paulo: Pearson, c2019.
-
-- RUSSELL, Stuart J.; NORVIG, Peter. **Inteligência artificial:** uma abordagem moderna. 4. ed. Rio de Janeiro, RJ: LTC, 2022.
-
-- SUTHERLAND, Jeffrey Victor; SUTHERLAND, J. J. **Scrum:** a arte de fazer o dobro do trabalho na metade do tempo. Rio de Janeiro, RJ: Sextante, 2019. 254 p.
-
-> **Links úteis**:
-> - [Padrão PUC Minas de normalização ABNT](http://portal.pucminas.br/biblioteca/documentos/GUIA-COMPLETO-ABNT-Elaborar-formatar-trabalho-cientificoNOVO.pdf)
-> - [Formato ABNT](https://www.normastecnicas.com/abnt/)
+CARMO, Eraldo Souza do; CUNHA, Franciely Farias da; PRAZERES, Maria Sueli Corrêa dos. Transporte escolar na Amazônia: uma análise dos condicionantes de acesso de estudantes ribeirinhos à escola do campo. Revista Brasileira de Educação do Campo, [S.l.], v. 5, 2020. DOI: 10.20873/uft.rbec.e6897. Disponível em: https://www.periodicos.capes.gov.br/index.php/acervo/buscador.html?task=detalhes&source=all&id=W3081390272. Acesso em: 13 mar. 2025.
