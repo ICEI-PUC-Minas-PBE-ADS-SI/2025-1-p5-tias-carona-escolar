@@ -41,7 +41,6 @@ Com base na análise das personas, foram identificadas as seguintes histórias d
 |Maria               | Verificar a reputação dos motoristas|Saber se posso confiar neles para transportar meus filhos.|
 |João                | Oferecer caronas para colegas|Ajudar os outros e reduzir meus custos com combustível.|
 |Carlos              | Gerenciar minhas caronas oferecidas|Facilitar o planejamento de rotas e horários.|
-|Usuário do sistema  | Registrar minhas tarefas           | Não esquecer de fazê-las               |
 |Administrador       | Alterar permissões                 | Permitir que possam administrar contas |
 
 Apresente aqui as histórias de usuários que são relevantes para o projeto da sua solução. As histórias de usuários consistem em uma ferramenta poderosa para a compreensão e elicitação dos requisitos funcionais e não funcionais da sua aplicação. Se possível, agrupe as histórias de usuários por contexto, para facilitar consultas recorrentes a esta parte do documento.
@@ -61,15 +60,15 @@ As tabelas a seguir apresentam os requisitos funcionais e não funcionais que de
 
 |ID    | Descrição do Requisito  | Prioridade |
 |------|-----------------------------------------|----|
-|RF-001| Permitir que o usuário cadastre tarefas | ALTA | 
-|RF-002| Emitir um relatório de tarefas no mês   | MÉDIA |
+|RF-001| Permitir o cadastro de pais, alunos e motoristas com verificação de identidade. | ALTA | 
+|RF-002| Permitir que os usuários avaliem e deixem feedback sobre as caronas realizadas.   | MÉDIA |
+|RF-003| Implementar um sistema de correspondência de rotas com base em proximidade e horários.   | ALTA |
 
 ### Requisitos não funcionais
 
 |ID     | Descrição do Requisito  |Prioridade |
 |-------|-------------------------|----|
-|RNF-001| O sistema deve ser responsivo para rodar em dispositivos móveis | MÉDIA | 
-|RNF-002| Deve processar as requisições do usuário em no máximo 3 segundos |  BAIXA | 
+|RNF-001| O sistema deve garantir a segurança dos dados dos usuários | ALTA | 
 
 Com base nas histórias de usuários, enumere os requisitos da sua solução. Classifique esses requisitos em dois grupos:
 
