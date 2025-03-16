@@ -18,6 +18,7 @@ João tem 18 anos e está no último ano do ensino médio. Ele já possui habili
 Carlos tem 45 anos e trabalha como engenheiro. Ele é pai de um aluno da escola e já oferece caronas para outros estudantes que moram em sua rota. Carlos deseja uma forma mais organizada de gerenciar as caronas, garantindo a segurança dos passageiros e facilitando o planejamento de rotas e horários. Ele também quer contribuir para a redução do tráfego e da poluição na região, alinhando-se aos valores de sustentabilidade.
 
 ### 4. Ana, administradora do sistema
+Ana tem 35 anos e é responsável pela gestão e manutenção do aplicativo de carona escolar. Ela possui experiência em tecnologia e gerenciamento de sistemas, e seu principal objetivo é garantir que a plataforma funcione de forma segura, eficiente e alinhada com as políticas da escola. Ana busca ferramentas que permitam gerenciar usuários, monitorar o uso do aplicativo e resolver problemas técnicos rapidamente. Suas principais necessidades incluem garantir a segurança dos dados dos usuários, facilitar a administração de contas e monitorar o desempenho da plataforma.
 
 Exemplo: _Pedro Paulo tem 26 anos, é arquiteto recém-formado e autônomo. Pensa em se desenvolver profissionalmente por meio de um mestrado fora do país, pois adora viajar, é solteiro e sempre quis fazer um intercâmbio. Está buscando uma agência que o ajude a encontrar universidades na Europa que aceitem alunos estrangeiros._
 
@@ -39,13 +40,13 @@ Com base na análise das personas, foram identificadas as seguintes histórias d
 
 |EU COMO... `PERSONA`| QUERO/PRECISO ... `FUNCIONALIDADE` |PARA ... `MOTIVO/VALOR`                 |
 |--------------------|------------------------------------|----------------------------------------|
-|Maria               | Cadastrar meus filhos como passageiros|Garantir que eles possam solicitar caronas com segurança.|
-|Maria               | Verificar a reputação dos motoristas|Saber se posso confiar neles para transportar meus filhos.|
-|João                | Oferecer caronas para colegas|Ajudar os outros e reduzir meus custos com combustível.|
-|Carlos              | Gerenciar minhas caronas oferecidas|Facilitar o planejamento de rotas e horários.|
-|Ana       | Gerenciar os usuários do sistema                 | Garantir que apenas pessoas verificadas tenham acesso à plataforma. |
-|Ana       | Bloquear ou suspender contas problemáticas                 | Garantir que usuários que violam as regras sejam removidos. |
-|Ana       | Visualizar todas as caronas em tempo real                 | Monitorar o uso da plataforma e identificar atividades suspeitas. |
+|Usuário              | Cadastrar meus filhos como passageiros|Garantir que eles possam solicitar caronas com segurança.|
+|Usuário              | Verificar a reputação dos motoristas|Saber se posso confiar neles para transportar meus filhos.|
+|Usuário              | Oferecer caronas para colegas|Ajudar os outros e reduzir meus custos com combustível.|
+|Usuário              | Gerenciar minhas caronas oferecidas|Facilitar o planejamento de rotas e horários.|
+|Administrador       | Gerenciar os usuários do sistema                 | Garantir que apenas pessoas verificadas tenham acesso à plataforma. |
+|Administrador       | Bloquear ou suspender contas problemáticas                 | Garantir que usuários que violam as regras sejam removidos. |
+|Administrador       | Visualizar todas as caronas em tempo real                 | Monitorar o uso da plataforma e identificar atividades suspeitas. |
 
 Apresente aqui as histórias de usuários que são relevantes para o projeto da sua solução. As histórias de usuários consistem em uma ferramenta poderosa para a compreensão e elicitação dos requisitos funcionais e não funcionais da sua aplicação. Se possível, agrupe as histórias de usuários por contexto, para facilitar consultas recorrentes a esta parte do documento.
 
