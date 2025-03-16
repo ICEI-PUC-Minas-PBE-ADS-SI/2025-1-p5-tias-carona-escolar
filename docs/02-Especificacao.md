@@ -67,12 +67,23 @@ As tabelas a seguir apresentam os requisitos funcionais e não funcionais que de
 |RF-001| Permitir o cadastro de pais, alunos e motoristas com verificação de identidade. | ALTA | 
 |RF-002| Permitir que os usuários avaliem e deixem feedback sobre as caronas realizadas.   | MÉDIA |
 |RF-003| Implementar um sistema de correspondência de rotas com base em proximidade e horários.   | ALTA |
+|RF-004| Permitir que os motoristas visualizem solicitações de carona em sua rota.	   | ALTA |
+|RF-005| Implementar um sistema de chat para comunicação entre motoristas e passageiros.   | MÉDIA |
+|RF-006| Permitir que os administradores gerenciem usuários e caronas.   | ALTA |
+|RF-007| Oferecer uma funcionalidade de histórico de caronas realizadas.   | BAIXA |
+|RF-008| Permitir que os usuários editem seus perfis e preferências de carona.   | BAIXA |
 
 ### Requisitos não funcionais
 
 |ID     | Descrição do Requisito  |Prioridade |
 |-------|-------------------------|----|
 |RNF-001| O sistema deve garantir a segurança dos dados dos usuários | ALTA | 
+|RNF-002| A plataforma deve ser responsiva e funcionar em dispositivos móveis e desktops. | ALTA |
+|RNF-003| O sistema deve suportar até 1.000 usuários simultâneos sem degradação de desempenho. | MÉDIA |
+|RNF-004| A plataforma deve ser desenvolvida com tecnologias que permitam futuras atualizações. | MÉDIA | 
+|RNF-005| O sistema deve ser capaz de integrar-se com APIs de mapas (ex: Google Maps) para rotas. | ALTA | 
+|RNF-006| A plataforma deve oferecer uma funcionalidade de "favoritos" para rotas frequentes. | BAIXA |
+|RNF-007| A interface do usuário deve ser intuitiva e de fácil uso, mesmo para pessoas não técnicas. | ALTA |
 
 Com base nas histórias de usuários, enumere os requisitos da sua solução. Classifique esses requisitos em dois grupos:
 
