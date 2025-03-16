@@ -90,14 +90,18 @@ Lembre-se de que cada requisito deve corresponder a uma e somente uma caracterí
 
 ## Restrições
 
-Enumere as restrições à sua solução. Lembre-se de que as restrições geralmente limitam a solução candidata.
+|ID   | Restrição                                                                                      |
+|-----|------------------------------------------------------------------------------------------------|
+|001  | O projeto deverá ser entregue até o final do semestre, respeitando o cronograma acadêmico.     |
+|002  | O custo total do desenvolvimento do projeto não deve exceder o orçamento definido pela instituição. |
+|003  | A solução deve garantir que os dados dos usuários, especialmente as crianças, sejam tratados com total segurança e conformidade com a LGPD (Lei Geral de Proteção de Dados). |
+|004  | O aplicativo deve ser acessível apenas aos alunos e pais da escola ou instituição de ensino, não permitindo o uso por outras pessoas não vinculadas. |
+|005  | A plataforma deve ser compatível com navegadores modernos e dispositivos móveis (Android e iOS), garantindo boa experiência de uso. |
+|006  | O sistema não pode depender de integração com serviços de terceiros que sejam instáveis ou sujeitos a alterações frequentes, garantindo estabilidade. |
+|007  | O tempo de resposta da plataforma deve ser rápido, com limite de até 3 segundos para processar as requisições dos usuários. |
+|008  | A plataforma deve ser compatível com diferentes faixas etárias de usuários, oferecendo uma interface simples para os pais. |
 
-O projeto está restrito aos itens apresentados na tabela a seguir.
 
-|ID| Restrição                                             |
-|--|-------------------------------------------------------|
-|001| O projeto deverá ser entregue até o final do semestre |
-|002| O custo total do projeto não deve exceder o orçamento definido       |
 
 ## Diagrama de casos de uso
 
