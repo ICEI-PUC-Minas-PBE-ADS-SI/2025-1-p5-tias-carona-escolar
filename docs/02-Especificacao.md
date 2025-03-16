@@ -17,6 +17,8 @@ João tem 18 anos e está no último ano do ensino médio. Ele já possui habili
 ### 3. Carlos, pai voluntário
 Carlos tem 45 anos e trabalha como engenheiro. Ele é pai de um aluno da escola e já oferece caronas para outros estudantes que moram em sua rota. Carlos deseja uma forma mais organizada de gerenciar as caronas, garantindo a segurança dos passageiros e facilitando o planejamento de rotas e horários. Ele também quer contribuir para a redução do tráfego e da poluição na região, alinhando-se aos valores de sustentabilidade.
 
+### 4. Ana, administradora do sistema
+
 Exemplo: _Pedro Paulo tem 26 anos, é arquiteto recém-formado e autônomo. Pensa em se desenvolver profissionalmente por meio de um mestrado fora do país, pois adora viajar, é solteiro e sempre quis fazer um intercâmbio. Está buscando uma agência que o ajude a encontrar universidades na Europa que aceitem alunos estrangeiros._
 
 Enumere e detalhe as personas da sua solução. Para tanto, baseie-se tanto nos documentos disponibilizados na disciplina e/ou nos seguintes links:
@@ -41,7 +43,9 @@ Com base na análise das personas, foram identificadas as seguintes histórias d
 |Maria               | Verificar a reputação dos motoristas|Saber se posso confiar neles para transportar meus filhos.|
 |João                | Oferecer caronas para colegas|Ajudar os outros e reduzir meus custos com combustível.|
 |Carlos              | Gerenciar minhas caronas oferecidas|Facilitar o planejamento de rotas e horários.|
-|Administrador       | Alterar permissões                 | Permitir que possam administrar contas |
+|Ana       | Gerenciar os usuários do sistema                 | Garantir que apenas pessoas verificadas tenham acesso à plataforma. |
+|Ana       | Bloquear ou suspender contas problemáticas                 | Garantir que usuários que violam as regras sejam removidos. |
+|Ana       | Visualizar todas as caronas em tempo real                 | Monitorar o uso da plataforma e identificar atividades suspeitas. |
 
 Apresente aqui as histórias de usuários que são relevantes para o projeto da sua solução. As histórias de usuários consistem em uma ferramenta poderosa para a compreensão e elicitação dos requisitos funcionais e não funcionais da sua aplicação. Se possível, agrupe as histórias de usuários por contexto, para facilitar consultas recorrentes a esta parte do documento.
 
