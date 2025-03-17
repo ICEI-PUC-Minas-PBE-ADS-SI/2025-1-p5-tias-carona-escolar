@@ -61,7 +61,7 @@ Atualizado em: 21/04/2024
 
 | Responsável   | Tarefa/Requisito | Iniciado em    | Prazo      | Status | Terminado em    |
 | :----         |    :----         |      :----:    | :----:     | :----: | :----:          |
-| Guilherme Siqueira Ramos        | Contexto    |11/03/2025     | 16/03/2025 | ✔️    | 11/03/2025                |
+| Guilherme Siqueira Ramos        | Introdução    |11/03/2025     | 16/03/2025 | ✔️    | 11/03/2025                |
 | Guilherme Siqueira Ramos        | Restrições    |15/03/2025     | 16/03/2025 | ✔️    | 16/03/2025                |
 | Guilherme Siqueira Ramos        | Busca de Referências    |13/03/2025     | 16/03/2025 | ✔️    | 16/03/2025                |
 | Vinicius Henrique Alves        | Relatório | 15/03/2025     | 16/03/2025 | ✔️    | 15/03/2025      |
