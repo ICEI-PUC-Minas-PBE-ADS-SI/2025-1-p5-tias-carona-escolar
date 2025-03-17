@@ -61,11 +61,11 @@ Atualizado em: 21/04/2024
 
 | Responsável   | Tarefa/Requisito | Iniciado em    | Prazo      | Status | Terminado em    |
 | :----         |    :----         |      :----:    | :----:     | :----: | :----:          |
+| Guilherme Siqueira Ramos        | Contexto    |11/03/2025     | 16/03/2025 | ✔️    | 11/03/2025                |
+| Guilherme Siqueira Ramos        | Restrições    |15/03/2025     | 16/03/2025 | ✔️    | 16/03/2025                |
+| Guilherme Siqueira Ramos        | Busca de Referências    |13/03/2025     | 16/03/2025 | ✔️    | 16/03/2025                |
 | Vinicius Henrique Alves        | Relatório | 15/03/2025     | 16/03/2025 | ✔️    | 15/03/2025      |
 | Vinicius Henrique Alves        | Apresentação | 15/03/2025     | 16/03/2025 | ✔️    | 16/03/2025      |
-| AlunaZ        | Objetivos    | 03/02/2024     | 10/02/2024 | 📝    |                 |
-| AlunoY        | Histórias de usuário  | 01/01/2024     | 07/01/2005 | ⌛     |                 |
-| AlunoK        | Personas 1  |    01/01/2024        | 12/02/2005 | ❌    |       |
 
 #### Sprint 2
 
