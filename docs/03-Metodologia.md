@@ -43,7 +43,7 @@ Discuta como a configuração do projeto foi feita na ferramenta de versionament
 - _Scrum master_: AlunaX
 - Protótipos: AlunoY
 - Testes: AlunoK
-- Documentação: Vinicius Henrique Alves
+- Documentação: Vinicius Henrique Alves, Guilherme Siqueira Ramos
 
 #### Sprint 2
 - _Scrum master_: AlunaY
@@ -53,11 +53,9 @@ Discuta como a configuração do projeto foi feita na ferramenta de versionament
 
 ###  Quadro de tarefas
 
-> Apresente a divisão de tarefas entre os membros do grupo e o acompanhamento da execução, conforme o exemplo abaixo.
-
 #### Sprint 1
 
-Atualizado em: 21/04/2024
+Atualizado em: 16/05/2025
 
 | Responsável   | Tarefa/Requisito | Iniciado em    | Prazo      | Status | Terminado em    |
 | :----         |    :----         |      :----:    | :----:     | :----: | :----:          |
