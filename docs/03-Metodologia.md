@@ -64,8 +64,9 @@ Atualizado em: 16/03/2025
 | Guilherme Siqueira Ramos | Busca de Referências    |13/03/2025     | 16/03/2025 | ✔️    | 16/03/2025                |
 | Vinicius Henrique Alves | Relatório | 15/03/2025     | 16/03/2025 | ✔️    | 15/03/2025      |
 | Vinicius Henrique Alves | Apresentação | 15/03/2025     | 16/03/2025 | ✔️    | 16/03/2025      |
-| Otávio Gonçalves Rocha | Finalização de requisitos | 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
+| Otávio Gonçalves Rocha | Finalização de requisitos e entrega| 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
 | Otávio Gonçalves Rocha | Adição de Referências | 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
+| Otávio Gonçalves Rocha | Metodologia e Ferramentas | 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
 | Walyson Moises | Refinamento  | 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
 | Walyson Moises | Finalização do documento de processo de negócios| 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
 | Luisa Machado | Validação dos requisitos da entrega da sprint 1 | 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
