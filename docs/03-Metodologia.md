@@ -40,16 +40,16 @@ Discuta como a configuração do projeto foi feita na ferramenta de versionament
 > Apresente a divisão de papéis entre os membros do grupo em cada Sprint. O desejável é que, em cada Sprint, o aluno assuma papéis diferentes na equipe. Siga o modelo do exemplo abaixo:
 
 #### Sprint 1
-- _Scrum master_: AlunaX
-- Protótipos: AlunoY
-- Testes: AlunoK
+- _Scrum master_: Luisa Machado
+- Protótipos: Tiago Rafael
+- Testes: Walyson, Otávio Rocha
 - Documentação: Vinicius Henrique Alves, Guilherme Siqueira Ramos
 
 #### Sprint 2
-- _Scrum master_: AlunaY
-- Desenvolvedor _front-end_: AlunoX
-- Desenvolvedor _back-end_: AlunoK
-- Testes: AlunaZ
+- _Scrum master_: Luisa Machado
+- Desenvolvedor _front-end_: Otávio Rocha, Guilherme Siqueira
+- Desenvolvedor _back-end_: Walyson, Vinicius Henrique
+- Testes: Tiago Rafael
 
 ###  Quadro de tarefas
 
@@ -59,11 +59,18 @@ Atualizado em: 16/05/2025
 
 | Responsável   | Tarefa/Requisito | Iniciado em    | Prazo      | Status | Terminado em    |
 | :----         |    :----         |      :----:    | :----:     | :----: | :----:          |
-| Guilherme Siqueira Ramos        | Introdução    |11/03/2025     | 16/03/2025 | ✔️    | 11/03/2025                |
-| Guilherme Siqueira Ramos        | Restrições    |15/03/2025     | 16/03/2025 | ✔️    | 16/03/2025                |
-| Guilherme Siqueira Ramos        | Busca de Referências    |13/03/2025     | 16/03/2025 | ✔️    | 16/03/2025                |
-| Vinicius Henrique Alves        | Relatório | 15/03/2025     | 16/03/2025 | ✔️    | 15/03/2025      |
-| Vinicius Henrique Alves        | Apresentação | 15/03/2025     | 16/03/2025 | ✔️    | 16/03/2025      |
+| Guilherme Siqueira Ramos | Introdução    |11/03/2025     | 16/03/2025 | ✔️    | 11/03/2025                |
+| Guilherme Siqueira Ramos | Restrições    |15/03/2025     | 16/03/2025 | ✔️    | 16/03/2025                |
+| Guilherme Siqueira Ramos | Busca de Referências    |13/03/2025     | 16/03/2025 | ✔️    | 16/03/2025                |
+| Vinicius Henrique Alves | Relatório | 15/03/2025     | 16/03/2025 | ✔️    | 15/03/2025      |
+| Vinicius Henrique Alves | Apresentação | 15/03/2025     | 16/03/2025 | ✔️    | 16/03/2025      |
+| Otávio Gonçalves Rocha | Finalização de requisitos | 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
+| Otávio Gonçalves Rocha | Adição de Referências | 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
+| Walyson Moises | Refinamento  | 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
+| Walyson Moises | Finalização do documento de processo de negócios| 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
+| Luisa Machado | Validação dos requisitos da entrega da sprint 1 | 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
+| Tiago Rafael | Criar personas | 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
+| Tiago Rafael | Definir requisitos | 16/03/2025 | 16/03/2025 | ✔️ | 16/03/2025
 
 #### Sprint 2
 
@@ -111,6 +118,8 @@ Liste todas as ferramentas que foram empregadas no projeto, justificando a escol
 
 Exemplo: os artefatos do projeto são desenvolvidos a partir de diversas plataformas e a relação dos ambientes com seu respectivo propósito é apresentada na tabela que se segue.
 
+Utilizando whatsapp para comunicação do projeto, assim como a documentação assíncrona e compartilha dos produtos do Google (Google Docs etc.) Também utilizaremos o board do github scrum, para trackear as tasks das sprints.
+
 | Ambiente                            | Plataforma                         | Link de acesso                         |
 |-------------------------------------|------------------------------------|----------------------------------------|
 | Repositório de código fonte         | GitHub                             | http://....                            |
@@ -118,4 +127,8 @@ Exemplo: os artefatos do projeto são desenvolvidos a partir de diversas platafo
 | Projeto de interface                | Figma                              | http://....                            |
 | Gerenciamento do projeto            | GitHub Projects                    | http://....                            |
 | Hospedagem                          | Vercel                             | http://....                            |
+| Google Docs                         | Google                             | https://docs.google.com/document/d/14SgsHeZ-naK56n0AYIdo_QnAllGSwJT3YsZAmS03pBo/edit?tab=t.0 |
+| Google Slides                       | Google                             | https://docs.google.com/presentation/d/1rFdk1TUFGbskCzCFMquKYxxWXrYll8nOFvKFMe0rLsU/edit?usp=sharing |
+| Whatsapp                            | Meta                               | whatsapp.com                           |
+| Microsoft Visual Studio Code        | Microsoft                          | https://code.visualstudio.com          |
  
