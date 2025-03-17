@@ -74,14 +74,20 @@ Atualizado em: 16/05/2025
 
 #### Sprint 2
 
-Atualizado em: 21/04/2024
+Atualizado em: 16/03/2025
 
-| Responsável   | Tarefa/Requisito | Iniciado em    | Prazo      | Status | Terminado em    |
-| :----         |    :----         |      :----:    | :----:     | :----: | :----:          |
-| AlunaX        | Página inicial   | 01/02/2024     | 07/03/2024 | ✔️    | 05/02/2024      |
-| AlunaZ        | CSS unificado    | 03/02/2024     | 10/03/2024 | 📝    |                 |
-| AlunoY        | Página de login  | 01/02/2024     | 07/03/2024 | ⌛     |                 |
-| AlunoK        | Script de login  |  01/01/2024    | 12/03/2024 | ❌    |       |
+| Responsável         | Tarefa/Requisito                                                     | Iniciado em | Prazo | Status | Terminado em |
+|--------------------|------------------------------------------------------------------|-------------|-------|--------|--------------|
+| Otávio Rocha      | RF-001 - Permitir o cadastro de pais, alunos e motoristas com verificação de identidade. |             |       | 📝    |              |
+| Guilherme Siqueira | RF-002 - Permitir que os usuários avaliem e deixem feedback sobre as caronas realizadas. |             |       | 📝    |              |
+| Vinicius Henrique  | RF-003 - Implementar um sistema de correspondência de rotas com base em proximidade e horários. |             |       | 📝    |              |
+| Walyson Moises     | RF-004 - Permitir que os motoristas visualizem solicitações de carona em sua rota. |             |       | 📝    |              |
+| Tiago Rafael      | RF-005 - Implementar um sistema de chat para comunicação entre motoristas e passageiros. |             |       | 📝    |              |
+| Luisa Machado     | RF-006 - Permitir que os administradores gerenciem usuários e caronas. |             |       | 📝    |              |
+| Otávio Rocha      | RF-007 - Oferecer uma funcionalidade de histórico de caronas realizadas. |             |       | 📝    |              |
+| Guilherme Siqueira | RF-008 - Permitir que os usuários editem seus perfis e preferências de carona. |             |       | 📝    |              |
+
+
 
 
 Legenda:
