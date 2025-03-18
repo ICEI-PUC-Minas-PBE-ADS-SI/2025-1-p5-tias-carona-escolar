@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String             @id @default(uuid())
+  name               String
+  email              String?            @unique
+  password           String?
+  imgUrl             String?
+  numberOfFollowers  Int?               @default(0)
+  numberOfFollowings Int                @default(0)
+  username           String?            @unique
+  createdAt          DateTime?          @default(now())
+  isActive           Boolean?           @default(true)
+  authProvider       String?            @default("local")
+  refreshTokens      RefreshToken[]
+  passwordRecoveries PasswordRecovery[]
+
+  following Follow[] @relation("FollowingRelation")
+  followers Follow[] @relation("FollowerRelation")
+}
+
+model Follow {
+  id         String @id @default(uuid())
+  followerId String
+  followeeId String
+
+  follower User @relation("FollowingRelation", fields: [followerId], references: [id])
+  followee User @relation("FollowerRelation", fields: [followeeId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followeeId])
+}
+
+model RefreshToken {
+  id      String  @id @default(uuid())
+  token   String
+  user    User    @relation(fields: [userId], references: [id])
+  userId  String
+  email   String
+  revoked Boolean @default(false)
+}
+
+model PasswordRecovery {
+  id        String  @id @default(uuid())
+  token     String
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+  email     String
+  expiresAt BigInt
+  revoked   Boolean @default(false)
+}

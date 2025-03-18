@@ -1,0 +1,24 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "db/queries"
+    schema: "db/migrations"
+    gen:
+      go:
+        package: "dbsqlc"
+        out: "internal/adapters/out/repository/sqlc"
+        sql_package: "pgx/v5"
+        rename:
+          tb_driver_offers: DriverOffer
+          tb_payment: Payment
+          tb_ride: Ride
+          tb_ride_passenger: RidePassenger
+          tb_ride_payment: RidePayment
+          tb_ride_request: RideRequest
+          tb_role: Role
+          tb_sustainable_route: SustainableRoute
+          tb_use_role: UserRole
+          tb_user: User
+          tb_vehicle: Vehicle
+          tb_user_role: UserRole
+          tb_ride_points: RidePoints
