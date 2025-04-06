@@ -2,7 +2,7 @@
 
 O processo trata da etapa operacional em que o transporte escolar realiza a rota de embarque dos alunos. Oportunidades de melhoria incluem a integração com sistemas escolares para atualização em tempo real e otimização dinâmica de rotas.
 
-![Modelo BPMN do Processo 2](../images/process2.png "Modelo BPMN do Processo 2.")
+![430674773-16a6979a-b3e8-4a96-bc4a-730775e53f98](https://github.com/user-attachments/assets/cbb30ba0-95b2-40f7-8a0f-9ac37e517c87)
 
 **Seguir GPS até o endereço do aluno**
 
