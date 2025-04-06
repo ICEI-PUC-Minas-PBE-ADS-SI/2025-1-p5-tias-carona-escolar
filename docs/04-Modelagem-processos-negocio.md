@@ -37,9 +37,6 @@ Figura 4: Embarque Diário do Aluno com uso do Strada
 
 ## Indicadores de desempenho
 
-Apresente aqui os principais indicadores de desempenho e algumas metas para o processo. Atenção: as informações necessárias para gerar os indicadores devem estar contempladas no diagrama de classe. Coloque no mínimo 5 indicadores.
-
-Use o seguinte modelo:
 
 | **Indicador** | **Objetivos** | **Descrição** | **Fonte de dados** | **Fórmula de cálculo** |
 | ---           | ---           | ---           | ---             | ---             |
