@@ -14,11 +14,19 @@ Figura 2: Embarque Diário do Aluno
 
 ## Descrição geral da proposta (Modelagem TO BE)
 
-Tendo identificado os gargalos dos modelos AS-IS, apresentem uma descrição da proposta de solução, buscando maior eficiência com a introdução da tecnologia. Abordem também os limites dessa solução e seu alinhamento com as estratégias e objetivos do contexto de negócio escolhido.
+A proposta de modelagem TO-BE busca otimizar o processo de solicitação e o uso do transporte escolar por meio da introdução de uma plataforma digital. Nessa nova abordagem, o processo inicia-se com o cadastro do aluno na plataforma pelo responsável, seguido da assinatura dos termos de responsabilidade e da validação de identidade. Em seguida, é realizada a verificação automática da disponibilidade de transporte parceiro. Dessa forma, é possível seguir com a solicitação de uma nova carona, na qual ocorre a criação automática do contrato, que é disponibilizado para o aceite do responsável. Após o uso do serviço, o responsável pode registrar sua experiência por meio de uma avaliação da qualidade do transporte escolar.
 
-Cole aqui os modelos da solução proposta (modelo TO-BE), elaborados com o apoio da ferramenta baseada em BPMN utilizada na disciplina. Cada processo identificado deve ter seu modelo TO-BE específico. Descrevam as oportunidades de melhoria de cada processo da solução proposta.
+A solução propõe uma modernização efetiva dos processos relacionados à mobilidade estudantil, agregando mais agilidade, rastreabilidade e segurança para os responsáveis e para as instituições envolvidas.
 
-Apresente aqui uma descrição da sua proposta, abordando seus limites e suas ligações com as estratégias e objetivos do negócio. Apresente também as oportunidades de melhoria.
+Entre as oportunidades de melhoria estão a redução do tempo de resposta às solicitações, a automatização de tarefas repetitivas e a coleta de dados por meio das avaliações, permitindo o aperfeiçoamento contínuo do serviço. Como limitação, a proposta depende da adesão digital por parte dos usuários e da disponibilidade efetiva de transporte parceiro, o que pode representar um desafio em regiões mais remotas ou com baixa cobertura.
+
+Os diagramas BPMN abaixo ilustram os principais fluxos atuais:
+
+![image](https://github.com/user-attachments/assets/d07b06e4-849b-402e-9a53-13ca3e7dc4b3)<br>
+Figura 3: Solicitação de Transporte Escolar com uso do Strada
+
+![image](https://github.com/user-attachments/assets/16a6979a-b3e8-4a96-bc4a-730775e53f98)<br>
+Figura 4: Embarque Diário do Aluno com uso do Strada
 
 ## Modelagem dos processos
 
