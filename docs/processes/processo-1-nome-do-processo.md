@@ -1,151 +1,122 @@
-# Processo 1 – Solicitação de Transporte Escolar
+### 3.3.1 Processo 1 – Solicitação de Transporte Escolar
 
-Este processo descreve o fluxo de solicitação, análise e contratação do serviço de transporte escolar entre o tutor do aluno e o prestador do serviço.
+O processo descreve o fluxo completo de solicitação de transporte escolar por parte de um aluno/responsável, passando pelas etapas de cadastro, validação, envio e aprovação da solicitação, até a assinatura do contrato. Oportunidades de melhoria incluem a automação de validações, integração com parceiros de transporte em tempo real e digitalização completa da assinatura de documentos.
 
-## Oportunidades de melhoria
+![430674796-d07b06e4-849b-402e-9a53-13ca3e7dc4b3](https://github.com/user-attachments/assets/cffec543-4321-4052-bf73-3113a048a6dd)
 
-- Automatizar o envio de notificações para maior agilidade;
-- Incluir um sistema de geolocalização para verificação de rotas disponíveis;
-- Possibilitar acompanhamento em tempo real da análise e confirmação da solicitação pelo tutor;
-- Reduzir retrabalho automatizando a verificação de vagas e rotas.
+**Cadastro do aluno na plataforma**
 
-![Modelo BPMN do Processo 1](https://github.com/user-attachments/assets/d95d5d65-47b9-40a5-a47f-ba72ccb2a5f8)
+| **Campo**       | **Tipo**         | **Restrições**        | **Valor default** |
+|-----------------|------------------|------------------------|-------------------|
+| nome_completo   | Caixa de texto   | obrigatório            |                   |
+| data_nascimento | Data             | obrigatório            |                   |
+| nome_responsável | Caixa de texto  | obrigatório            |                   |
+| e-mail          | Caixa de texto   | formato de e-mail      |                   |
+| telefone        | Número           | somente números        |                   |
 
----
-
-## Detalhamento das Atividades
-
-### Solicitação de Transporte Escolar
-
-| Campo          | Tipo           | Restrições        | Valor default |
-|----------------|----------------|-------------------|----------------|
-| Nome do aluno  | Caixa de Texto | Obrigatório       |                |
-| Endereço       | Área de Texto  | Obrigatório       |                |
-| Escola         | Caixa de Texto | Obrigatório       |                |
-| Turno          | Seleção única  | Manhã, Tarde, Integral |          |
-
-**Comandos**
-
-| Comando   | Destino                    | Tipo     |
-|-----------|----------------------------|----------|
-| Enviar    | Recebimento da Solicitação | default  |
-| Cancelar  | Fim do Processo            | cancel   |
+| **Comandos**         | **Destino**                               | **Tipo**   |
+|----------------------|--------------------------------------------|------------|
+| avançar              | Assinatura dos Termos de Responsabilidade | default    |
 
 ---
 
-### Recebimento da Solicitação
+**Assinatura dos Termos de Responsabilidade**
 
-| Campo              | Tipo         | Restrições           | Valor default         |
-|--------------------|--------------|-----------------------|------------------------|
-| Solicitação ID     | Número       | Gerado automaticamente |                      |
-| Data de recebimento| Data e Hora  | Automático            |                      |
+| **Campo**                 | **Tipo**  | **Restrições**                             | **Valor default** |
+|--------------------------|-----------|--------------------------------------------|-------------------|
+| termo_responsabilidade   | Arquivo   | leitura obrigatória antes da assinatura    |                   |
 
-**Comandos**
-
-| Comando           | Destino                | Tipo     |
-|-------------------|------------------------|----------|
-| Verificar Vagas   | Verificação de Vagas   | default  |
+| **Comandos**         | **Destino**               | **Tipo**   |
+|----------------------|----------------------------|------------|
+| assinar              | Validação de Identidade    | default    |
 
 ---
 
-### Verificação de Vagas
+**Validação de Identidade**
 
-| Campo                     | Tipo   | Restrições   | Valor default |
-|---------------------------|--------|--------------|----------------|
-| Número de vagas disponíveis | Número | Obrigatório |                |
+| **Campo**          | **Tipo** | **Restrições**                       | **Valor default** |
+|--------------------|----------|--------------------------------------|-------------------|
+| documento_foto     | Imagem   | obrigatório, formato jpg/png         |                   |
+| selfie_documento   | Imagem   | obrigatório                          |                   |
 
-**Comandos**
-
-| Comando                     | Destino                                  | Tipo     |
-|-----------------------------|------------------------------------------|----------|
-| Continuar                   | Verificação de Rotas                     | default  |
-| Notificar Indisponibilidade| Notificação de Indisponibilidade (Sem vagas) | cancel |
+| **Comandos**         | **Destino**                                | **Tipo**   |
+|----------------------|---------------------------------------------|------------|
+| validar              | Verificação de Transporte Parceiro Disponível | default |
 
 ---
 
-### Verificação de Rotas
+**Verificação de Transporte Parceiro Disponível**
 
-| Campo              | Tipo         | Restrições   | Valor default |
-|--------------------|--------------|--------------|----------------|
-| Endereço na rota   | Seleção única| Obrigatório  |                |
+| **Campo**         | **Tipo**       | **Restrições** | **Valor default** |
+|-------------------|----------------|----------------|-------------------|
+| endereço_origem   | Caixa de texto | obrigatório    |                   |
+| endereço_destino  | Caixa de texto | obrigatório    |                   |
+| turno             | Seleção única  | obrigatório    |                   |
 
-**Comandos**
-
-| Comando                     | Destino                                  | Tipo     |
-|-----------------------------|------------------------------------------|----------|
-| Continuar                   | Elaboração do Contrato                   | default  |
-| Notificar Indisponibilidade| Notificação de Indisponibilidade (Sem rotas) | cancel |
-
----
-
-### Elaboração do Contrato
-
-| Campo            | Tipo     | Restrições | Valor default |
-|------------------|----------|------------|----------------|
-| Dados do contrato| Arquivo  | PDF        |                |
-
-**Comandos**
-
-| Comando          | Destino                    | Tipo     |
-|------------------|----------------------------|----------|
-| Enviar Proposta  | Avaliação da Proposta      | default  |
+| **Comandos**               | **Destino**                            | **Tipo**   |
+|----------------------------|-----------------------------------------|------------|
+| consultar_disponibilidade | Envio da Solicitação de Carona         | default    |
+| encerrar                   | Fim do processo (caso indisponível)    | cancel     |
 
 ---
 
-### Avaliação da Proposta
+**Envio da Solicitação de Carona**
 
-| Campo     | Tipo          | Restrições         | Valor default |
-|-----------|---------------|--------------------|----------------|
-| Proposta  | Área de Texto | Leitura obrigatória|                |
-| Aceite    | Seleção única | Sim, Não           |                |
+| **Campo**     | **Tipo**      | **Restrições** | **Valor default** |
+|---------------|---------------|----------------|-------------------|
+| observações   | Área de texto | opcional       |                   |
 
-**Comandos**
-
-| Comando   | Destino                 | Tipo     |
-|-----------|--------------------------|----------|
-| Aceitar   | Assinatura do Contrato   | default  |
-| Recusar   | Fim do Processo          | cancel   |
+| **Comandos**         | **Destino**                 | **Tipo**   |
+|----------------------|-----------------------------|------------|
+| enviar_solicitacao   | Recebimento da Solicitação  | default    |
 
 ---
 
-### Assinatura do Contrato
+**Recebimento da Solicitação**
 
-| Campo              | Tipo     | Restrições     | Valor default |
-|--------------------|----------|----------------|----------------|
-| Assinatura digital | Imagem   | Obrigatório    |                |
-| Data da assinatura | Data     | Automático     |                |
+| **Campo** | **Tipo**       | **Restrições**              | **Valor default** |
+|-----------|----------------|-----------------------------|-------------------|
+| status    | Seleção única  | pendente/aprovado/recusado  | pendente          |
 
-**Comandos**
-
-| Comando             | Destino                    | Tipo     |
-|---------------------|----------------------------|----------|
-| Confirmar Assinatura| Confirmação do Transporte  | default  |
+| **Comandos**         | **Destino**                    | **Tipo**   |
+|----------------------|---------------------------------|------------|
+| aprovar              | Criação Automática do Contrato | default    |
+| recusar              | Fim do processo                 | cancel     |
 
 ---
 
-### Confirmação do Transporte
+**Criação Automática do Contrato**
 
-| Campo        | Tipo          | Restrições   | Valor default |
-|--------------|---------------|--------------|----------------|
-| Confirmação  | Seleção única | Sim, Não     |                |
+| **Campo**      | **Tipo** | **Restrições**            | **Valor default** |
+|----------------|----------|----------------------------|-------------------|
+| contrato_pdf   | Arquivo  | gerado automaticamente     |                   |
 
-**Comandos**
-
-| Comando   | Destino                      | Tipo     |
-|-----------|------------------------------|----------|
-| Confirmar | Inclusão do Endereço na Rota | default  |
+| **Comandos**         | **Destino**            | **Tipo**   |
+|----------------------|-------------------------|------------|
+| gerar_contrato       | Avaliação do Serviço    | default    |
 
 ---
 
-### Inclusão do Endereço na Rota
+**Avaliação do Serviço**
 
-| Campo              | Tipo        | Restrições   | Valor default |
-|--------------------|-------------|--------------|----------------|
-| Endereço do aluno  | Área de Texto | Obrigatório |                |
-| Rota atribuída     | Seleção única | Obrigatório |                |
+| **Campo**      | **Tipo**      | **Restrições** | **Valor default** |
+|----------------|---------------|----------------|-------------------|
+| nota_serviço   | Número         | de 1 a 5       |                   |
+| comentários    | Área de texto | opcional       |                   |
 
-**Comandos**
+| **Comandos**         | **Destino**             | **Tipo**   |
+|----------------------|--------------------------|------------|
+| aceitar              | Assinatura do Contrato   | default    |
+| recusar              | Fim do processo          | cancel     |
 
-| Comando   | Destino         | Tipo     |
-|-----------|------------------|----------|
-| Finalizar | Fim do Processo  | default  |
+---
+
+**Assinatura do Contrato**
+
+| **Campo**               | **Tipo** | **Restrições** | **Valor default** |
+|--------------------------|----------|----------------|-------------------|
+| assinatura_eletrônica    | Imagem   | obrigatório    |                   |
+
+| **Comandos**         | **Destino**       | **Tipo**   |
+|----------------------|--------------------|------------|
+| concluir             | Fim do processo    | default    |
