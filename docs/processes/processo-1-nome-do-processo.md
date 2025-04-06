@@ -1,67 +1,151 @@
-### 3.3.1 Processo 1 – NOME DO PROCESSO
+# Processo 1 – Solicitação de Transporte Escolar
 
-_Apresente aqui o nome e as oportunidades de melhoria para o processo 1. 
-Em seguida, apresente o modelo do processo 1, descrito no padrão BPMN._
- 
-![Exemplo de um Modelo BPMN do PROCESSO 1](../images/process.png "Modelo BPMN do Processo 1.")
+Este processo descreve o fluxo de solicitação, análise e contratação do serviço de transporte escolar entre o tutor do aluno e o prestador do serviço.
 
-#### Detalhamento das atividades
+## Oportunidades de melhoria
 
-_Descreva aqui cada uma das propriedades das atividades do processo 1. 
-Devem estar relacionadas com o modelo de processo apresentado anteriormente._
+- Automatizar o envio de notificações para maior agilidade;
+- Incluir um sistema de geolocalização para verificação de rotas disponíveis;
+- Possibilitar acompanhamento em tempo real da análise e confirmação da solicitação pelo tutor;
+- Reduzir retrabalho automatizando a verificação de vagas e rotas.
 
-_Os tipos de dados a serem utilizados são:_
+![Modelo BPMN do Processo 1](https://github.com/user-attachments/assets/d95d5d65-47b9-40a5-a47f-ba72ccb2a5f8)
 
-_* **Área de texto** - campo texto de múltiplas linhas_
+---
 
-_* **Caixa de texto** - campo texto de uma linha_
+## Detalhamento das Atividades
 
-_* **Número** - campo numérico_
+### Solicitação de Transporte Escolar
 
-_* **Data** - campo do tipo data (dd-mm-aaaa)_
+| Campo          | Tipo           | Restrições        | Valor default |
+|----------------|----------------|-------------------|----------------|
+| Nome do aluno  | Caixa de Texto | Obrigatório       |                |
+| Endereço       | Área de Texto  | Obrigatório       |                |
+| Escola         | Caixa de Texto | Obrigatório       |                |
+| Turno          | Seleção única  | Manhã, Tarde, Integral |          |
 
-_* **Hora** - campo do tipo hora (hh:mm:ss)_
+**Comandos**
 
-_* **Data e Hora** - campo do tipo data e hora (dd-mm-aaaa, hh:mm:ss)_
+| Comando   | Destino                    | Tipo     |
+|-----------|----------------------------|----------|
+| Enviar    | Recebimento da Solicitação | default  |
+| Cancelar  | Fim do Processo            | cancel   |
 
-_* **Imagem** - campo contendo uma imagem_
+---
 
-_* **Seleção única** - campo com várias opções de valores que são mutuamente exclusivas (tradicional radio button ou combobox)_
+### Recebimento da Solicitação
 
-_* **Seleção múltipla** - campo com várias opções que podem ser selecionadas mutuamente (tradicional checkbox ou listbox)_
+| Campo              | Tipo         | Restrições           | Valor default         |
+|--------------------|--------------|-----------------------|------------------------|
+| Solicitação ID     | Número       | Gerado automaticamente |                      |
+| Data de recebimento| Data e Hora  | Automático            |                      |
 
-_* **Arquivo** - campo de upload de documento_
+**Comandos**
 
-_* **Link** - campo que armazena uma URL_
+| Comando           | Destino                | Tipo     |
+|-------------------|------------------------|----------|
+| Verificar Vagas   | Verificação de Vagas   | default  |
 
-_* **Tabela** - campo formado por uma matriz de valores_
+---
 
+### Verificação de Vagas
 
-**Nome da atividade 1**
+| Campo                     | Tipo   | Restrições   | Valor default |
+|---------------------------|--------|--------------|----------------|
+| Número de vagas disponíveis | Número | Obrigatório |                |
 
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-| ***Exemplo:***  |                  |                |                   |
-| login           | Caixa de Texto   | formato de e-mail |                |
-| senha           | Caixa de Texto   | mínimo de 8 caracteres |           |
+**Comandos**
 
-| **Comandos**         |  **Destino**                   | **Tipo** |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel/  ) |
-| ***Exemplo:***       |                                |                   |
-| entrar               | Fim do Processo 1              | default           |
-| cadastrar            | Início do proceso de cadastro  |                   |
+| Comando                     | Destino                                  | Tipo     |
+|-----------------------------|------------------------------------------|----------|
+| Continuar                   | Verificação de Rotas                     | default  |
+| Notificar Indisponibilidade| Notificação de Indisponibilidade (Sem vagas) | cancel |
 
+---
 
-**Nome da atividade 2**
+### Verificação de Rotas
 
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-|                 |                  |                |                   |
+| Campo              | Tipo         | Restrições   | Valor default |
+|--------------------|--------------|--------------|----------------|
+| Endereço na rota   | Seleção única| Obrigatório  |                |
 
-| **Comandos**         |  **Destino**                   | **Tipo**          |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel/  ) |
-|                      |                                |                   |
+**Comandos**
+
+| Comando                     | Destino                                  | Tipo     |
+|-----------------------------|------------------------------------------|----------|
+| Continuar                   | Elaboração do Contrato                   | default  |
+| Notificar Indisponibilidade| Notificação de Indisponibilidade (Sem rotas) | cancel |
+
+---
+
+### Elaboração do Contrato
+
+| Campo            | Tipo     | Restrições | Valor default |
+|------------------|----------|------------|----------------|
+| Dados do contrato| Arquivo  | PDF        |                |
+
+**Comandos**
+
+| Comando          | Destino                    | Tipo     |
+|------------------|----------------------------|----------|
+| Enviar Proposta  | Avaliação da Proposta      | default  |
+
+---
+
+### Avaliação da Proposta
+
+| Campo     | Tipo          | Restrições         | Valor default |
+|-----------|---------------|--------------------|----------------|
+| Proposta  | Área de Texto | Leitura obrigatória|                |
+| Aceite    | Seleção única | Sim, Não           |                |
+
+**Comandos**
+
+| Comando   | Destino                 | Tipo     |
+|-----------|--------------------------|----------|
+| Aceitar   | Assinatura do Contrato   | default  |
+| Recusar   | Fim do Processo          | cancel   |
+
+---
+
+### Assinatura do Contrato
+
+| Campo              | Tipo     | Restrições     | Valor default |
+|--------------------|----------|----------------|----------------|
+| Assinatura digital | Imagem   | Obrigatório    |                |
+| Data da assinatura | Data     | Automático     |                |
+
+**Comandos**
+
+| Comando             | Destino                    | Tipo     |
+|---------------------|----------------------------|----------|
+| Confirmar Assinatura| Confirmação do Transporte  | default  |
+
+---
+
+### Confirmação do Transporte
+
+| Campo        | Tipo          | Restrições   | Valor default |
+|--------------|---------------|--------------|----------------|
+| Confirmação  | Seleção única | Sim, Não     |                |
+
+**Comandos**
+
+| Comando   | Destino                      | Tipo     |
+|-----------|------------------------------|----------|
+| Confirmar | Inclusão do Endereço na Rota | default  |
+
+---
+
+### Inclusão do Endereço na Rota
+
+| Campo              | Tipo        | Restrições   | Valor default |
+|--------------------|-------------|--------------|----------------|
+| Endereço do aluno  | Área de Texto | Obrigatório |                |
+| Rota atribuída     | Seleção única | Obrigatório |                |
+
+**Comandos**
+
+| Comando   | Destino         | Tipo     |
+|-----------|------------------|----------|
+| Finalizar | Fim do Processo  | default  |
