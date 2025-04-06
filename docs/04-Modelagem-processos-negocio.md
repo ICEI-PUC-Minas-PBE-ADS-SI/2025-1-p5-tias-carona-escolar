@@ -43,9 +43,11 @@ Use o seguinte modelo:
 
 | **Indicador** | **Objetivos** | **Descrição** | **Fonte de dados** | **Fórmula de cálculo** |
 | ---           | ---           | ---           | ---             | ---             |
-| Percentual de reclamações | Avaliar quantitativamente as reclamações | Percentual de reclamações em relação ao total de atendimentos | Tabela Reclamações | número total de reclamações / número total de atendimentos |
-| Taxa de requisições atendidas | Melhorar a prestação de serviços medindo a porcentagem de requisições atendidas| Mede a % de requisições atendidas na semana | Tabela Solicitações | (número de requisições atendidas / número total de requisições) * 100 |
-| Taxa de entrega de material | Manter controle sobre os materiais que estão sendo entregues | Mede % de material entregue dentro do mês | Tabela Pedidos | (número de pedidos entregues / número total de pedidos) * 100 |
+| Taxa de solicitações de caronas atendidas | Medir a eficiência do sistema em atender às demandas de caronas. | Percentual de caronas atendidas em relação ao total feitas pelos pais/responsáveis. | Tabela Solicitação de Carona | (número total de solicitação de caronas atendidas / número total de solicitações) * 100 |
+| Índice de Satisfação | Avaliar a qualidade do serviço a partir das avaliações dos usuários. | Média das notas (0-5) dadas pelos pais/responsáveis após o uso do serviço. | Tabela Avaliação | Média aritmética das notas recebidas |
+| Tempo Médio de Resposta | Reduzir o tempo entre a solicitação e a confirmação da carona. | Tempo médio (em horas/minutos) desde a solicitação até a atribuição de um motorista. | Tabela Solicitação de Carona | Soma(tempo de resposta por solicitação) / Nº total de solicitações
+| Taxa de Cancelamentos | Identificar problemas no processo (ex: motoristas desistentes, rotas inviáveis). | Percentual de caronas canceladas em relação ao total agendadas. | Tabela Caronas | (número de caronas canceladas / número total de caronas agendadas) * 100 |
+| Disponibilidade de Motoristas | Garantir que há motoristas suficientes para atender a demanda. | Número médio de motoristas ativos por dia em relação à demanda estimada. | Tabela Motorista + Tabela Solicitação de Carona | (número de motoristas disponíveis por dia / número de solicitações por dia) * 100
 
 
 Obs.: todas as informações necessárias para gerar os indicadores devem estar no diagrama de classe a ser apresentado posteriormente.
