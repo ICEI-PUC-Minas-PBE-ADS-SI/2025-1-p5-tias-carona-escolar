@@ -1,67 +1,32 @@
-### 3.3.2 Processo 2 – NOME DO PROCESSO
- 
-_Apresente aqui o nome e as oportunidades de melhoria para o processo 2. 
-Em seguida, apresente o modelo do processo 2, descrito no padrão BPMN._
+### 3.3.2 Processo 2 – Roteirização e Embarque dos Alunos
 
-![Exemplo de um Modelo BPMN do PROCESSO 2](../images/process.png "Modelo BPMN do Processo 2.")
+O processo trata da etapa operacional em que o transporte escolar realiza a rota de embarque dos alunos. Oportunidades de melhoria incluem a integração com sistemas escolares para atualização em tempo real e otimização dinâmica de rotas.
 
+![Modelo BPMN do Processo 2](../images/process2.png "Modelo BPMN do Processo 2.")
 
-#### Detalhamento das atividades
+**Seguir GPS até o endereço do aluno**
 
-_Descreva aqui cada uma das propriedades das atividades do processo 2. 
-Devem estar relacionadas com o modelo de processo apresentado anteriormente._
+| **Campo**               | **Tipo**       | **Restrições**                  | **Valor default** |
+|--------------------------|----------------|----------------------------------|-------------------|
+| coordenadas_endereco     | Link           | baseado no endereço do aluno     |                   |
+| status_gps               | Seleção única  | ativo/inativo                    | ativo             |
 
-_Os tipos de dados a serem utilizados são:_
+| **Comandos**         | **Destino**       | **Tipo**   |
+|----------------------|--------------------|------------|
+| reprocessar_rota     | Seguir GPS         | cancel     |
 
-_* **Área de texto** - campo texto de múltiplas linhas_
+---
 
-_* **Caixa de texto** - campo texto de uma linha_
+**Embarcar Aluno**
 
-_* **Número** - campo numérico_
+| **Campo**             | **Tipo**      | **Restrições**              | **Valor default** |
+|------------------------|---------------|------------------------------|-------------------|
+| nome_aluno             | Caixa de texto| obrigatório                  |                   |
+| horário_embarque       | Data e Hora   | obrigatório                  | horário atual     |
+| foto_aluno             | Imagem        | opcional                     |                   |
+| confirmação_embarque   | Seleção única | sim/não                      |                   |
 
-_* **Data** - campo do tipo data (dd-mm-aaaa)_
-
-_* **Hora** - campo do tipo hora (hh:mm:ss)_
-
-_* **Data e Hora** - campo do tipo data e hora (dd-mm-aaaa, hh:mm:ss)_
-
-_* **Imagem** - campo contendo uma imagem_
-
-_* **Seleção única** - campo com várias opções de valores que são mutuamente exclusivas (tradicional radio button ou combobox)_
-
-_* **Seleção múltipla** - campo com várias opções que podem ser selecionadas mutuamente (tradicional checkbox ou listbox)_
-
-_* **Arquivo** - campo de upload de documento_
-
-_* **Link** - campo que armazena uma URL_
-
-_* **Tabela** - campo formado por uma matriz de valores_
-
-**Nome da atividade 1**
-
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-| ***Exemplo:***  |                  |                |                   |
-| login           | Caixa de Texto   | formato de e-mail |                |
-| senha           | Caixa de Texto   | mínimo de 8 caracteres |           |
-
-| **Comandos**         |  **Destino**                   | **Tipo** |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel/  ) |
-| ***Exemplo:***       |                                |                   |
-| entrar               | Fim do Processo 1              | default           |
-| cadastrar            | Início do proceso de cadastro  |                   |
-
-
-**Nome da atividade 2**
-
-| **Campo**       | **Tipo**         | **Restrições** | **Valor default** |
-| ---             | ---              | ---            | ---               |
-| [Nome do campo] | [tipo de dados]  |                |                   |
-|                 |                  |                |                   |
-
-| **Comandos**         |  **Destino**                   | **Tipo**          |
-| ---                  | ---                            | ---               |
-| [Nome do botão/link] | Atividade/processo de destino  | (default/cancel/  ) |
-|                      |                                |                   |
+| **Comandos**         | **Destino**              | **Tipo**   |
+|----------------------|---------------------------|------------|
+| embarcar             | Fim do processo           | default    |
+| voltar_rota          | Seguir GPS                | cancel     |
