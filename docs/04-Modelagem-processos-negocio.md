@@ -1,16 +1,16 @@
 # Modelagem dos processos de negócio
 
-<span style="color:red">Pré-requisitos: <a href="02-Especificacao.md"> Especificação do projeto</a></span>
-
-> **Links úteis**:
-> - [Modelagem de processos AS-IS x TO-BE](https://dheka.com.br/modelagem-as-is-to-be/)
-> - [20 dicas práticas de modelagem de processos](https://dheka.com.br/20-dicas-praticas-de-modelagem-de-processos/)
-
 ## Modelagem da situação atual (Modelagem AS IS)
 
-Apresente uma descrição textual de como os sistemas atuais resolvem o problema que seu projeto se propõe a resolver. Caso sua proposta seja inovadora e não existam processos claramente definidos, apresente como as tarefas que seu sistema pretende implementar são executadas atualmente, mesmo que não se utilize tecnologia computacional.
+Atualmente, os pais ou responsáveis formalizam pedidos de transporte escolar visando assegurar que seus filhos tenham um meio seguro de chegar à escola. No entanto, quando o serviço público não está disponível ou a solicitação não é atendida, eles precisam recorrer a serviços particulares de transporte, o que pode gerar custos adicionais e preocupações com a qualidade e segurança do serviço.
 
-Com o tema do projeto definido, escolham alguns processos no contexto de negócios. Para ilustrar os potenciais ganhos com a automatização, imaginem processos manuais, ineficientes e/ou com muitas idas e vindas, gerando, assim, retrabalho. Colem aqui os modelos dos processos atuais (modelo AS-IS), elaborados com o apoio da ferramenta baseada em BPMN utilizada na disciplina.
+Os diagramas BPMN abaixo ilustram os principais fluxos atuais:
+
+![image](https://github.com/user-attachments/assets/4d2d2f81-de98-4c71-b6e6-a93d23b2735e)<br>
+Figura 1: Solicitação de Transporte Escolar
+
+![image](https://github.com/user-attachments/assets/923b2395-f423-4ed5-b698-b0816b840c23)<br>
+Figura 2: Embarque Diário do Aluno
 
 ## Descrição geral da proposta (Modelagem TO BE)
 
