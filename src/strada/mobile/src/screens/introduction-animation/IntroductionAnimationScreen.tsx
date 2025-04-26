@@ -10,21 +10,23 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import {
   SplashView,
-  RelaxView,
+  SecondView,
   CareView,
   MoodDiaryView,
   WelcomeView,
   TopBackSkipView,
   CenterNextButton,
 } from "./scenes";
-import { colors } from "@/src/constants/colors";
 import { useRouter } from "expo-router";
 import LoginScreen from "../login/LoginView";
+import { lightTheme } from "@/src/constants/theme";
 
 const IntroductionAnimationScreen: React.FC = () => {
   const navigation = useNavigation();
   const window = useWindowDimensions();
   const router = useRouter();
+
+  const theme = lightTheme;
 
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -96,7 +98,7 @@ const IntroductionAnimationScreen: React.FC = () => {
   }, [playAnimation]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.mintCream }}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       <StatusBar translucent backgroundColor="transparent" />
       <SplashView {...{ onNextClick, animationController }} />
 
@@ -108,7 +110,7 @@ const IntroductionAnimationScreen: React.FC = () => {
           },
         ]}
       >
-        <RelaxView {...{ animationController }} />
+        <SecondView {...{ animationController }} />
 
         <CareView {...{ animationController }} />
 

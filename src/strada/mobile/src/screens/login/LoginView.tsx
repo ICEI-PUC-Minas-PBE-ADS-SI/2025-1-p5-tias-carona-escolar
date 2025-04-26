@@ -52,21 +52,21 @@ const InputField: React.FC<{
 }) => (
   <View style={styles.inputContainer}>
     {iconLibrary === "Ionicons" ? (
-      <Ionicons name={iconName} size={30} color={theme.secondary} />
+      <Ionicons name={iconName} size={30} color={theme.blue} />
     ) : (
-      <SimpleLineIcons name={iconName} size={30} color={theme.secondary} />
+      <SimpleLineIcons name={iconName} size={30} color={theme.blue} />
     )}
     <TextInput
       style={styles.textInput}
       placeholder={placeholder}
-      placeholderTextColor={theme.secondary}
+      placeholderTextColor={theme.blue}
       secureTextEntry={secureTextEntry}
       keyboardType={keyboardType ?? "default"}
       onChangeText={onChangeText}
     />
     {toggleSecure && (
       <TouchableOpacity onPress={toggleSecure}>
-        <SimpleLineIcons name="eye" size={20} color={theme.secondary} />
+        <SimpleLineIcons name="eye" size={20} color={theme.blue} />
       </TouchableOpacity>
     )}
   </View>
@@ -348,7 +348,7 @@ const createStyles = (theme: Theme) =>
     },
     headingText: {
       fontSize: 32,
-      color: theme.primary,
+      color: theme.blue,
       fontFamily: fonts.SemiBold,
     },
     formContainer: {
@@ -360,7 +360,7 @@ const createStyles = (theme: Theme) =>
     },
     inputContainer: {
       borderWidth: 1,
-      borderColor: theme.secondary,
+      borderColor: theme.blue,
       borderRadius: 100,
       paddingHorizontal: 20,
       flexDirection: "row",
@@ -375,13 +375,13 @@ const createStyles = (theme: Theme) =>
     },
     forgotPasswordText: {
       textAlign: "right",
-      color: theme.primary,
+      color: theme.blue,
       fontFamily: fonts.SemiBold,
       marginVertical: 10,
     },
     loginButtonWrapper: {
       minHeight: 45,
-      backgroundColor: theme.darkBlue,
+      backgroundColor: theme.blue,
       alignItems: "center",
       justifyContent: "center",
       borderRadius: 100,
@@ -399,12 +399,12 @@ const createStyles = (theme: Theme) =>
       marginVertical: 20,
       fontSize: 14,
       fontFamily: fonts.Regular,
-      color: theme.primary,
+      color: theme.blue,
     },
     googleButtonContainer: {
       flexDirection: "row",
       borderWidth: 1,
-      borderColor: theme.primary,
+      borderColor: theme.blue,
       borderRadius: 10,
       justifyContent: "center",
       alignItems: "center",
@@ -429,7 +429,7 @@ const createStyles = (theme: Theme) =>
       gap: 5,
     },
     accountText: {
-      color: theme.primary,
+      color: theme.blue,
       fontFamily: fonts.Regular,
     },
   });

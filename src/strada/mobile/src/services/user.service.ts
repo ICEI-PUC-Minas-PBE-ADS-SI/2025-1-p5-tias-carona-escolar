@@ -35,8 +35,16 @@ export const updateUser = async (id: string, user: IUserRequest) => {
 };
 
 export const storeUserID = async (id: string) => {
-  await SecureStore.setItemAsync("userID", id);
+    await SecureStore.setItemAsync("userID", id);
 };
+
+export const getStoredUser = async () => {
+  return await SecureStore.getItemAsync("user");
+}
+
+export const storeUser = async (user: IUserRequest) => {
+  await SecureStore.setItemAsync("user", JSON.stringify(user));
+}
 
 export const getStoredUserID = async () => {
   return await SecureStore.getItemAsync("userID");
