@@ -1,0 +1,2 @@
+ALTER TABLE tb_rides ADD COLUMN img_url VARCHAR(255);
+ALTER TABLE tb_ride_requests ADD COLUMN img_url VARCHAR(255);
