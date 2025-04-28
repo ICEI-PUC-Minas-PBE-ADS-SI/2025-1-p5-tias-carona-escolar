@@ -4,6 +4,8 @@
 node_modules/
 
 .env.development
+#/android
+#/ios
 
 # Expo
 .expo/
