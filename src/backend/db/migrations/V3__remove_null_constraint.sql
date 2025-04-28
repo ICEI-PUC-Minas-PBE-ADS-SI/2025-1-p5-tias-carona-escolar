@@ -1,1 +1,0 @@
-ALTER TABLE tb_rides ALTER COLUMN stop_points DROP NOT NULL;

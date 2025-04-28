@@ -1,1 +1,0 @@
-ALTER TABLE tb_rides ADD COLUMN stop_points GEOGRAPHY(MultiPoint, 4326) NOT NULL;
