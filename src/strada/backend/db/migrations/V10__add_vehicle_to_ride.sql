@@ -1,0 +1,1 @@
+ALTER TABLE tb_rides ADD constraint fk_vehicle FOREIGN KEY (vehicle_id) REFERENCES tb_vehicles(id);

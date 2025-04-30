@@ -9,7 +9,7 @@ import * as crypto from 'crypto';
 @Injectable()
 export class JwtServiceImpl implements IJwtService {
   private readonly publicKey: string;
-  private readonly kid = crypto.randomUUID();
+  private readonly kid: string;
   private readonly modulus: string;
   private readonly exponent: string;
 
@@ -17,6 +17,7 @@ export class JwtServiceImpl implements IJwtService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {
+    this.kid = configService.get<string>('JWT_KID', 'auth-server');
     const publicKeyPath = configService.get<string>('PUBLIC_KEY_PATH');
     this.publicKey = fs.readFileSync(path.resolve(publicKeyPath), 'utf8');
     const publicKeyBuffer = crypto.createPublicKey(this.publicKey);

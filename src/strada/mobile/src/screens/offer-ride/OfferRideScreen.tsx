@@ -11,6 +11,7 @@ import {
   StatusBar,
   Alert,
   Platform,
+  Modal,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -20,6 +21,7 @@ import { colors } from "@/src/constants/colors";
 import { AppImages } from "@/src/assets";
 import CustomCalendar from "@/src/components/shared/CustomCalendar";
 import RecurringInDays from "@/src/components/offer-ride/ReccuringInDays";
+import AutocompleteSearch from "@/src/components/shared/SearchBar";
 
 // Dados do veículo do usuário (mockados)
 const userVehicle = {
@@ -50,6 +52,22 @@ const OfferRideScreen = () => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [isRecurringRide, setIsRecurringRide] = useState(false);
   const [canMakeStops, setCanMakeStops] = useState(false);
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+
+  const openSearchModal = () => {
+    setSearchModalVisible(true);
+  };
+
+  const closeSearchModal = () => {
+    setSearchModalVisible(false);
+  };
+
+  const handlePlaceSelected = (place) => {
+    console.log("Local selecionado:", place);
+    // Aqui você pode navegar para a tela de resultados de caronas
+    // ou fazer qualquer outra ação necessária
+    closeSearchModal();
+  };
 
   // Função para voltar à tela anterior
   const handleGoBack = useCallback(() => {
@@ -188,9 +206,20 @@ const OfferRideScreen = () => {
             <Text style={styles.sectionTitle}>Rota da Viagem</Text>
           </View>
 
+          <Modal
+            visible={searchModalVisible}
+            animationType="slide"
+            onRequestClose={closeSearchModal}
+          >
+            <AutocompleteSearch
+              onSelectPlace={handlePlaceSelected}
+              onBack={closeSearchModal}
+            />
+          </Modal>
+
           <TouchableOpacity
             style={styles.locationInput}
-            onPress={() => navigateToLocationPicker("origin")}
+            onPress={openSearchModal}
           >
             <View style={[styles.locationDot, styles.originDot]} />
             <View style={styles.locationTextContainer}>
@@ -206,7 +235,7 @@ const OfferRideScreen = () => {
 
           <TouchableOpacity
             style={styles.locationInput}
-            onPress={() => navigateToLocationPicker("destination")}
+            onPress={openSearchModal}
           >
             <View style={[styles.locationDot, styles.destinationDot]} />
             <View style={styles.locationTextContainer}>

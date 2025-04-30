@@ -4,7 +4,6 @@ import {
   Text,
   Animated,
   useWindowDimensions,
-  Dimensions,
   View,
 } from "react-native";
 import { AppImages } from "../../../assets";
@@ -21,7 +20,7 @@ const IMAGE_HEIGHT = 250;
 const WelcomeView: React.FC<Props> = ({ animationController }) => {
   const window = useWindowDimensions();
   const theme = lightTheme;
-  const styles = getStyles(theme);
+  const styles = getStyles(theme, window);
 
   const careRef = useRef<Text | null>(null);
 
@@ -61,68 +60,74 @@ const WelcomeView: React.FC<Props> = ({ animationController }) => {
         <View style={styles.overlay} />
       </View>
 
-      <Animated.View style={{ flexDirection: "row" }}>
-        <Animated.Text
-          style={[
-            styles.title,
-            { transform: [{ translateX: welcomeTextAnim }] },
-          ]}
-          ref={careRef}
-        >
-          Stra
-        </Animated.Text>
-        <Animated.Text
-          style={[
-            styles.title,
-            styles.titlePink,
-            { transform: [{ translateX: welcomeTextAnim }] },
-          ]}
-          ref={careRef}
-        >
-          da
-        </Animated.Text>
-      </Animated.View>
-      <Text style={styles.subtitle}>
-        Sua carona está pronta. Vamos{"\n"}
-        compartilhar a estrada juntos?
-      </Text>
+      <View style={styles.contentContainer}>
+        <Animated.View style={{ flexDirection: "row" }}>
+          <Animated.Text
+            style={[
+              styles.title,
+              { transform: [{ translateX: welcomeTextAnim }] },
+            ]}
+            ref={careRef}
+          >
+            Stra
+          </Animated.Text>
+          <Animated.Text
+            style={[
+              styles.title,
+              styles.titlePink,
+              { transform: [{ translateX: welcomeTextAnim }] },
+            ]}
+            ref={careRef}
+          >
+            da
+          </Animated.Text>
+        </Animated.View>
+        <Text style={styles.subtitle}>
+          Sua carona está pronta. Vamos{"\n"}
+          compartilhar a estrada juntos?
+        </Text>
+      </View>
     </Animated.View>
   );
 };
 
-const { width, height } = Dimensions.get("window");
-
-const getStyles = (theme: Theme) =>
+const getStyles = (theme: Theme, window: { width: number; height: number }) =>
   StyleSheet.create({
     container: {
       position: "absolute",
       left: 0,
-      right: 0,
+      top: 0,
+      width: window.width,
+      height: window.height,
+      backgroundColor: "#452132",
       alignItems: "center",
-      paddingBottom: 100,
-    },
-    image: {
-      maxWidth: IMAGE_WIDTH,
-      maxHeight: IMAGE_HEIGHT,
-      marginTop: 450,
     },
     videoContainer: {
       position: "absolute",
-      width: width,
-      height: height,
+      width: window.width,
+      height: window.height,
+      top: 0,
       left: 0,
-      top: -350,
+      zIndex: 1,
     },
     video: {
-      width: width,
-      height: height,
+      width: "100%",
+      height: "100%",
       position: "absolute",
     },
     overlay: {
       position: "absolute",
       width: "100%",
       height: "100%",
-      backgroundColor: "rgba(0, 0, 0, 0.6)",
+      backgroundColor: "rgba(0, 0, 0, 0.3)",
+    },
+    contentContainer: {
+      position: "absolute",
+      width: "100%",
+      height: "100%",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 2,
     },
     title: {
       color: theme.primaryBlueDarkTheme,
