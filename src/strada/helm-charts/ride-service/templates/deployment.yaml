@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "chat-service.fullname" . }}
+  name: {{ include "ride-service.fullname" . }}
   labels:
-    {{- include "chat-service.labels" . | nindent 4 }}
+    {{- include "ride-service.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "chat-service.selectorLabels" . | nindent 6 }}
+      {{- include "ride-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "chat-service.labels" . | nindent 8 }}
+        {{- include "ride-service.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -27,7 +27,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "chat-service.serviceAccountName" . }}
+      serviceAccountName: {{ include "ride-service.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -42,7 +42,7 @@ spec:
               protocol: TCP
           envFrom:
             - secretRef:
-                name: {{ .Release.Name }}-chat-secrets
+                name: {{ .Release.Name }}-ride-secrets
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:

@@ -29,6 +29,7 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
         String accessToken = request.getURI().getQuery().split("token=")[1];
+        System.out.println(request.getURI());
         String nickname = tokenValidator.validateAuthentication(accessToken);
         if(nickname != null){
             attributes.put("nickname", nickname);

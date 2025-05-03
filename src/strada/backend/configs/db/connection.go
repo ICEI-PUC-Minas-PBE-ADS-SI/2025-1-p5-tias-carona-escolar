@@ -2,7 +2,6 @@ package config
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/244Walyson/shared-ride/configs"
@@ -27,14 +26,5 @@ func ConnectDB() (*pgxpool.Pool, error) {
 }
 
 func getConnectionString() string {
-
-	Host := configs.GetEnv("DB_HOST", "localhost")
-	Port := configs.GetEnvAsInt("DB_PORT", 5432)
-	User := configs.GetEnv("DB_USER", "")
-	Password := configs.GetEnv("DB_PASSWORD", "")
-	DBName := configs.GetEnv("DB_NAME", "")
-	SSLMode := configs.GetEnv("DB_SSLMODE", "disable")
-
-	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
-		User, Password, Host, Port, DBName, SSLMode)
+	return configs.GetEnv("DATABASE_URL", "")
 }

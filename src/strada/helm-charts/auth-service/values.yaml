@@ -62,20 +62,21 @@ service:
   port: 3000
 
 ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/secure-backends: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
   hosts:
-    - host: chart-example.local
+    - host: auth.strada.appbr.store
       paths:
         - path: /
           pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  tls:
+    - secretName: auth-tls
+      hosts:
+        - auth.strada.appbr.store
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

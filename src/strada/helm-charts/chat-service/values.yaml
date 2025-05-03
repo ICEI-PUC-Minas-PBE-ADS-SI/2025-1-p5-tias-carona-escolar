@@ -10,13 +10,13 @@ image:
   # Overwxx4231passcoderides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-# secrets:
-#   eurekaServer: ${EUREKA_SERVER}
-#   corsOrigins: ${CORS_ORIGINS}
-#   kafkaSaslUsername: ${KAFKA_SASL_USERNAME}
-#   kafkaSaslPassword: ${KAFKA_SASL_PASSWORD}
-#   kafkaBootstrapServers: ${KAFKA_BOOTSTRAP_SERVERS}
-#   mongoDbUri: ${MONGO_DB_URI}
+secrets:
+  #eurekaServer: ${EUREKA_SERVER}
+  #corsOrigins: "*" #${CORS_ORIGINS}
+  #kafkaSaslUsername: ${KAFKA_SASL_USERNAME}
+  #kafkaSaslPassword: ${KAFKA_SASL_PASSWORD}
+  #kafkaBootstrapServers: kafka-controller-headless.kafka.svc.cluster.local:9092 #${KAFKA_BOOTSTRAP_SERVERS}
+  #mongoDbUri: mongodb://user:password@mongodb-0-external.mongodb.svc.cluster.local:27017/chat-db #${MONGO_DB_URI}
 
 # mongodb://user:password@mongodb-0-external.mongodb.svc.cluster.local:27017/chat-db
 
@@ -54,20 +54,23 @@ service:
   port: 8080
 
 ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/secure-backends: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
   hosts:
-    - host: chart-example.local
+    - host: chat.strada.appbr.store
       paths:
         - path: /
           pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  tls:
+    - secretName: chat-tls
+      hosts:
+        - chat.strada.appbr.store
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

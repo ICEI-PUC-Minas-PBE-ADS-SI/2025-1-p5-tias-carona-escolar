@@ -40,27 +40,9 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          env:
-            - name: "EUREKA_SERVER"
-              valueFrom:
-                secretKeyRef:
-                  key: EUREKA_SERVER
-                  name: {{ .Release.Namespace }}
-            - name: "CORS_ORIGINS"
-              valueFrom:
-                secretKeyRef:
-                  key: CORS_ORIGINS
-                  name: {{ .Release.Namespace }}
-            - name: "KAFKA_BOOTSTRAP_SERVERS"
-              valueFrom:
-                secretKeyRef:
-                  key: KAFKA_BOOTSTRAP_SERVERS
-                  name: {{ .Release.Namespace }}
-            - name: "JWK_SET_URI"
-              valueFrom:
-                secretKeyRef:
-                  key: JWK_SET_URI
-                  name: {{ .Release.Namespace }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-notification-secrets
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
