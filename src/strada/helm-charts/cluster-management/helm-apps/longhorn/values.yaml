@@ -1,0 +1,11 @@
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  host: longhorn.strada.appbr.store
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: true
+    cert-manager.io/issuer: "letsencrypt-prod"
+
+
+#lsblk

@@ -1,0 +1,11 @@
+repositories:
+- name: gitlab
+  url: https://charts.gitlab.io
+
+releases:
+- name: runner
+  namespace: gitlab-managed-apps
+  chart: gitlab/gitlab-runner
+  installed: true
+  values:
+    - values.yaml.gotmpl

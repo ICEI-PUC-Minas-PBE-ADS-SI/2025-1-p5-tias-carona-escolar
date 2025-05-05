@@ -1,0 +1,58 @@
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      access: proxy
+      orgId: 1
+      url: http://prometheus-prometheus-server:80
+      isDefault: true
+
+
+persistence:
+  enabled: true
+  #storageClass: nfs-client
+  accessMode: "ReadWriteOnce"
+
+
+initChownData:
+  enabled: false
+
+
+ingress:
+  enabled: true
+  # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+  # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+  ingressClassName: nginx
+  # Values can be templated
+  annotations: {}
+  kubernetes.io/ingress.class: nginx
+  kubernetes.io/tls-acme: "true"
+  cert-manager.io/issuer: "letsencrypt-prod"
+  labels: {}
+  path: /
+  pathType: Prefix
+  hosts:
+    - grafana.api.waly.dev.br
+
+  extraPaths: []
+  # - path: /*
+  #   backend:
+  #     serviceName: ssl-redirect
+  #     servicePort: use-annotation
+  ## Or for k8s > 1.19
+  # - path: /*
+  #   pathType: Prefix
+  #   backend:
+  #     service:
+  #       name: ssl-redirect
+  #       port:
+  #         name: use-annotation
+
+
+# kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+# kubectl run debug-pod --rm -i --tty --image=busybox -- sh
+
+# kubectl run debug-pod --rm -i --tty --image=curlimages/curl -- /bin/sh

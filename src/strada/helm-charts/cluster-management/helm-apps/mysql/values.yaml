@@ -1,0 +1,45 @@
+image:
+  registry: docker.io
+  repository: bitnami/mysql
+  tag: 8.0.37-debian-12-r3
+
+auth:
+  rootPassword: secretpassword
+
+service:
+  type: LoadBalancer
+
+persistence:
+  enabled: true
+  #storageClass: longhorn
+  accessMode: "ReadWriteOnce"
+  
+
+initdbScripts:
+  my_init_script.sh: |
+    #!/bin/sh
+    if [[ $(hostname) == *master* ]]; then
+      echo "Master node"
+      mysql -P 3306 -uroot -psecretpassword -e "create database kanban";
+      mysql -P 3306 -uroot -psecretpassword -e "create database notification";
+    else
+      echo "No master node"
+    fi
+  
+
+# kubectl exec -it mysql-0 -n mysql -- /bin/bash
+
+# mysql -h mysql.mysql.svc.cluster.local -uroot -psecretpassword
+
+# CREATE USER 'kanbanUser'@'%' IDENTIFIED BY 'password123';
+# GRANT ALL PRIVILEGES ON *.* TO 'kanbanUser'@'%' WITH GRANT OPTION;
+# FLUSH PRIVILEGES;
+
+
+# CREATE DATABASE kanban;
+# CREATE DATABASE notification;
+
+# mysqldump -uroot -psecretpassword > /home/waly/kanban-backup.sql
+
+# kubectl exec -it mysql-0 -n mysql -- mysqldump -uroot -psecretpassword kanban > /home/waly/kanban-backup.sql
+# kubectl exec -it mysql-0 -n mysql -- mysqldump -uroot -psecretpassword notification > /home/waly/notification-backup.sql
