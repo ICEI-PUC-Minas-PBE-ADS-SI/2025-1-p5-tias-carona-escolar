@@ -1,0 +1,331 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// schema.prisma
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+model Ride {
+  id       String @id @default(cuid())
+  driverId String @map("driver_id")
+
+  // Using PostGIS Point type for precise geospatial operations
+  startPoint Unsupported("geometry(Point, 4326)") @map("start_point")
+  endPoint   Unsupported("geometry(Point, 4326)") @map("end_point")
+
+  // Keep address strings for display purposes
+  startAddress String @map("start_address")
+  endAddress   String @map("end_address")
+
+  departureTime  DateTime   @map("departure_time")
+  availableSeats Int        @map("available_seats")
+  pricePerSeat   Float      @map("price_per_seat")
+  status         RideStatus @default(PENDING)
+
+  // Vehicle information
+  vehicleModel String @map("vehicle_model")
+  vehicleColor String @map("vehicle_color")
+  licensePlate String @map("license_plate")
+
+  // Ride preferences
+  allowLuggage Boolean @default(false) @map("allow_luggage")
+
+  // Estimated values (from route planning)
+  estimatedDuration Int   @map("estimated_duration") // minutes
+  estimatedDistance Float @map("estimated_distance") // meters (using meters for precision)
+
+  // Actual values (when completed)
+  actualDuration  Int?      @map("actual_duration") // minutes
+  actualDistance  Float?    @map("actual_distance") // meters
+  actualStartTime DateTime? @map("actual_start_time") // when ride actually started
+  actualEndTime   DateTime? @map("actual_end_time") // when ride actually ended
+
+  // Route as LineString for efficient spatial queries
+  plannedRoute Unsupported("geometry(LineString, 4326)")? @map("planned_route")
+  actualRoute  Unsupported("geometry(LineString, 4326)")? @map("actual_route")
+  boundingBox  Unsupported("geometry(Polygon, 4326)")?    @map("bounding_box")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  routePoints RoutePoint[]
+  passengers  RidePassenger[]
+  requests    RideRequest[]
+  actualPath  ActualPathPoint[]
+  ratings     Rating[]
+  payments    Payment[]
+
+  // Localização atual (opcional e atualizada em tempo real)
+  currentLatitude    Float?                                @map("current_latitude")
+  currentLongitude   Float?                                @map("current_longitude")
+  currentLocation    Unsupported("geometry(Point, 4326)")? @map("current_location")
+  lastLocationUpdate DateTime?                             @map("last_location_update")
+
+  // Spatial indexes for efficient geographic queries
+  @@index([startPoint], type: Gist)
+  @@index([endPoint], type: Gist)
+  @@index([plannedRoute], type: Gist)
+  @@index([departureTime])
+  @@index([status])
+  @@index([driverId])
+  @@map("rides")
+}
+
+model RoutePoint {
+  id     String                               @id @default(cuid())
+  rideId String                               @map("ride_id")
+  point  Unsupported("geometry(Point, 4326)")
+  order  Int
+
+  // Optional: store additional info about this waypoint
+  address   String?
+  isPickup  Boolean @default(false) @map("is_pickup") // if this is a passenger pickup point
+  isDropoff Boolean @default(false) @map("is_dropoff") // if this is a passenger dropoff point
+
+  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
+
+  @@index([point], type: Gist)
+  @@index([rideId, order])
+  @@map("route_points")
+}
+
+model ActualPathPoint {
+  id        String                               @id @default(cuid())
+  rideId    String                               @map("ride_id")
+  userId    String                               @map("user_id") // who recorded this point (driver or passenger)
+  point     Unsupported("geometry(Point, 4326)")
+  timestamp DateTime                             @default(now())
+  order     Int
+
+  // Additional tracking info
+  speed    Float? // km/h
+  heading  Float? // degrees (0-360)
+  accuracy Float? // meters
+
+  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
+
+  @@index([point], type: Gist)
+  @@index([rideId, timestamp])
+  @@index([rideId, order])
+  @@map("actual_path_points")
+}
+
+model RidePassenger {
+  id          String          @id @default(cuid())
+  rideId      String          @map("ride_id")
+  passengerId String          @map("passenger_id")
+  seatsBooked Int             @default(1) @map("seats_booked")
+  totalPaid   Float           @map("total_paid")
+  status      PassengerStatus @default(CONFIRMED)
+
+  // Pickup and dropoff locations (can be different from ride start/end)
+  pickupPoint    Unsupported("geometry(Point, 4326)")? @map("pickup_point")
+  dropoffPoint   Unsupported("geometry(Point, 4326)")? @map("dropoff_point")
+  pickupAddress  String?                               @map("pickup_address")
+  dropoffAddress String?                               @map("dropoff_address")
+
+  joinedAt     DateTime  @default(now()) @map("joined_at")
+  pickedUpAt   DateTime? @map("picked_up_at") // when passenger was actually picked up
+  droppedOffAt DateTime? @map("dropped_off_at") // when passenger was actually dropped off
+
+  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
+
+  @@unique([rideId, passengerId])
+  @@index([pickupPoint], type: Gist)
+  @@index([dropoffPoint], type: Gist)
+  @@map("ride_passengers")
+}
+
+model RideRequest {
+  id          String        @id @default(cuid())
+  rideId      String        @map("ride_id")
+  passengerId String        @map("passenger_id")
+  seatsNeeded Int           @default(1) @map("seats_needed")
+  message     String?
+  status      RequestStatus @default(PENDING)
+
+  // Requested pickup/dropoff locations
+  requestedPickupPoint    Unsupported("geometry(Point, 4326)")? @map("requested_pickup_point")
+  requestedDropoffPoint   Unsupported("geometry(Point, 4326)")? @map("requested_dropoff_point")
+  requestedPickupAddress  String?                               @map("requested_pickup_address")
+  requestedDropoffAddress String?                               @map("requested_dropoff_address")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  respondedAt DateTime? @map("responded_at") // when driver accepted/rejected
+
+  pickupDistance     Float? @map("pickup_distance")
+  dropoffDistance    Float? @map("dropoff_distance")
+  additionalDistance Float? @map("additional_distance")
+  detourPercentage   Float? @map("detour_percentage")
+
+  pickedUpAt   DateTime? @map("picked_up_at") // when passenger wants to be picked up
+  droppedOffAt DateTime? @map("dropped_off_at") // when passenger wants to be dropped off
+
+  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
+
+  @@unique([rideId, passengerId])
+  @@index([requestedPickupPoint], type: Gist)
+  @@index([requestedDropoffPoint], type: Gist)
+  @@map("ride_requests")
+}
+
+model Rating {
+  id        String     @id @default(cuid())
+  rideId    String     @map("ride_id")
+  raterId   String     @map("rater_id") // who gave the rating
+  ratedId   String     @map("rated_id") // who received the rating
+  rating    Int // 1-5 stars
+  comment   String?
+  type      RatingType // DRIVER_TO_PASSENGER or PASSENGER_TO_DRIVER
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
+
+  @@unique([rideId, raterId, ratedId])
+  @@index([ratedId])
+  @@index([raterId])
+  @@map("ratings")
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  rideId        String        @map("ride_id")
+  passengerId   String        @map("passenger_id")
+  amount        Float
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  transactionId String?       @map("transaction_id")
+
+  // Payment processing details
+  gatewayResponse Json?   @map("gateway_response") // Store payment gateway response
+  failureReason   String? @map("failure_reason") // If payment failed
+  refundAmount    Float?  @map("refund_amount") // If partially refunded
+  refundReason    String? @map("refund_reason") // Reason for refund
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  processedAt DateTime? @map("processed_at") // When payment was actually processed
+
+  ride Ride @relation(fields: [rideId], references: [id], onDelete: Cascade)
+
+  @@index([passengerId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+// New model for ride search optimization
+model RideSearchIndex {
+  id     String @id @default(cuid())
+  rideId String @unique @map("ride_id")
+
+  // Bounding box for quick filtering
+  boundingBox Unsupported("geometry(Polygon, 4326)") @map("bounding_box")
+
+  // Searchable fields
+  departureDate  DateTime @map("departure_date") // Date only for day-based searches
+  availableSeats Int      @map("available_seats")
+  pricePerSeat   Float    @map("price_per_seat")
+  allowSmoking   Boolean  @map("allow_smoking")
+  allowPets      Boolean  @map("allow_pets")
+  allowLuggage   Boolean  @map("allow_luggage")
+
+  // Denormalized driver info for faster queries
+  driverRating     Float? @map("driver_rating")
+  driverTotalRides Int?   @map("driver_total_rides")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([boundingBox], type: Gist)
+  @@index([departureDate, availableSeats])
+  @@index([pricePerSeat])
+  @@map("ride_search_index")
+}
+
+// Model for storing popular routes for analytics
+model PopularRoute {
+  id         String                                    @id @default(cuid())
+  startPoint Unsupported("geometry(Point, 4326)")      @map("start_point")
+  endPoint   Unsupported("geometry(Point, 4326)")      @map("end_point")
+  route      Unsupported("geometry(LineString, 4326)")
+
+  startAddress String @map("start_address")
+  endAddress   String @map("end_address")
+
+  rideCount   Int   @default(1) @map("ride_count")
+  avgPrice    Float @map("avg_price")
+  avgDuration Int   @map("avg_duration") // minutes
+  avgDistance Float @map("avg_distance") // meters
+
+  lastRideDate DateTime @map("last_ride_date")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([startPoint], type: Gist)
+  @@index([endPoint], type: Gist)
+  @@index([rideCount])
+  @@map("popular_routes")
+}
+
+enum RideStatus {
+  PENDING // Ride created, waiting for passengers
+  ACTIVE // Ride has passengers, waiting for departure
+  IN_PROGRESS // Ride is currently happening
+  COMPLETED // Ride finished successfully
+  CANCELLED // Ride cancelled
+}
+
+enum PassengerStatus {
+  CONFIRMED // Passenger confirmed and paid
+  CANCELLED // Passenger cancelled
+  NO_SHOW // Passenger didn't show up
+  PICKED_UP // Passenger was picked up
+  DROPPED_OFF // Passenger was dropped off
+}
+
+enum RequestStatus {
+  PENDING // Request sent, waiting for driver response
+  ACCEPTED // Driver accepted the request
+  ON_GOING // Driver picked up the passenger
+  COMPLETED // Request completed successfully
+  REJECTED // Driver rejected the request
+  CANCELLED // Passenger cancelled the request
+  EXPIRED // Request expired without response
+}
+
+enum RatingType {
+  DRIVER_TO_PASSENGER
+  PASSENGER_TO_DRIVER
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  PIX
+  E_WALLET
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
