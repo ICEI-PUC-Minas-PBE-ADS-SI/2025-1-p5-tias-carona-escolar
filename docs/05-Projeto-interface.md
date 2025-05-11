@@ -53,28 +53,43 @@ Visão geral da interação do usuário por meio das telas do sistema. Apresente
 
 ### Tela principal do sistema
 
-Descrição da tela principal do sistema.
+Interface principal mostrando o mapa com rotas disponíveis, pontos de origem e destino.
 
-> Insira aqui a tela principal do sistema
-
+> ![image](https://github.com/user-attachments/assets/138c2b84-9863-465a-a8df-59fc6de5abc6)
 
 ###  Telas do processo 1
 
-Descrição da tela relativa à atividade 1 do processo 1.
+Apresenta o logotipo Strada e uma ilustração de um carro com localização, introduzindo o conceito de carona escolar segura
 
-> Insira aqui a tela da atividade 1
+> ![image](https://github.com/user-attachments/assets/b70be147-a049-4c73-94a7-2587f4631b36)
 
-Descrição da tela relativa à atividade 2 do processo 1.
+ Sequência de três telas destacando os principais benefícios da plataforma: "Carona do seu jeito", "Segurança em primeiro lugar" e "Juntos vamos mais longe"
 
-> Insira aqui a tela da atividade 2
+> ![image](https://github.com/user-attachments/assets/714fd013-fcb8-465e-99a4-62bc0d7756f0)
+
+ Interface com opções de login para usuários existentes ou cadastro para novos usuários.
+ 
+> ![image](https://github.com/user-attachments/assets/08d01ffc-3133-45f9-94c4-8a4908c0a0ab)
 
 
 ### Telas do processo 2
 
-Descrição da tela relativa à atividade 1 do processo 2.
+ Tela para definição de origem, destino, horário e outras preferências para a carona desejada.
 
-> Insira aqui a tela da atividade 1
+> ![image](https://github.com/user-attachments/assets/76c1e8a4-2765-4475-9f55-c0153c2283d3)
 
-Descrição da tela relativa à atividade 2 do processo 2.
+Interface para motoristas registrarem seus trajetos disponíveis, horários e vagas.
 
-> Insira aqui a tela da atividade 2
+> ![image](https://github.com/user-attachments/assets/945bacec-f73f-44ac-a470-2946e34a211c)
+
+
+### Telas do processo 3
+
+> ![image](https://github.com/user-attachments/assets/cabc8fb3-c747-4b92-af18-bc4bb8a16de2)
+> ![image](https://github.com/user-attachments/assets/4e374e6f-1ac1-4969-8076-e8bc2c57be96)
+
+### Telas do processo 4
+
+ Lista de caronas anteriores com informações resumidas e avaliações recebidas/realizadas.
+ 
+ > ![image](https://github.com/user-attachments/assets/693d9f9b-f89f-4d90-973d-7ff1344bbb7f)
