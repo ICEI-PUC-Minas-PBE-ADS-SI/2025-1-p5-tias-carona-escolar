@@ -48,9 +48,6 @@ São protótipos usados no design de interface para sugerir a estrutura de um si
 
 
 ## Interface do sistema
-
-Visão geral da interação do usuário por meio das telas do sistema. Apresente as principais interfaces da plataforma em sua versão final.
-
 ### Tela principal do sistema
 
 Interface principal mostrando o mapa com rotas disponíveis, pontos de origem e destino.
@@ -71,7 +68,6 @@ Apresenta o logotipo Strada e uma ilustração de um carro com localização, in
  
 > ![image](https://github.com/user-attachments/assets/08d01ffc-3133-45f9-94c4-8a4908c0a0ab)
 
-
 ### Telas do processo 2
 
  Tela para definição de origem, destino, horário e outras preferências para a carona desejada.
@@ -81,7 +77,6 @@ Apresenta o logotipo Strada e uma ilustração de um carro com localização, in
 Interface para motoristas registrarem seus trajetos disponíveis, horários e vagas.
 
 > ![image](https://github.com/user-attachments/assets/945bacec-f73f-44ac-a470-2946e34a211c)
-
 
 ### Telas do processo 3
 
