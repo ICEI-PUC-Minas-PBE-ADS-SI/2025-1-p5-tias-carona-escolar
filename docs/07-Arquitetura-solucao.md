@@ -22,23 +22,9 @@ O diagrama de classes ilustra graficamente a estrutura do software e como cada u
 * Notification Service  
 ![image](https://github.com/user-attachments/assets/3fa1721a-f221-48b5-99fd-74a80859f85b)
 
-
-
-> **Links úteis**:
-> - [Diagramas de classes - documentação da IBM](https://www.ibm.com/docs/pt-br/rational-soft-arch/9.7.0?topic=diagrams-class)
-> - [O que é um diagrama de classe UML?](https://www.lucidchart.com/pages/pt/o-que-e-diagrama-de-classe-uml)
-
 ##  Modelo de dados
-
-O desenvolvimento da solução proposta requer a existência de bases de dados que permitam realizar o cadastro de dados e os controles associados aos processos identificados, assim como suas recuperações.
-
-Utilizando a notação do DER (Diagrama Entidade-Relacionamento), elabore um modelo, usando alguma ferramenta, que contemple todas as entidades e atributos associados às atividades dos processos identificados. Deve ser gerado um único DER que suporte todos os processos escolhidos, visando, assim, uma base de dados integrada. O modelo deve contemplar também o controle de acesso dos usuários (partes interessadas nos processos) de acordo com os papéis definidos nos modelos do processo de negócio.
-
-Apresente o modelo de dados por meio de um modelo relacional que contemple todos os conceitos e atributos apresentados na modelagem dos processos.
-
 ### Modelo ER
 
-O Modelo ER representa, por meio de um diagrama, como as entidades (coisas, objetos) se relacionam entre si na aplicação interativa.
 * Ride Service  
 ![image](https://github.com/user-attachments/assets/bc3e92a1-fe98-4b13-80e1-b6ad8866bf40)
 * User Service  
