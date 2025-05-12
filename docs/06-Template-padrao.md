@@ -36,8 +36,7 @@ O mapa exibe os trajetos das caronas em tempo real, com a cor rosa claro para as
 ### Layout Responsivo
 - **Smartphones**: O layout é simplificado, com os elementos organizados verticalmente.
 
-![Untitled](https://github.com/user-attachments/assets/57e3486a-fb8c-48cc-809a-c2a25c1f51ff)
-
+![logo](https://github.com/user-attachments/assets/307c3177-065f-405c-82fc-827607123bcd)
 
 ![Untitled](https://github.com/user-attachments/assets/69bdc5e8-ac2d-40c6-9188-94c391ad54ad)
 
