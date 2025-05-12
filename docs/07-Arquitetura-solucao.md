@@ -4,7 +4,6 @@
 
 Definição de como o software é estruturado em termos dos componentes que fazem parte da solução e do ambiente de hospedagem da aplicação.
 
-![Arquitetura da Solução](images/arquitetura.png)
 ![diagram-export-5-10-2025-5_54_43-PM](https://github.com/user-attachments/assets/a003891d-197d-4f83-a82a-00e1f077f4b6)
 
 ![diagram-export-5-10-2025-7_00_21-PM](https://github.com/user-attachments/assets/2d948ba8-6fc5-47c0-bf83-2becb7328870)
@@ -36,16 +35,6 @@ O diagrama de classes ilustra graficamente a estrutura do software e como cada u
 * Notification Service  
 ![image](https://github.com/user-attachments/assets/c3609bd8-a9a5-4641-9926-e43871b81feb)
 
-
-> **Links úteis**:
-> - [Como fazer um diagrama entidade relacionamento](https://www.lucidchart.com/pages/pt/como-fazer-um-diagrama-entidade-relacionamento)
-
-### Esquema relacional
-
-O Esquema Relacional corresponde à representação dos dados em tabelas juntamente com as restrições de integridade e chave primária.
- 
-
-![Exemplo de um modelo relacional](images/modelo_relacional.png "Exemplo de modelo relacional.")
 ---
 
 > **Links úteis**:
@@ -470,13 +459,6 @@ Aplica os arquivos Helm no cluster Kubernetes para atualizar os serviços.
 Aplicação é atualizada automaticamente no cluster e torna-se acessível ao usuário final.
 
 ![image](https://github.com/user-attachments/assets/e44d5edf-6cf9-41db-88ae-1b599821c6d9)
-
-
-> **Links úteis**:
-> - [Website com GitHub Pages](https://pages.github.com/)
-> - [Programação colaborativa com Repl.it](https://repl.it/)
-> - [Getting started with Heroku](https://devcenter.heroku.com/start)
-> - [Publicando seu site no Heroku](http://pythonclub.com.br/publicando-seu-hello-world-no-heroku.html)
 
 ## Qualidade de software
 
