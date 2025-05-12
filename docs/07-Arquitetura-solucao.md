@@ -462,13 +462,30 @@ Aplicação é atualizada automaticamente no cluster e torna-se acessível ao us
 
 ## Qualidade de software
 
-Conceituar qualidade é uma tarefa complexa, mas ela pode ser vista como um método gerencial que, por meio de procedimentos disseminados por toda a organização, busca garantir um produto final que satisfaça às expectativas dos stakeholders.
+O projeto adota a norma ISO/IEC 25010:2023 para garantir a qualidade do software, focando em características que atendam às necessidades dos stakeholders. As subcaracterísticas priorizadas são:
 
-No contexto do desenvolvimento de software, qualidade pode ser entendida como um conjunto de características a serem atendidas, de modo que o produto de software atenda às necessidades de seus usuários. Entretanto, esse nível de satisfação nem sempre é alcançado de forma espontânea, devendo ser continuamente construído. Assim, a qualidade do produto depende fortemente do seu respectivo processo de desenvolvimento.
+**Completude e Correção Funcional:** Garante que todas as funcionalidades especificadas sejam implementadas e operem corretamente.
 
-A norma internacional ISO/IEC 25010, que é uma atualização da ISO/IEC 9126, define oito características e 30 subcaracterísticas de qualidade para produtos de software. Com base nessas características e nas respectivas subcaracterísticas, identifique as subcaracterísticas que sua equipe utilizará como base para nortear o desenvolvimento do projeto de software, considerando alguns aspectos simples de qualidade. Justifique as subcaracterísticas escolhidas pelo time e elenque as métricas que permitirão à equipe avaliar os objetos de interesse.
+**Apropriação de Interação:** Assegura uma interface intuitiva, facilitando a usabilidade.
 
-> **Links úteis**:
-> - [ISO/IEC 25010:2011 - Systems and Software Engineering — Systems and Software Quality Requirements and Evaluation (SQuaRE) — System and Software Quality Models](https://www.iso.org/standard/35733.html/)
-> - [Análise sobre a ISO 9126 – NBR 13596](https://www.tiespecialistas.com.br/analise-sobre-iso-9126-nbr-13596/)
-> - [Qualidade de software - Engenharia de Software](https://www.devmedia.com.br/qualidade-de-software-engenharia-de-software-29/18209)
+**Analisabilidade e Modificabilidade:** Promove um código claro e fácil de manter, utilizando ferramentas como ESLint e SonarQube.
+
+**Confidencialidade:** Protege dados sensíveis contra acessos não autorizados.
+
+**Métricas de Avaliação**
+
+**Funcionalidade:** Percentual de requisitos implementados, cobertura de testes e taxa de defeitos.
+
+**Usabilidade:** Tempo para completar tarefas e pontuação em testes de usabilidade (ex.: SUS).
+
+Manutenibilidade: Densidade de code smells (SonarQube), conformidade com padrões (ESLint) e complexidade ciclomática.
+
+Segurança: Número de vulnerabilidades detectadas e percentual de endpoints protegidos.
+
+Ferramentas
+
+**ESLint:** Valida padrões de codificação e melhora a legibilidade do código.
+
+**SonarQube:** Analisa qualidade, detecta code smells e vulnerabilidades, integrado ao pipeline de CI/CD.
+
+Essas práticas garantem um software funcional, seguro, usável e de fácil manutenção, alinhado às expectativas dos usuários.
