@@ -51,6 +51,12 @@ Discuta como a configuração do projeto foi feita na ferramenta de versionament
 - Desenvolvedor _back-end_: Walyson, Vinicius Henrique
 - Testes: Tiago Rafael
 
+#### Sprint 3
+- _Scrum master_: Luisa Machado
+- Desenvolvedor _front-end_: Otávio Rocha, Guilherme Siqueira
+- Desenvolvedor _back-end_: Walyson, Vinicius Henrique
+- Testes: Tiago Rafael
+
 ###  Quadro de tarefas
 
 #### Sprint 1
@@ -88,6 +94,14 @@ Atualizado em: 16/03/2025
 | Otávio Rocha      | RF-007 - Oferecer uma funcionalidade de histórico de caronas realizadas. |             |       | 📝    |              |
 | Guilherme Siqueira | RF-008 - Permitir que os usuários editem seus perfis e preferências de carona. |             |       | 📝    |              |
 
+
+#### Sprint 3
+
+Atualizado em: 11/05/2025
+
+| Responsável   | Tarefa/Requisito | Iniciado em    | Prazo      | Status | Terminado em    |
+| :----         |    :----         |      :----:    | :----:     | :----: | :----:          |
+| Vinicius | Apresentação   |11/05/2025     | 11/05/2025 | ✔️    | 11/05/2025                |
 
 
 
