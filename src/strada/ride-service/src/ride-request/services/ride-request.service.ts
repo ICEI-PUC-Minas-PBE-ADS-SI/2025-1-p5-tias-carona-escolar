@@ -1,6 +1,13 @@
-import { Injectable, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { RequestStatus } from '@prisma/client';
 import { RideRequestRepository } from '../repositories/ride-request.repository';
+import { OptimalPickupDto } from '../controllers/ride-request.controller';
 
 interface GeoPoint {
   latitude: number;
@@ -172,7 +179,8 @@ export class RideRequestService {
     }
 
     try {
-      const acceptedRequest = await this.rideRequestRepository.acceptRequest(id);
+      const acceptedRequest =
+        await this.rideRequestRepository.acceptRequest(id);
 
       return {
         success: true,
@@ -199,7 +207,8 @@ export class RideRequestService {
     }
 
     try {
-      const rejectedRequest = await this.rideRequestRepository.rejectRequest(id);
+      const rejectedRequest =
+        await this.rideRequestRepository.rejectRequest(id);
 
       return {
         success: true,
@@ -220,7 +229,8 @@ export class RideRequestService {
     }
 
     try {
-      const cancelledRequest = await this.rideRequestRepository.cancelRequest(id);
+      const cancelledRequest =
+        await this.rideRequestRepository.cancelRequest(id);
 
       return {
         success: true,
@@ -261,6 +271,7 @@ export class RideRequestService {
         radius: radiusMeters,
       };
     } catch (error) {
+      console.error('Error fetching requests within radius:', error);
       throw new BadRequestException('Erro ao buscar solicitações na área');
     }
   }
@@ -276,7 +287,9 @@ export class RideRequestService {
     const maxDistance = dto.maxDistance || 1000;
 
     if (maxDistance <= 0 || maxDistance > 10000) {
-      throw new BadRequestException('Distância máxima deve estar entre 1 e 10000 metros');
+      throw new BadRequestException(
+        'Distância máxima deve estar entre 1 e 10000 metros',
+      );
     }
 
     try {
@@ -311,7 +324,9 @@ export class RideRequestService {
         data: statistics,
       };
     } catch (error) {
-      throw new BadRequestException('Erro ao obter estatísticas das solicitações');
+      throw new BadRequestException(
+        'Erro ao obter estatísticas das solicitações',
+      );
     }
   }
 
@@ -324,9 +339,8 @@ export class RideRequestService {
     }
 
     try {
-      const requests = await this.rideRequestRepository.findPendingRequestsForDriver(
-        driverId,
-      );
+      const requests =
+        await this.rideRequestRepository.findPendingRequestsForDriver(driverId);
 
       return {
         success: true,
@@ -354,10 +368,8 @@ export class RideRequestService {
     }
 
     try {
-      const updatedRequest = await this.rideRequestRepository.updatePickupStatus(
-        id,
-        status,
-      );
+      const updatedRequest =
+        await this.rideRequestRepository.updatePickupStatus(id, status);
 
       return {
         success: true,
@@ -378,10 +390,8 @@ export class RideRequestService {
     }
 
     try {
-      const updatedRequest = await this.rideRequestRepository.updateDropoffStatus(
-        id,
-        'COMPLETED',
-      );
+      const updatedRequest =
+        await this.rideRequestRepository.updateDropoffStatus(id, 'COMPLETED');
 
       return {
         success: true,
@@ -398,7 +408,9 @@ export class RideRequestService {
    */
   async bulkUpdateStatus(requestIds: string[], status: RequestStatus) {
     if (!requestIds || requestIds.length === 0) {
-      throw new BadRequestException('Lista de IDs das solicitações é obrigatória');
+      throw new BadRequestException(
+        'Lista de IDs das solicitações é obrigatória',
+      );
     }
 
     if (!this.isValidRequestStatus(status)) {
@@ -420,6 +432,49 @@ export class RideRequestService {
       throw new BadRequestException('Erro ao atualizar solicitações em lote');
     }
   }
+  async findOptimalPickupDropoff({
+    rideId,
+    params,
+  }: {
+    rideId: string;
+    params: OptimalPickupDto;
+  }): Promise<{
+    optimalPickupPoint: { latitude: number; longitude: number };
+    optimalDropoffPoint: { latitude: number; longitude: number };
+    walkingDistances: { toPickup: number; fromDropoff: number };
+    rideSegmentDistance: number;
+    totalDetourKm: number;
+  } | null> {
+    const { passengerStart, passengerEnd, maxDetourKm = 2 } = params;
+
+    try {
+      const result =
+        await this.rideRequestRepository.findOptimalPickupDropoffPoints(
+          rideId,
+          passengerStart,
+          passengerEnd,
+          maxDetourKm,
+        );
+
+      if (!result) {
+        return null; // Detour exceeds maximum allowed or no optimal points found
+      }
+
+      return result;
+    } catch (error) {
+      if (error.message === 'Ride not found') {
+        throw new NotFoundException('Ride not found');
+      }
+
+      if (error.message === 'Could not extract ride coordinates') {
+        throw new BadRequestException('Invalid ride coordinates');
+      }
+
+      throw new InternalServerErrorException(
+        'Error finding optimal pickup/dropoff points',
+      );
+    }
+  }
 
   // Métodos privados de validação
   private validateCreateRideRequestDto(dto: CreateRideRequestDto) {
@@ -432,7 +487,9 @@ export class RideRequestService {
     }
 
     if (!dto.seatsNeeded || dto.seatsNeeded <= 0 || dto.seatsNeeded > 8) {
-      throw new BadRequestException('Número de assentos deve estar entre 1 e 8');
+      throw new BadRequestException(
+        'Número de assentos deve estar entre 1 e 8',
+      );
     }
 
     if (dto.pickupLocation && !this.isValidLocation(dto.pickupLocation)) {
