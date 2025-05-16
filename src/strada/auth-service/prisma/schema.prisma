@@ -1,10 +1,8 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-// schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,52 +13,95 @@ datasource db {
 }
 
 model User {
-  id                 String             @id @default(uuid())
-  name               String
-  email              String?            @unique
-  password           String?
-  imgUrl             String?
-  numberOfFollowers  Int?               @default(0)
-  numberOfFollowings Int                @default(0)
-  username           String?            @unique
-  createdAt          DateTime?          @default(now())
-  isActive           Boolean?           @default(true)
-  authProvider       String?            @default("local")
+  id           String    @id @default(uuid())
+  name         String
+  email        String?   @unique
+  password     String?
+  imgUrl       String?
+  username     String?   @unique
+  createdAt    DateTime? @default(now())
+  isActive     Boolean?  @default(true)
+  authProvider String?   @default("local")
+
+  // Informações pessoais e documentos (opcionais)
+  cpf       String?   @unique
+  rg        String?
+  birthDate DateTime?
+  phone     String?
+  address   String?
+  cep       String?
+  city      String?
+  state     String?
+
+  // Tipo de usuário: ADULT (adulto), MINOR (menor), GUARDIAN (responsável)
+  userType UserType @default(ADULT)
+
+  // Relacionamentos
   refreshTokens      RefreshToken[]
   passwordRecoveries PasswordRecovery[]
 
-  following Follow[] @relation("FollowingRelation")
-  followers Follow[] @relation("FollowerRelation")
+  // Relacionamento de responsabilidade (para menores de idade)
+  guardians Guardian[] @relation("MinorRelation")
+  minors    Guardian[] @relation("GuardianRelation")
+
+  @@map("users")
 }
 
-model Follow {
+model Guardian {
   id         String @id @default(uuid())
-  followerId String
-  followeeId String
+  guardianId String
+  minorId    String
 
-  follower User @relation("FollowingRelation", fields: [followerId], references: [id])
-  followee User @relation("FollowerRelation", fields: [followeeId], references: [id])
+  // Tipo de responsabilidade
+  relationship GuardianType @default(PARENT)
+
+  // Autorização para caronas
+  canRequestRides Boolean @default(true)
+  canAcceptRides  Boolean @default(true)
+
+  // Relacionamentos
+  guardian User @relation("GuardianRelation", fields: [guardianId], references: [id], onDelete: Cascade)
+  minor    User @relation("MinorRelation", fields: [minorId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
-  @@unique([followerId, followeeId])
+  @@unique([guardianId, minorId])
+  @@map("guardians")
 }
 
 model RefreshToken {
   id      String  @id @default(uuid())
   token   String
-  user    User    @relation(fields: [userId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  String
   email   String
   revoked Boolean @default(false)
+
+  @@map("refresh_tokens")
 }
 
 model PasswordRecovery {
   id        String  @id @default(uuid())
   token     String
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   email     String
   expiresAt BigInt
   revoked   Boolean @default(false)
+
+  @@map("password_recoveries")
+}
+
+// Enums
+enum UserType {
+  ADULT
+  MINOR
+  GUARDIAN
+}
+
+enum GuardianType {
+  PARENT
+  LEGAL_GUARDIAN
+  RELATIVE
+  AUTHORIZED_ADULT
 }

@@ -12,14 +12,23 @@ export class UpdateUserUseCase {
   ) {}
 
   async execute(id: string, dto: IUserRequest): Promise<IUserResponse> {
-    await this.findUserByIdUseCase.execute(id);
+    const existingUser = await this.findUserByIdUseCase.execute(id);
+
     try {
-      dto.password = 'oldUser.password';
-      const user = UserMapper.toEntity(dto);
-      delete user.id;
-      delete user.password;
-      delete user.createdAt;
-      return await this.userRepository.update(id, user);
+      const userToUpdate = UserMapper.toPartialEntity({
+        ...existingUser,
+        ...dto,
+        authProvider: dto.authProvider as 'local' | 'oauth',
+      });
+
+      delete userToUpdate.id;
+      delete userToUpdate.createdAt;
+
+      if (!dto.password) {
+        delete userToUpdate.password;
+      }
+
+      return await this.userRepository.update(id, userToUpdate);
     } catch (error) {
       console.log(error);
       throw new UserDomainException('Error updating user');

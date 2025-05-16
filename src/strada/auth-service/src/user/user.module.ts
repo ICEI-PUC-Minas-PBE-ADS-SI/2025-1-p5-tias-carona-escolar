@@ -10,15 +10,14 @@ import { FindUserByIdlUserUseCase } from './core/use-cases/find-user-by-id.use-c
 import { UpdateUserUseCase } from './core/use-cases/update-user.use-case';
 import { FindAllUseCase } from './core/use-cases/find-all-use-case';
 import { AuthModule } from '@/src/auth/auth.module';
-import { FollowUserByIdUseCase } from './core/use-cases/follow-user-by-id.use-case';
-import { UnfollowUserByIdUseCase } from './core/use-cases/unfollow-user-by-id.use-case';
-import { FindFollowingUsersUseCase } from './core/use-cases/find-following-users.use-case';
 import { UpdateUserPasswordUseCase } from './core/use-cases/update-user-password.use-case';
 import { UserGrpcController } from './infrastructure/controllers/user-grpc.controller';
+import { GuardianService } from './core/use-cases/guardians.service';
+import { GuardianController } from './infrastructure/controllers/guardians.controller';
 
 @Module({
   imports: [forwardRef(() => AuthModule)],
-  controllers: [UserController, UserGrpcController],
+  controllers: [UserController, UserGrpcController, GuardianController],
   providers: [
     PrismaService,
     {
@@ -67,43 +66,6 @@ import { UserGrpcController } from './infrastructure/controllers/user-grpc.contr
       inject: ['IUserRepository'],
     },
     {
-      provide: FollowUserByIdUseCase,
-      useFactory: (
-        userRepository: IUserRepository,
-        findUserByIdUserCase: FindUserByIdlUserUseCase,
-        updateUserUseCase: UpdateUserUseCase,
-      ) => {
-        return new FollowUserByIdUseCase(
-          userRepository,
-          findUserByIdUserCase,
-          updateUserUseCase,
-        );
-      },
-      inject: ['IUserRepository', FindUserByIdlUserUseCase, UpdateUserUseCase],
-    },
-    {
-      provide: UnfollowUserByIdUseCase,
-      useFactory: (
-        userRepository: IUserRepository,
-        findUserByIdUserCase: FindUserByIdlUserUseCase,
-        updateUserUseCase: UpdateUserUseCase,
-      ) => {
-        return new UnfollowUserByIdUseCase(
-          userRepository,
-          findUserByIdUserCase,
-          updateUserUseCase,
-        );
-      },
-      inject: ['IUserRepository', FindUserByIdlUserUseCase, UpdateUserUseCase],
-    },
-    {
-      provide: FindFollowingUsersUseCase,
-      useFactory: (userRepository: IUserRepository) => {
-        return new FindFollowingUsersUseCase(userRepository);
-      },
-      inject: ['IUserRepository'],
-    },
-    {
       provide: UpdateUserPasswordUseCase,
       useFactory: (
         userRepository: IUserRepository,
@@ -112,6 +74,13 @@ import { UserGrpcController } from './infrastructure/controllers/user-grpc.contr
         return new UpdateUserPasswordUseCase(userRepository, passwordEncoder);
       },
       inject: ['IUserRepository', 'IPasswordEncoder'],
+    },
+    {
+      provide: GuardianService,
+      useFactory: (userRepository: IUserRepository) => {
+        return new GuardianService(userRepository);
+      },
+      inject: ['IUserRepository'],
     },
   ],
   exports: [

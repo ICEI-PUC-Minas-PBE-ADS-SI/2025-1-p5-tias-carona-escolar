@@ -22,7 +22,10 @@ export class UpdateUserPasswordUseCase {
       throw new UserResourceNotFoundException('User not found');
     }
 
-    const user = UserMapper.toEntity(existingUser);
+    const user = UserMapper.toPartialEntity({
+      ...existingUser,
+      authProvider: existingUser.authProvider as 'local' | 'oauth',
+    });
 
     user.password = await this.passwordEncoder.encode(password);
 
