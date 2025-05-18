@@ -22,7 +22,7 @@ import { useLocalSearchParams } from "expo-router/build/hooks";
 import { getStoredUserID, getUser } from "@/src/services/user.service";
 import { IUserRequest } from "@/src/interfaces/user-request.interface";
 
-const API_BASE_URL = "ws://192.168.100.210:8082";
+const API_BASE_URL = "wss://chat.strada.appbr.store";
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);

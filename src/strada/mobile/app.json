@@ -51,7 +51,8 @@
           "locationAlwaysAndWhenInUsePermission": "Allow Strada to use your location."
         }
       ],
-      "react-native-video"
+      "react-native-video",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
