@@ -1,0 +1,1620 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "HealthCheckController_healthCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "HealthCheck"
+        ]
+      }
+    },
+    "/rides": {
+      "post": {
+        "operationId": "RideController_createRide",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRideData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ride created successfully"
+          },
+          "400": {
+            "description": "Invalid input data"
+          }
+        },
+        "summary": "Create a new ride",
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/rides/search": {
+      "get": {
+        "operationId": "RideController_searchRides",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "distance",
+                "price",
+                "time",
+                "rating"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "allowLuggage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "allowPets",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "allowSmoking",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "maxPrice",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "seats",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "date",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maxEndDistance",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxStartDistance",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "endLng",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "endLat",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "startLng",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "startLat",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of rides matching the criteria"
+          }
+        },
+        "summary": "Search for rides based on filters",
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/rides/search/route-similarity": {
+      "post": {
+        "operationId": "RideController_searchByRouteSimilarity",
+        "parameters": [
+          {
+            "name": "maxRouteDistance",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "minSimilarity",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "date",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "seats",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Array of route points",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GeoPoint"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of rides with similar routes"
+          }
+        },
+        "summary": "Search rides by route similarity",
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/rides/{id}/status": {
+      "put": {
+        "operationId": "RideController_updateRideStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "New status",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ride status updated"
+          },
+          "404": {
+            "description": "Ride not found"
+          }
+        },
+        "summary": "Update ride status",
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/rides/{id}/location": {
+      "put": {
+        "operationId": "RideController_updateRideLocation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeoPoint"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ride location updated"
+          },
+          "404": {
+            "description": "Ride not found"
+          }
+        },
+        "summary": "Update ride location",
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/rides/popular-routes": {
+      "get": {
+        "operationId": "RideController_getPopularRoutes",
+        "parameters": [
+          {
+            "name": "startLat",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "startLng",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "radius",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of popular routes"
+          }
+        },
+        "summary": "Get popular routes",
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/rides/heatmap": {
+      "post": {
+        "operationId": "RideController_getRideDensityHeatmap",
+        "parameters": [
+          {
+            "name": "gridSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoundingBox"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ride density heatmap data"
+          }
+        },
+        "summary": "Get ride density heatmap",
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/rides/dynamic-price": {
+      "post": {
+        "operationId": "RideController_calculateDynamicPrice",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "startLocation": {
+                    "type": "object",
+                    "properties": {
+                      "latitude": {
+                        "type": "number"
+                      },
+                      "longitude": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "endLocation": {
+                    "type": "object",
+                    "properties": {
+                      "latitude": {
+                        "type": "number"
+                      },
+                      "longitude": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "waypoints": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "latitude": {
+                          "type": "number"
+                        },
+                        "longitude": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  },
+                  "departureTime": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "seats": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dynamic price calculation"
+          }
+        },
+        "summary": "Calculate dynamic price for a ride",
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/rides/history/{userId}": {
+      "get": {
+        "operationId": "RideController_getRideHistory",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "date",
+                "price",
+                "distance"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (default: 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "End date (YYYY-MM-DD)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "Start date (YYYY-MM-DD)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "COMPLETED",
+                "CANCELLED",
+                "ALL"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "userType",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "driver",
+                "passenger"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ride history retrieved successfully"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Get ride history for a user (driver or passenger)",
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/rides/{id}": {
+      "get": {
+        "operationId": "RideController_findRideById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ride details"
+          },
+          "404": {
+            "description": "Ride not found"
+          }
+        },
+        "summary": "Get ride by ID",
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/rides/{rideId}/requests": {
+      "post": {
+        "operationId": "RideRequestController_createRideRequest",
+        "parameters": [
+          {
+            "name": "rideId",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the ride",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRideRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ride request created successfully with detour analysis"
+          },
+          "400": {
+            "description": "Invalid request data or excessive detour"
+          },
+          "404": {
+            "description": "Ride not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Request to join a ride with optional custom pickup/dropoff locations",
+        "tags": [
+          "Ride Requests"
+        ]
+      },
+      "get": {
+        "operationId": "RideRequestController_getRideRequests",
+        "parameters": [
+          {
+            "name": "rideId",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the ride",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by request status (PENDING, ACCEPTED, REJECTED, CANCELLED)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of ride requests retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all requests for a specific ride",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/{id}": {
+      "get": {
+        "operationId": "RideRequestController_getRideRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the ride request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ride request details retrieved successfully"
+          },
+          "404": {
+            "description": "Ride request not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get ride request details by ID",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/passengers/{passengerId}/requests": {
+      "get": {
+        "operationId": "RideRequestController_getPassengerRequests",
+        "parameters": [
+          {
+            "name": "passengerId",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the passenger",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by request status",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of passenger ride requests retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all requests made by a specific passenger",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/{id}/accept": {
+      "put": {
+        "operationId": "RideRequestController_acceptRideRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the ride request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ride request accepted successfully. Available seats updated."
+          },
+          "400": {
+            "description": "Not enough available seats or request cannot be accepted"
+          },
+          "404": {
+            "description": "Ride request not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept a ride request (Driver action)",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/{id}/reject": {
+      "put": {
+        "operationId": "RideRequestController_rejectRideRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the ride request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "description": "Optional reason for rejection"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ride request rejected successfully"
+          },
+          "404": {
+            "description": "Ride request not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reject a ride request (Driver action)",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/{id}/cancel": {
+      "put": {
+        "operationId": "RideRequestController_cancelRideRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the ride request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ride request cancelled successfully. Seats returned if previously accepted."
+          },
+          "404": {
+            "description": "Ride request not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel a ride request (Passenger action)",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/bulk-update-status": {
+      "put": {
+        "operationId": "RideRequestController_bulkUpdateRequestStatus",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkStatusUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk status update completed with success/failure summary"
+          },
+          "400": {
+            "description": "Invalid status or malformed request"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bulk update status of multiple ride requests (Admin function)",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/search/nearby": {
+      "get": {
+        "operationId": "RideRequestController_searchNearbyRequests",
+        "parameters": [
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip for pagination",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results (default: 20)",
+            "schema": {}
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by request status",
+            "schema": {}
+          },
+          {
+            "name": "radiusMeters",
+            "required": false,
+            "in": "query",
+            "description": "Search radius in meters (default: 5000, max: 50000)",
+            "schema": {}
+          },
+          {
+            "name": "centerLng",
+            "required": true,
+            "in": "query",
+            "description": "Center longitude for search",
+            "schema": {}
+          },
+          {
+            "name": "centerLat",
+            "required": true,
+            "in": "query",
+            "description": "Center latitude for search",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ride requests within radius retrieved with distance calculations"
+          },
+          "400": {
+            "description": "Invalid coordinates or search radius too large"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Search for ride requests within a geographic radius (PostGIS-powered)",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/search/by-route": {
+      "post": {
+        "operationId": "RideRequestController_searchRequestsByRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RouteSearchDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ride requests along route retrieved with route distance calculations"
+          },
+          "400": {
+            "description": "Invalid route geometry or distance parameters"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Find ride requests along a specific route geometry (PostGIS-powered)",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/{rideId}/requests/optimal-pickup": {
+      "post": {
+        "operationId": "RideRequestController_findOptimalPickupDropoff",
+        "parameters": [
+          {
+            "name": "rideId",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the ride",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimalPickupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Optimal pickup/dropoff points calculated with walking distances and detour analysis"
+          },
+          "400": {
+            "description": "Invalid passenger coordinates or excessive detour requirement"
+          },
+          "404": {
+            "description": "Ride not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Find optimal pickup and dropoff points along ride route (PostGIS spatial analysis)",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/passengers/{passengerId}/find-compatible-rides": {
+      "post": {
+        "operationId": "RideRequestController_findCompatibleRides",
+        "parameters": [
+          {
+            "name": "passengerId",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the passenger",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FindCompatibleRidesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Compatible rides found with match scoring and detour analysis"
+          },
+          "400": {
+            "description": "Invalid location data or search parameters"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Find compatible rides for a passenger based on their preferences",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/{id}/smart-recommendations": {
+      "get": {
+        "operationId": "RideRequestController_getSmartRideRecommendations",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the ride request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Smart recommendations with compatibility scoring and historical data"
+          },
+          "404": {
+            "description": "Ride request not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get AI-powered ride recommendations for a specific request",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/{id}/priority-score": {
+      "get": {
+        "operationId": "RideRequestController_calculateRequestPriority",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the ride request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Priority score calculated with detailed factor analysis"
+          },
+          "404": {
+            "description": "Ride request not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Calculate priority score for a ride request based on multiple factors",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/statistics": {
+      "get": {
+        "operationId": "RideRequestController_getRideRequestStatistics",
+        "parameters": [
+          {
+            "name": "rideId",
+            "required": false,
+            "in": "query",
+            "description": "Filter statistics by ride ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "passengerId",
+            "required": false,
+            "in": "query",
+            "description": "Filter statistics by passenger ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "Start date for statistics (ISO format)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "End date for statistics (ISO format)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ride request statistics with acceptance rates and response times"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get ride request statistics and analytics",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/analytics/density-heatmap": {
+      "get": {
+        "operationId": "RideRequestController_getRequestDensityHeatmap",
+        "parameters": [
+          {
+            "name": "bounds",
+            "required": true,
+            "in": "query",
+            "description": "Bounding box in format: minLng,minLat,maxLng,maxLat",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gridSize",
+            "required": false,
+            "in": "query",
+            "description": "Grid cell size in meters (default: 1000)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "Start date for analysis (ISO format)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "End date for analysis (ISO format)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Heatmap data with ride request density by geographic grid"
+          },
+          "400": {
+            "description": "Invalid bounds format or date parameters"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get ride request density heatmap data for geographic visualization",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/analytics/popular-routes": {
+      "get": {
+        "operationId": "RideRequestController_getPopularRoutes",
+        "parameters": [
+          {
+            "name": "startLat",
+            "required": false,
+            "in": "query",
+            "description": "Filter routes starting near this latitude",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "startLng",
+            "required": false,
+            "in": "query",
+            "description": "Filter routes starting near this longitude",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "radius",
+            "required": false,
+            "in": "query",
+            "description": "Search radius in meters (default: 5000)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of popular routes to return (default: 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "Start date for route analysis (ISO format)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "End date for route analysis (ISO format)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of popular route combinations with usage statistics"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get popular pickup/dropoff route combinations",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/analytics/performance-metrics": {
+      "get": {
+        "operationId": "RideRequestController_getPerformanceMetrics",
+        "parameters": [
+          {
+            "name": "timeframe",
+            "required": false,
+            "in": "query",
+            "description": "Timeframe for analysis: daily, weekly, monthly (default: weekly)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeGeographic",
+            "required": false,
+            "in": "query",
+            "description": "Include geographic breakdown (default: false)",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comprehensive performance metrics and trends"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get comprehensive performance metrics for ride requests",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/live/dashboard": {
+      "get": {
+        "operationId": "RideRequestController_getLiveDashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Live dashboard data with current statistics"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get real-time dashboard data for ride requests",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/{id}/live-status": {
+      "get": {
+        "operationId": "RideRequestController_getLiveRequestStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the ride request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Real-time status information with live updates"
+          },
+          "404": {
+            "description": "Ride request not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get real-time status updates for a specific ride request",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/{id}/notify-alternatives": {
+      "post": {
+        "operationId": "RideRequestController_notifyAlternatives",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "UUID of the ride request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alternative suggestions sent successfully"
+          },
+          "404": {
+            "description": "Ride request not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send alternative ride suggestions to passenger if request is taking too long",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/admin/health-check": {
+      "get": {
+        "operationId": "RideRequestController_adminHealthCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "System health status with detailed metrics"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Health check for ride request system (Admin only)",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    },
+    "/rides/requests/admin/cleanup-stale": {
+      "post": {
+        "operationId": "RideRequestController_cleanupStaleRequests",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "olderThanDays": {
+                    "type": "number",
+                    "description": "Remove requests older than X days"
+                  },
+                  "dryRun": {
+                    "type": "boolean",
+                    "description": "Preview changes without executing"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cleanup completed with summary of actions taken"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Clean up stale ride requests (Admin only)",
+        "tags": [
+          "Ride Requests"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Strada",
+    "description": "A simple API to manage and share rides",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "strada",
+      "description": ""
+    }
+  ],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "CreateRideData": {
+        "type": "object",
+        "properties": {}
+      },
+      "GeoPoint": {
+        "type": "object",
+        "properties": {}
+      },
+      "BoundingBox": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateRideRequestDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "BulkStatusUpdateDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "RouteSearchDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "OptimalPickupDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "FindCompatibleRidesDto": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}
