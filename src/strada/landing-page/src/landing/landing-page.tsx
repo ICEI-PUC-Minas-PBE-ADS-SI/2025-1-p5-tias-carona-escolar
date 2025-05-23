@@ -33,15 +33,8 @@ const colors = {
 };
 
 const StradaLanding = () => {
-  const [scrollY, setScrollY] = useState(0);
   const [activeFeature, setActiveFeature] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -87,7 +80,10 @@ const StradaLanding = () => {
     { number: "95%", label: "Satisfação" },
   ];
 
-  const handleScrollToSection = (e, id: string) => {
+  const handleScrollToSection = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    id: string
+  ): void => {
     setMobileMenuOpen(false);
     e.preventDefault();
     const element = document.getElementById(id);
