@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -9,13 +9,75 @@ import {
   StatusBar,
   Alert,
   useWindowDimensions,
+  ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { AppImages } from "@/src/assets";
+import { getRideById } from "@/src/services/ride.service";
 
-const colors = {
+// Types
+interface RideData {
+  id: string;
+  driverId: string;
+  startAddress: string;
+  endAddress: string;
+  departureTime: string;
+  availableSeats: number;
+  pricePerSeat: number;
+  status: "PENDING" | "ACTIVE" | "COMPLETED" | "CANCELLED";
+  vehicleModel: string;
+  vehicleColor: string;
+  licensePlate: string;
+  allowLuggage: boolean;
+  estimatedDuration: number;
+  estimatedDistance: number;
+  actualDuration: number | null;
+  actualDistance: number | null;
+  actualStartTime: string | null;
+  actualEndTime: string | null;
+  createdAt: string;
+  updatedAt: string;
+  currentLatitude: number | null;
+  currentLongitude: number | null;
+  lastLocationUpdate: string | null;
+  routePoints: RoutePoint[];
+  requests: RideRequest[];
+}
+
+interface RoutePoint {
+  latitude: number;
+  longitude: number;
+  timestamp: string;
+}
+
+interface RideRequest {
+  id: string;
+  userId: string;
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
+  requestedSeats: number;
+  message?: string;
+  createdAt: string;
+}
+
+interface Colors {
+  white: string;
+  black: string;
+  primaryPink: string;
+  lightPink: string;
+  darkPink: string;
+  neutralLight: string;
+  primaryBlue: string;
+  primaryBlueDarkTheme: string;
+  secondaryBlue: string;
+  accentBlue: string;
+  softBlue: string;
+  lightGrey: string;
+  grey: string;
+  darkGrey: string;
+}
+
+const colors: Colors = {
   white: "#FFFFFF",
   black: "#1A1A1A",
   primaryPink: "#FF758F",
@@ -32,69 +94,121 @@ const colors = {
   darkGrey: "#8C8C8C",
 };
 
-// Dados mockados para a carona selecionada
-const rideData = {
-  id: "1",
-  driver: "Mariana Silva",
-  avatar: AppImages.github,
-  origin: "São Paulo - Avenida Paulista, 1578",
-  originNickname: "MASP",
-  destination: "Campinas - Terminal Rodoviário",
-  destinationNickname: "Rodoviária de Campinas",
-  date: "26 de Abril, 2025",
-  time: "17:30",
-  price: "R$ 35",
-  rating: 4.9,
-  reviewsCount: 124,
-  totalRides: 312,
-  memberSince: "Março 2023",
-  seatsTotal: 3,
-  seatsAvailable: 2,
-  preferences: ["Não fumar", "Animais: Não", "Bagagem pequena"],
-  vehicle: {
-    model: "Honda Civic",
-    year: "2022",
-    color: "Prata",
-    plate: "ABC1D23",
-  },
-  schedule: {
-    departureWindow: "15min",
-    stops: "Sem paradas",
-    estimatedArrival: "19:15",
-  },
-  participants: [
-    {
-      id: "1",
-      name: "Carlos M.",
-      avatar: AppImages.github,
-      rating: 4.7,
-    },
-  ],
-};
-
-const RideDetailsScreen = () => {
+const RideDetailsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const { id } = useLocalSearchParams();
-  const [favorite, setFavorite] = useState(false);
+  const { rideId } = useLocalSearchParams();
 
-  const handleGoBack = useCallback(() => {
+  const [favorite, setFavorite] = useState<boolean>(false);
+  const [rideData, setRideData] = useState<RideData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Função para formatar data
+  const formatDate = useCallback((dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  }, []);
+
+  // Função para formatar horário
+  const formatTime = useCallback((dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }, []);
+
+  // Função para calcular horário estimado de chegada
+  const calculateArrivalTime = useCallback((departureTime: string, duration: number): string => {
+    const departure = new Date(departureTime);
+    const arrival = new Date(departure.getTime() + (duration * 60000)); // duration em minutos
+    return arrival.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }, []);
+
+  // Função para formatar endereço (pegar apenas parte principal)
+  const formatAddress = useCallback((address: string): string => {
+    return address.split('–')[0].trim();
+  }, []);
+
+  // Função para obter nickname do endereço
+  const getAddressNickname = useCallback((address: string): string => {
+    const parts = address.split('–');
+    return parts.length > 1 ? parts[1].split(',')[0].trim() : formatAddress(address);
+  }, [formatAddress]);
+
+  // Função para obter texto do status
+  const getStatusText = useCallback((status: RideData['status']): string => {
+    const statusMap: Record<RideData['status'], string> = {
+      PENDING: 'Aguardando passageiros',
+      ACTIVE: 'Em andamento',
+      COMPLETED: 'Concluída',
+      CANCELLED: 'Cancelada'
+    };
+    return statusMap[status] || status;
+  }, []);
+
+  // Função para obter cor do status
+  const getStatusColor = useCallback((status: RideData['status']): { background: string; text: string } => {
+    const colorMap: Record<RideData['status'], { background: string; text: string }> = {
+      PENDING: { background: colors.softBlue, text: colors.primaryBlue },
+      ACTIVE: { background: colors.lightPink, text: colors.primaryPink },
+      COMPLETED: { background: '#E8F5E8', text: '#4CAF50' },
+      CANCELLED: { background: '#FFEBEE', text: '#F44336' }
+    };
+    return colorMap[status] || { background: colors.lightGrey, text: colors.darkGrey };
+  }, []);
+
+  // Carregar dados da carona
+  useEffect(() => {
+    const loadRideData = async (): Promise<void> => {
+      if (!rideId) {
+        setError('ID da carona não fornecido');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const data: RideData = await getRideById(rideId as string);
+        setRideData(data);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar dados da carona';
+        setError(errorMessage);
+        console.error('Erro ao buscar carona:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRideData();
+  }, [rideId]);
+
+  const handleGoBack = useCallback((): void => {
     router.back();
   }, [router]);
 
-  const toggleFavorite = useCallback(() => {
+  const toggleFavorite = useCallback((): void => {
     setFavorite((prev) => !prev);
   }, []);
 
-  const handleShare = useCallback(() => {
+  const handleShare = useCallback((): void => {
     Alert.alert(
       "Compartilhar",
       "Funcionalidade de compartilhamento será implementada."
     );
   }, []);
 
-  const handleReserve = useCallback(() => {
+  const handleReserve = useCallback((): void => {
     Alert.alert("Reservar Carona", "Você deseja reservar esta carona?", [
       {
         text: "Cancelar",
@@ -107,9 +221,65 @@ const RideDetailsScreen = () => {
     ]);
   }, [router]);
 
-  const handleChat = useCallback(() => {
-    router.push(`/chat/${rideData.driver.replace(/\s/g, "").toLowerCase()}`);
+  const handleChat = useCallback((): void => {
+    if (rideData?.driverId) {
+      router.push(`/chat/${rideData.driverId}`);
+    }
   }, [router, rideData]);
+
+  // Função para obter ícone de preferência
+  const getPreferenceIcon = useCallback((preference: string): string => {
+    if (preference.toLowerCase().includes("fumar")) return "smoke-free";
+    if (preference.toLowerCase().includes("bagagem")) return "luggage";
+    if (preference.toLowerCase().includes("animais")) return "pets";
+    return "info";
+  }, []);
+
+  // Loading state
+  if (loading) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+            <Icon name="arrow-back" size={24} color={colors.black} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Detalhes da Carona</Text>
+          <View style={styles.headerActions} />
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primaryPink} />
+          <Text style={styles.loadingText}>Carregando...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Error state
+  if (error || !rideData) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+            <Icon name="arrow-back" size={24} color={colors.black} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Detalhes da Carona</Text>
+          <View style={styles.headerActions} />
+        </View>
+        <View style={styles.errorContainer}>
+          <Icon name="error-outline" size={48} color={colors.darkGrey} />
+          <Text style={styles.errorText}>{error || 'Carona não encontrada'}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={handleGoBack}>
+            <Text style={styles.retryButtonText}>Voltar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  const arrivalTime = calculateArrivalTime(rideData.departureTime, rideData.estimatedDuration);
+  const statusColors = getStatusColor(rideData.status);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -152,13 +322,13 @@ const RideDetailsScreen = () => {
                 <View style={styles.routePoint}>
                   <View style={styles.originDot} />
                   <View style={styles.routeInfo}>
-                    <Text style={styles.routeTime}>{rideData.time}</Text>
+                    <Text style={styles.routeTime}>{formatTime(rideData.departureTime)}</Text>
                     <View>
                       <Text style={styles.routeLocation}>
-                        {rideData.originNickname}
+                        {getAddressNickname(rideData.startAddress)}
                       </Text>
                       <Text style={styles.routeAddress} numberOfLines={1}>
-                        {rideData.origin}
+                        {formatAddress(rideData.startAddress)}
                       </Text>
                     </View>
                   </View>
@@ -173,15 +343,13 @@ const RideDetailsScreen = () => {
                 <View style={styles.routePoint}>
                   <View style={styles.destinationDot} />
                   <View style={styles.routeInfo}>
-                    <Text style={styles.routeTime}>
-                      {rideData.schedule.estimatedArrival}
-                    </Text>
+                    <Text style={styles.routeTime}>{arrivalTime}</Text>
                     <View>
                       <Text style={styles.routeLocation}>
-                        {rideData.destinationNickname}
+                        {getAddressNickname(rideData.endAddress)}
                       </Text>
                       <Text style={styles.routeAddress} numberOfLines={1}>
-                        {rideData.destination}
+                        {formatAddress(rideData.endAddress)}
                       </Text>
                     </View>
                   </View>
@@ -192,11 +360,11 @@ const RideDetailsScreen = () => {
             <View style={styles.priceAndDateContainer}>
               <View style={styles.dateContainer}>
                 <Icon name="event" size={16} color={colors.darkGrey} />
-                <Text style={styles.dateText}>{rideData.date}</Text>
+                <Text style={styles.dateText}>{formatDate(rideData.departureTime)}</Text>
               </View>
 
               <View style={styles.priceTag}>
-                <Text style={styles.priceText}>{rideData.price}</Text>
+                <Text style={styles.priceText}>R$ {rideData.pricePerSeat.toFixed(2)}</Text>
                 <Text style={styles.pricePerPerson}>por pessoa</Text>
               </View>
             </View>
@@ -209,26 +377,25 @@ const RideDetailsScreen = () => {
             </View>
 
             <View style={styles.driverInfo}>
-              <Image source={rideData.avatar} style={styles.driverAvatar} />
+              <Icon
+                name="account-circle"
+                size={50}
+                color={colors.primaryPink}
+                style={styles.driverAvatar}
+              />
               <View style={styles.driverDetails}>
                 <View style={styles.driverNameAndRating}>
-                  <Text style={styles.driverName}>{rideData.driver}</Text>
+                  <Text style={styles.driverName}>{rideData.driverId}</Text>
                   <View style={styles.ratingContainer}>
                     <Icon name="star" size={16} color="#FFD700" />
-                    <Text style={styles.ratingText}>{rideData.rating}</Text>
+                    <Text style={styles.ratingText}>4.8</Text>
                   </View>
                 </View>
-                <Text style={styles.reviewsText}>
-                  {rideData.reviewsCount} avaliações
-                </Text>
+                <Text style={styles.reviewsText}>85 avaliações</Text>
                 <View style={styles.driverStats}>
-                  <Text style={styles.statsText}>
-                    {rideData.totalRides} caronas
-                  </Text>
+                  <Text style={styles.statsText}>150 caronas</Text>
                   <Text style={styles.statsText}>•</Text>
-                  <Text style={styles.statsText}>
-                    Membro desde {rideData.memberSince}
-                  </Text>
+                  <Text style={styles.statsText}>Membro desde Mar 2023</Text>
                 </View>
               </View>
               <TouchableOpacity style={styles.chatButton} onPress={handleChat}>
@@ -247,10 +414,8 @@ const RideDetailsScreen = () => {
               <View style={styles.detailItem}>
                 <Icon name="schedule" size={20} color={colors.darkGrey} />
                 <View style={styles.detailTextContainer}>
-                  <Text style={styles.detailLabel}>Janela de partida</Text>
-                  <Text style={styles.detailValue}>
-                    {rideData.schedule.departureWindow}
-                  </Text>
+                  <Text style={styles.detailLabel}>Duração estimada</Text>
+                  <Text style={styles.detailValue}>{rideData.estimatedDuration} min</Text>
                 </View>
               </View>
 
@@ -263,8 +428,7 @@ const RideDetailsScreen = () => {
                 <View style={styles.detailTextContainer}>
                   <Text style={styles.detailLabel}>Assentos</Text>
                   <Text style={styles.detailValue}>
-                    {rideData.seatsAvailable} de {rideData.seatsTotal}{" "}
-                    disponíveis
+                    {rideData.availableSeats} disponíveis
                   </Text>
                 </View>
               </View>
@@ -274,102 +438,76 @@ const RideDetailsScreen = () => {
                 <View style={styles.detailTextContainer}>
                   <Text style={styles.detailLabel}>Veículo</Text>
                   <Text style={styles.detailValue}>
-                    {rideData.vehicle.model} • {rideData.vehicle.color}
+                    {rideData.vehicleModel}
                   </Text>
                 </View>
               </View>
 
               <View style={styles.detailItem}>
-                <Icon name="more-horiz" size={20} color={colors.darkGrey} />
+                <Icon name="colorize" size={20} color={colors.darkGrey} />
                 <View style={styles.detailTextContainer}>
-                  <Text style={styles.detailLabel}>Paradas</Text>
+                  <Text style={styles.detailLabel}>Cor</Text>
                   <Text style={styles.detailValue}>
-                    {rideData.schedule.stops}
+                    {rideData.vehicleColor}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.detailItem}>
+                <Icon name="straighten" size={20} color={colors.darkGrey} />
+                <View style={styles.detailTextContainer}>
+                  <Text style={styles.detailLabel}>Distância</Text>
+                  <Text style={styles.detailValue}>
+                    {rideData.estimatedDistance} km
                   </Text>
                 </View>
               </View>
             </View>
           </View>
 
-          {/* Preferências */}
-          <View style={styles.preferencesSection}>
+          {/* Status da Carona */}
+          <View style={styles.statusSection}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Preferências do Motorista</Text>
+              <Text style={styles.sectionTitle}>Status</Text>
             </View>
 
-            <View style={styles.preferencesList}>
-              {rideData.preferences.map((preference, index) => (
-                <View key={index} style={styles.preferenceItem}>
-                  <Icon
-                    name={
-                      preference.includes("fumar")
-                        ? "smoke-free"
-                        : preference.includes("Animais")
-                        ? "pets"
-                        : "luggage"
-                    }
-                    size={18}
-                    color={colors.darkGrey}
-                  />
-                  <Text style={styles.preferenceText}>{preference}</Text>
-                </View>
-              ))}
+            <View style={styles.statusContainer}>
+              <View style={[
+                styles.statusBadge,
+                { backgroundColor: statusColors.background }
+              ]}>
+                <Text style={[
+                  styles.statusText,
+                  { color: statusColors.text }
+                ]}>
+                  {getStatusText(rideData.status)}
+                </Text>
+              </View>
             </View>
           </View>
 
-          {/* Passageiros */}
-          <View style={styles.passengersSection}>
+          {/* Informações Adicionais */}
+          <View style={styles.additionalInfoSection}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>
-                Passageiros ({rideData.participants.length})
-              </Text>
+              <Text style={styles.sectionTitle}>Informações Adicionais</Text>
             </View>
 
-            <View style={styles.passengersList}>
-              {rideData.participants.map((passenger) => (
-                <View key={passenger.id} style={styles.passengerItem}>
-                  <Image
-                    source={passenger.avatar}
-                    style={styles.passengerAvatar}
-                  />
-                  <View style={styles.passengerDetails}>
-                    <Text style={styles.passengerName}>{passenger.name}</Text>
-                    <View style={styles.passengerRating}>
-                      <Icon name="star" size={14} color="#FFD700" />
-                      <Text style={styles.passengerRatingText}>
-                        {passenger.rating}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              ))}
-
-              {Array.from({ length: rideData.seatsAvailable }).map(
-                (_, index) => (
-                  <View
-                    key={`empty-${index}`}
-                    style={styles.emptyPassengerSlot}
-                  >
-                    <View style={styles.emptyAvatar}>
-                      <Icon name="person" size={20} color={colors.grey} />
-                    </View>
-                    <Text style={styles.emptySlotText}>Assento disponível</Text>
-                  </View>
-                )
-              )}
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Placa do veículo:</Text>
+              <Text style={styles.infoValue}>{rideData.licensePlate}</Text>
             </View>
-          </View>
 
-          {/* Observações (opcional) */}
-          <View style={styles.notesSection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Observações do Motorista</Text>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Criada em:</Text>
+              <Text style={styles.infoValue}>{formatDate(rideData.createdAt)}</Text>
             </View>
-            <Text style={styles.notesText}>
-              Encontro no ponto de táxi em frente ao MASP. Posso esperar até 10
-              minutos após o horário combinado. Viagem direta sem paradas para
-              lanches. Traga apenas bagagem que caiba no porta-malas.
-            </Text>
+
+            {rideData.requests.length > 0 && (
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Solicitações:</Text>
+                <Text style={styles.infoValue}>{rideData.requests.length}</Text>
+              </View>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -378,19 +516,30 @@ const RideDetailsScreen = () => {
       <View style={[styles.footer, { paddingBottom: insets.bottom || 16 }]}>
         <View style={styles.footerInfo}>
           <Text style={styles.availableSeatsText}>
-            {rideData.seatsAvailable}{" "}
-            {rideData.seatsAvailable === 1
+            {rideData.availableSeats}{" "}
+            {rideData.availableSeats === 1
               ? "lugar disponível"
               : "lugares disponíveis"}
           </Text>
-          <Text style={styles.priceFooterText}>{rideData.price}</Text>
+          <Text style={styles.priceFooterText}>R$ {rideData.pricePerSeat.toFixed(2)}</Text>
         </View>
         <TouchableOpacity
-          style={styles.reserveButton}
+          style={[
+            styles.reserveButton,
+            { opacity: rideData.availableSeats > 0 && rideData.status === 'PENDING' ? 1 : 0.5 }
+          ]}
           onPress={handleReserve}
           activeOpacity={0.8}
+          disabled={rideData.availableSeats === 0 || rideData.status !== 'PENDING'}
         >
-          <Text style={styles.reserveButtonText}>Reservar</Text>
+          <Text style={styles.reserveButtonText}>
+            {rideData.availableSeats > 0 && rideData.status === 'PENDING'
+              ? 'Reservar'
+              : rideData.status !== 'PENDING'
+                ? 'Indisponível'
+                : 'Esgotado'
+            }
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -435,6 +584,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     paddingBottom: 24,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: colors.darkGrey,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  errorText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: colors.darkGrey,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: colors.primaryPink,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: colors.white,
+    fontWeight: '600',
   },
   mainCard: {
     backgroundColor: colors.white,
@@ -666,75 +848,43 @@ const styles = StyleSheet.create({
     color: colors.darkGrey,
     marginLeft: 6,
   },
-  passengersSection: {
+  statusSection: {
     paddingTop: 16,
     paddingBottom: 12,
     borderTopWidth: 1,
     borderTopColor: colors.lightGrey,
   },
-  passengersList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+  statusContainer: {
+    flexDirection: 'row',
   },
-  passengerItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "50%",
-    marginBottom: 14,
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
-  passengerAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginRight: 10,
+  statusText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
-  passengerDetails: {
-    flex: 1,
-  },
-  passengerName: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: colors.black,
-  },
-  passengerRating: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 2,
-  },
-  passengerRatingText: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: colors.darkGrey,
-    marginLeft: 4,
-  },
-  emptyPassengerSlot: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "50%",
-    marginBottom: 14,
-  },
-  emptyAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.lightGrey,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-  },
-  emptySlotText: {
-    fontSize: 14,
-    color: colors.darkGrey,
-  },
-  notesSection: {
+  additionalInfoSection: {
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: colors.lightGrey,
   },
-  notesText: {
+  infoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  infoLabel: {
     fontSize: 14,
-    lineHeight: 20,
     color: colors.darkGrey,
+  },
+  infoValue: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.black,
   },
   footer: {
     backgroundColor: colors.white,
