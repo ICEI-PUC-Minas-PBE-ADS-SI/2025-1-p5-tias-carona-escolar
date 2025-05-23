@@ -146,6 +146,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
 
   const handleLogin = useCallback(
     (type: "local" | "github" | "google") => {
+      return router.push("/home");
       if (type === "local") {
         console.log("Login com local", credentials);
         getAccessToken(credentials)

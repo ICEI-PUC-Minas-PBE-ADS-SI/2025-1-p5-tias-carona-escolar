@@ -25,7 +25,7 @@ async function bootstrap() {
     transport: Transport.GRPC,
     options: {
       package: "user",
-      protoPath: join(process.cwd(), 'src', 'user', 'infrastructure', 'proto', 'user.proto'),
+      protoPath: join(__dirname, '..', 'user', 'infrastructure', 'proto', 'user.proto'),
       url: '0.0.0.0:50051',
     }
   }

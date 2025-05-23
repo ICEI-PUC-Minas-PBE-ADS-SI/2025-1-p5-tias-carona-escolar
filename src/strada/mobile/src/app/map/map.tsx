@@ -1,8 +1,8 @@
-import MapboxMap from "@/src/screens/map/MapboxMap";
+import RideShareMap from "@/src/screens/map/RideShareMap";
 import React from "react";
 
 const MapTab = () => {
-  return <MapboxMap />;
+  return <RideShareMap />; //<MapboxMap />;
 };
 
 export default MapTab;
