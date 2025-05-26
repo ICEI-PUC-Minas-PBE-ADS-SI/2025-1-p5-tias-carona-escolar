@@ -1,11 +1,12 @@
 import { lightTheme } from "@/src/constants/theme";
 import { StyleSheet, View, Text } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { RideHistoryInterface } from "@/src/interfaces/ride-history.interface";
 
 const StatusBadge = ({
   status,
 }: {
-  status: "completed" | "cancelled" | "ongoing" | "scheduled";
+  status: RideHistoryInterface["status"];
 }) => {
   const theme = lightTheme;
   const styles = getStyles();
@@ -23,7 +24,7 @@ const StatusBadge = ({
         };
       case "cancelled":
         return { color: theme.darkPink, text: "Cancelada", icon: "x-circle" };
-      case "ongoing":
+      case "active":
         return { color: "#4CAF50", text: "Em andamento", icon: "clock" };
       default:
         return { color: theme.grey, text: "Agendada", icon: "calendar" };

@@ -177,6 +177,18 @@ export const calculateDynamicPrice = async (priceRequest: DynamicPriceRequest) =
   }
 };
 
+
+export const getRideHistory = async (userId: string, filters: any) => {
+  try {
+    console.log(`/rides/history/${userId}?${new URLSearchParams(filters)}`)
+    const response = await rideAxios.get(`/rides/history/${userId}?${new URLSearchParams(filters)}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 export const storeRideID = async (id: string) => {
   await SecureStore.setItemAsync("rideID", id);
 };

@@ -12,6 +12,7 @@ import {
   SearchRideFilters,
   GeoPoint,
   BoundingBox,
+  RideHistoryFilters,
 } from '../repositories/ride.repository';
 import { RideService } from '../services/ride.service';
 
@@ -204,6 +205,59 @@ export class RideController {
       departureTime,
       seats,
     );
+  }
+
+  @Get('history/:userId')
+  @ApiOperation({
+    summary: 'Get ride history for a user (driver or passenger)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ride history retrieved successfully',
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiParam({ name: 'userId', type: String })
+  @ApiQuery({ name: 'userType', enum: ['driver', 'passenger'], required: true })
+  @ApiQuery({
+    name: 'status',
+    enum: ['COMPLETED', 'CANCELLED', 'ALL'],
+    required: false,
+  })
+  @ApiQuery({
+    name: 'dateFrom',
+    type: String,
+    required: false,
+    description: 'Start date (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    type: String,
+    required: false,
+    description: 'End date (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'page',
+    type: Number,
+    required: false,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    description: 'Items per page (default: 10)',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    enum: ['date', 'price', 'distance'],
+    required: false,
+  })
+  @ApiQuery({ name: 'sortOrder', enum: ['asc', 'desc'], required: false })
+  async getRideHistory(
+    @Param('userId') userId: string,
+    @Query() filters: RideHistoryFilters,
+  ) {
+    return await this.rideService.getRideHistory(userId, filters);
   }
 
   @Get(':id')

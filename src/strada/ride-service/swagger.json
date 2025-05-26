@@ -490,6 +490,119 @@
         ]
       }
     },
+    "/rides/history/{userId}": {
+      "get": {
+        "operationId": "RideController_getRideHistory",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "date",
+                "price",
+                "distance"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page (default: 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "End date (YYYY-MM-DD)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "Start date (YYYY-MM-DD)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "COMPLETED",
+                "CANCELLED",
+                "ALL"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "userType",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "driver",
+                "passenger"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ride history retrieved successfully"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Get ride history for a user (driver or passenger)",
+        "tags": [
+          "rides"
+        ]
+      }
+    },
     "/rides/{id}": {
       "get": {
         "operationId": "RideController_findRideById",
