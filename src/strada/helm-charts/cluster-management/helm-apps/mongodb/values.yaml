@@ -1,0 +1,51 @@
+architecture: replicaset
+replicaCount: 2
+
+externalAccess:
+  enabled: true
+  service:
+    type: LoadBalancer
+  autoDiscovery:
+    enabled: true
+
+
+serviceAccount:
+  create: true
+
+automountServiceAccountToken: true
+rbac:
+  create: true
+
+persistence:
+  enabled: true
+  #storageClass: longhorn
+  accessMode: "ReadWriteOnce"
+
+
+
+auth:
+  rootPassword: SUASENHA
+  replicaSetKey: SUASENHA
+
+
+metrics:
+  enabled: true
+
+
+# kubectl run mongo-debug --rm -it --image=mongo --namespace=default -- bash
+
+# mongosh --host mongodb-0-external.mongodb.svc.cluster.local --port 27017 -u root -p SUASENHA
+
+# use chat-db
+# db.createUser({
+#   user: "chatUser",
+#   pwd: "password123",
+#   roles: [{ role: "readWrite", db: "chat-db" }]
+# })
+
+# <nome-do-serviço>.<namespace>.svc.cluster.local
+#mongodb-0-external.mongodb.svc.cluster.local
+
+# # kubectl run debug-pod --rm -i --tty --image=curlimages/curl -- /bin/sh
+
+# curl http://production-auto-deploy.kanban.svc.cluster.local:8081/.well-known/jwks.json

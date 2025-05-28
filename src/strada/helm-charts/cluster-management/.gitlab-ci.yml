@@ -1,0 +1,47 @@
+stages:
+  - deploy
+  - apply
+
+
+# build_image:
+#   image: docker
+#   stage: build
+#   services:
+#     - docker:dind
+#   script:
+#     - echo $DOCKER_ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin
+#     - docker login -u $DOCKER_USERNAME -p $DOCKER_ACCESS_TOKEN
+#     - docker build -t $DOCKER_USERNAME/hello-world:latest .
+#     - docker push $DOCKER_USERNAME/hello-world:latest
+#     - echo "Image pushed to Docker Hub"
+
+  
+# deploy-pvc:
+#   stage: deploy
+#   image:
+#     name: bitnami/kubectl:latest
+#     entrypoint: ['']
+#   script:
+#     - kubectl config get-contexts
+#     - kubectl config use-context $KUBE_CONTEXT:agent-k8s
+#     - kubectl apply -f helm-apps/applications/pvcs.yml
+#     - echo "Deployed PVCs"
+
+
+deploy-helm-apps:
+  stage: apply
+  image:
+    name: ghcr.io/helmfile/helmfile:canary
+  script:
+    - kubectl config get-contexts
+    - kubectl config use-context $KUBE_CONTEXT:agent-k8s
+    - helmfile init
+    - helmfile apply -f helmfile.yaml
+    - helm repo update
+    - helmfile sync
+    # - kubectl apply -f helm-apps/kafka-connect/deploy.yaml
+    # - kubectl apply -f helm-apps/redpanda-console/deploy.yaml
+    # - kubectl apply -f helm-apps/mysql/backup.yml
+    # - echo "Deployed Helm apps"
+
+
