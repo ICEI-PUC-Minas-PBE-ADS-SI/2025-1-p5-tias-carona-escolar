@@ -1,13 +1,13 @@
-# Default values for notification-service.
+# Default values for ride-service.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
 image:
-  repository: walymb/notification-service
+  repository: walymb/ride-service
   pullPolicy: Always
-  # Overrides the image tag whose default is the chart appVersion.
+  # Overwxx4231passcoderides the image tag whose default is the chart appVersion.
   tag: "latest"
 
 # secrets:
@@ -16,11 +16,9 @@ image:
 #   kafkaSaslUsername: ${KAFKA_SASL_USERNAME}
 #   kafkaSaslPassword: ${KAFKA_SASL_PASSWORD}
 #   kafkaBootstrapServers: ${KAFKA_BOOTSTRAP_SERVERS}
-#   dbHost: ${DB_HOST}
-#   dbPort: ${DB_PORT}
-#   dbName: ${DB_NOTIFICATION_NAME}
-#   dbUsername: ${DB_USERNAME}
-#   dbPassword: ${DB_PASSWORD}
+#   mongoDbUri: ${MONGO_DB_URI}
+
+# mongodb://user:password@mongodb-0-external.mongodb.svc.cluster.local:27017/chat-db
 
 imagePullSecrets: []
 nameOverride: ""
@@ -65,14 +63,14 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
   hosts:
-    - host: notification.strada.appbr.store
+    - host: ride.strada.appbr.store
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls:
-    - secretName: notification-tls
+    - secretName: ride-tls
       hosts:
-        - notification.strada.appbr.store
+        - ride.strada.appbr.store
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -88,11 +86,11 @@ resources: {}
 
 # livenessProbe:
 #   httpGet:
-#     path: /hello-world
+#     path: /
 #     port: http
 # readinessProbe:
 #   httpGet:
-#     path: /hello-world
+#     path: /
 #     port: http
 
 autoscaling:

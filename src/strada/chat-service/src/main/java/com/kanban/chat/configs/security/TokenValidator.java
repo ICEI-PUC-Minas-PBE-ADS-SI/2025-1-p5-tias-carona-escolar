@@ -44,14 +44,23 @@ public class TokenValidator {
                     .cache(true)
                     .cache(ttl, refreshTimeout)
                     .build();
+            System.out.println(keySource);
             JWSAlgorithm expectedJWSAlg = JWSAlgorithm.RS256;
             JWSKeySelector<SecurityContext> keySelector = new JWSVerificationKeySelector<>(
                     expectedJWSAlg,
                     keySource);
+            System.out.println(keySelector);
             jwtProcessor.setJWSKeySelector(keySelector);
             JWTClaimsSet claimsSet;
             claimsSet = jwtProcessor.process(token, null);
-            return claimsSet.getClaim("sub").toString();
+            System.out.println(claimsSet);
+            String subject = claimsSet.getSubject();
+            if (subject == null || subject.isEmpty()) {
+                log.error("JWT token missing or empty subject. Available claims: {}", claimsSet.getClaims().keySet());
+                throw new ForbiddenException("Invalid token: missing subject");
+            }
+
+            return subject;
         }catch (Exception e){
             log.error("Error while trying to process the Access Token", e);
             throw new ForbiddenException("Error while trying to process the Access Token");
