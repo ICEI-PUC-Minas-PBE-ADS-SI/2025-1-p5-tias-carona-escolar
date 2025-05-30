@@ -142,11 +142,7 @@ const fetchUsersData = async (
   }
 };
 
-interface RideShareMapProps {
-  rideId: string; // ID da corrida a ser exibida
-}
-
-const RideShareMap: React.FC<RideShareMapProps> = () => {
+const RideShareMap: React.FC = () => {
   const [rideData, setRideData] = useState<RideData | null>(null);
   const [driverData, setDriverData] = useState<Driver | null>(null);
   const [passengersData, setPassengersData] = useState<Record<string, Driver>>(
@@ -379,9 +375,9 @@ const RideShareMap: React.FC<RideShareMapProps> = () => {
         bounds={
           routeCoordinates && routeCoordinates.length > 0
             ? {
-                ne: calculateBoundingBox(routeCoordinates)?.ne,
-                sw: calculateBoundingBox(routeCoordinates)?.sw,
-              }
+              ne: calculateBoundingBox(routeCoordinates)?.ne,
+              sw: calculateBoundingBox(routeCoordinates)?.sw,
+            }
             : undefined
         }
         padding={{
@@ -389,14 +385,14 @@ const RideShareMap: React.FC<RideShareMapProps> = () => {
             currentSnapIndex === 0
               ? 60
               : currentSnapIndex === 1
-              ? Dimensions.get("window").height * 0.2
-              : 220,
+                ? Dimensions.get("window").height * 0.2
+                : 220,
           paddingBottom:
             currentSnapIndex === 0
               ? 100
               : currentSnapIndex === 1
-              ? Dimensions.get("window").height * 0.2
-              : Dimensions.get("window").height * 0.6,
+                ? Dimensions.get("window").height * 0.2
+                : Dimensions.get("window").height * 0.6,
           paddingLeft: 50,
           paddingRight: 50,
         }}
