@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useRouter, useGlobalSearchParams } from "expo-router";
+import { removeTokens } from "@/src/services/token.service";
 
 const UserDetailsScreen = () => {
   const router = useRouter();
@@ -56,6 +57,11 @@ const UserDetailsScreen = () => {
 
   const handleEmail = () => {
     Linking.openURL(`mailto:${userData.email}`);
+  };
+
+  const handleLogout = () => {
+    removeTokens();
+    router.replace("/login");
   };
 
   return (
@@ -278,6 +284,16 @@ const UserDetailsScreen = () => {
           <TouchableOpacity style={styles.footerButton}>
             <Feather name="alert-circle" size={16} color="#666" />
             <Text style={styles.footerButtonText}>Reportar usuário</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.footerButton, { backgroundColor: "#FFEAEA" }]}
+            onPress={handleLogout}
+          >
+            <Feather name="log-out" size={16} color="#D9534F" />
+            <Text style={[styles.footerButtonText, { color: "#D9534F" }]}>
+              Sair
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

@@ -50,27 +50,27 @@ const InputField: React.FC<{
   toggleSecure,
   onChangeText,
 }) => (
-  <View style={styles.inputContainer}>
-    {iconLibrary === "Ionicons" ? (
-      <Ionicons name={iconName} size={30} color={theme.blue} />
-    ) : (
-      <SimpleLineIcons name={iconName} size={30} color={theme.blue} />
-    )}
-    <TextInput
-      style={styles.textInput}
-      placeholder={placeholder}
-      placeholderTextColor={theme.blue}
-      secureTextEntry={secureTextEntry}
-      keyboardType={keyboardType ?? "default"}
-      onChangeText={onChangeText}
-    />
-    {toggleSecure && (
-      <TouchableOpacity onPress={toggleSecure}>
-        <SimpleLineIcons name="eye" size={20} color={theme.blue} />
-      </TouchableOpacity>
-    )}
-  </View>
-);
+    <View style={styles.inputContainer}>
+      {iconLibrary === "Ionicons" ? (
+        <Ionicons name={iconName} size={30} color={theme.blue} />
+      ) : (
+        <SimpleLineIcons name={iconName} size={30} color={theme.blue} />
+      )}
+      <TextInput
+        style={styles.textInput}
+        placeholder={placeholder}
+        placeholderTextColor={theme.blue}
+        secureTextEntry={secureTextEntry}
+        keyboardType={keyboardType ?? "default"}
+        onChangeText={onChangeText}
+      />
+      {toggleSecure && (
+        <TouchableOpacity onPress={toggleSecure}>
+          <SimpleLineIcons name="eye" size={20} color={theme.blue} />
+        </TouchableOpacity>
+      )}
+    </View>
+  );
 
 const LoginScreen: React.FC<Props> = ({ animationController }) => {
   const [actionType, setActionType] = useState<ActionType>("login");
@@ -85,10 +85,10 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
   const window = useWindowDimensions();
   const router = useRouter();
 
-  const slideContainerAnim = animationController.current!.interpolate({
+  const slideContainerAnim = animationController?.current?.interpolate({
     inputRange: [0, 0.8, 1],
     outputRange: [window.width, window.width, 0],
-  });
+  }) ?? new Animated.Value(0);
   const titleTextAnim = animationController.current!.interpolate({
     inputRange: [0, 0.6, 0.8, 1],
     outputRange: [26 * 10, 26 * 10, 26 * 10, 0],
@@ -146,9 +146,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
 
   const handleLogin = useCallback(
     (type: "local" | "github" | "google") => {
-      return router.push("/home");
       if (type === "local") {
-        console.log("Login com local", credentials);
         getAccessToken(credentials)
           .then((tokens) => {
             console.log("Login com sucesso", tokens);
