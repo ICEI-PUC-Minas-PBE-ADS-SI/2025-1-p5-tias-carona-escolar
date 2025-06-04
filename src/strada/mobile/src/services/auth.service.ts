@@ -11,7 +11,7 @@ export const getAccessToken = async (credentials: ICreadentials) => {
     const response = await axiosInstance.post(`/auth/token`, credentials);
     const accessToken = response.data;
     await storeToken(accessToken);
-    const decoded = await decodeAccessToken(accessToken.access_token);
+    const decoded = decodeAccessToken(accessToken.access_token);
     if (decoded) {
       await storeUserID(decoded.sub);
     }
@@ -29,7 +29,7 @@ export const refreshToken = async (refreshToken: string) => {
     });
     const accessToken = response.data;
     await storeToken(accessToken);
-    const decoded = await decodeAccessToken(accessToken.access_token);
+    const decoded = decodeAccessToken(accessToken.access_token);
     if (decoded) {
       await storeUserID(decoded.sub);
     }
