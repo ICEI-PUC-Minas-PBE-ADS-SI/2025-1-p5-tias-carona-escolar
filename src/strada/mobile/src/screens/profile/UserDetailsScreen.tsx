@@ -370,7 +370,8 @@ const UserDetailsScreen = () => {
             <Text style={styles.actionText}>Email</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.actionButton}
+            disabled={userId === userId}
+            style={[styles.actionButton, styles.actionButtonDisabled]}
             onPress={() => {
               router.push(`/chat/${userId}`);
             }}

@@ -1,5 +1,13 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { StyleSheet, StatusBar, Dimensions, Alert } from "react-native";
+import {
+  StyleSheet,
+  StatusBar,
+  Dimensions,
+  Alert,
+  ActivityIndicator,
+  View,
+  Text,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useAnimatedStyle, withTiming } from "react-native-reanimated";
 
@@ -101,6 +109,9 @@ interface RideData {
 // Função para buscar dados da corrida
 const fetchRideData = async (rideId: string): Promise<RideData | null> => {
   try {
+    if (!rideId) {
+      return null;
+    }
     const response = await getRideById(rideId);
     return response;
   } catch (error) {
@@ -180,7 +191,6 @@ const RideShareMap: React.FC = () => {
         // Buscar dados da corrida
         const ride = await fetchRideData(rideId);
         if (!ride) {
-          Alert.alert("Erro", "Não foi possível carregar os dados da corrida");
           return;
         }
 
@@ -280,6 +290,7 @@ const RideShareMap: React.FC = () => {
     return {
       id: rideData.id,
       driverName: driverData.name,
+      driverId: driverData.id,
       driverImage: driverData.imgUrl || "https://via.placeholder.com/150",
       carModel: rideData.vehicleModel,
       carColor: rideData.vehicleColor,
@@ -341,7 +352,10 @@ const RideShareMap: React.FC = () => {
           backgroundColor="transparent"
           translucent
         />
-        {/* Você pode adicionar um componente de loading aqui */}
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.primary} />
+          <Text>Carregando mapa...</Text>
+        </View>
       </GestureHandlerRootView>
     );
   }
