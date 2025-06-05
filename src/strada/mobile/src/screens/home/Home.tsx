@@ -74,9 +74,7 @@ interface RideData {
 const HomeScreen = () => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { width } = useWindowDimensions();
 
-  const [searchText, setSearchText] = useState("");
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [popularRoutes, setPopularRoutes] = useState<PopularRoute[]>([]);
   const [availableRides, setAvailableRides] = useState<RideData[]>([]);
@@ -206,33 +204,41 @@ const HomeScreen = () => {
   };
 
   const handlePlaceSelected = async (place) => {
-    if (userLocation && place.geometry) {
+    setLoadingRides(true)
+    if (userLocation && place) {
       try {
         const searchParams = {
           startLat: userLocation.lat,
           startLng: userLocation.lng,
-          endLat: place.geometry.location.lat,
-          endLng: place.geometry.location.lng,
-          limit: 20,
+          endLat: place.latitude,
+          endLng: place.longitude,
+          limit: 10,
           maxStartDistance: 2000,
           maxEndDistance: 2000,
           sortBy: "time" as const,
         };
 
-        const results = await searchRides(searchParams);
+        setSeeAll("routes")
+        closeSearchModal();
+        const { rides } = await searchRides(searchParams);
+        const ridesList = await Promise.all(
+          rides.map(async (ride: RideData) => {
+            const { name, imgUrl } = await getUser(ride.driver_id);
 
-        router.push({
-          pathname: "/search-results",
-          params: {
-            origin: `${userLocation.lat},${userLocation.lng}`,
-            destination: `${place.geometry.location.lat},${place.geometry.location.lng}`,
-            destinationName: place.description,
-            results: JSON.stringify(results.data || results),
-          },
-        });
+            return {
+              ...ride,
+              driverName: name,
+              driverProfileImg: imgUrl
+            };
+          })
+        );
+
+        setAvailableRides(ridesList);
+        return
       } catch (error) {
-        console.error("Erro na busca:", error);
         Alert.alert("Erro", "Erro ao buscar caronas para este destino");
+      } finally {
+        setLoadingRides(false)
       }
     }
 
