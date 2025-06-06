@@ -1,12 +1,10 @@
 import * as SecureStore from "expo-secure-store";
-import axiosInstance from "./helpers/interceptors";
+import { authAxios } from "./helpers/interceptors";
 import { IUserRequest } from "../interfaces/user-request.interface";
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
 
 export const createUser = async (user: IUserRequest) => {
   try {
-    const response = await axiosInstance.post(`/users`, user);
+    const response = await authAxios.post(`/users`, user);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -16,7 +14,7 @@ export const createUser = async (user: IUserRequest) => {
 
 export const getUser = async (id: string) => {
   try {
-    const response = await axiosInstance.get(`/users/${id}`);
+    const response = await authAxios.get(`/users/${id}`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -26,7 +24,8 @@ export const getUser = async (id: string) => {
 
 export const updateUser = async (id: string, user: IUserRequest) => {
   try {
-    const response = await axiosInstance.put(`/users/${id}`, user);
+    const response = await authAxios.put(`/users/${id}`, user);
+    storeUser(response.data)
     return response.data;
   } catch (error) {
     console.error(error);
@@ -42,7 +41,7 @@ export const getStoredUser = async () => {
   return await SecureStore.getItemAsync("user");
 }
 
-export const storeUser = async (user: IUserRequest) => {
+export const storeUser = async (user: Partial<IUserRequest>) => {
   await SecureStore.setItemAsync("user", JSON.stringify(user));
 }
 
