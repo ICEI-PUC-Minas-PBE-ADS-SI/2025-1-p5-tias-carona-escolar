@@ -8,12 +8,14 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { lightTheme } from "@/src/constants/theme";
 import { useRouter } from "expo-router";
+import { changeRideStatus } from "@/src/services/ride.service";
 
 const RideInfoCard = ({
   rideData,
   bottomSheetRef,
   snapPoints,
   onSheetChanges,
+  isOwner = false,
 }) => {
   const theme = lightTheme;
   const router = useRouter();
@@ -91,6 +93,17 @@ const RideInfoCard = ({
       return `${(distance / 1000).toFixed(1)} km`;
     }
     return `${distance.toFixed(0)} m`;
+  };
+
+  const startRide = async () => {
+    await changeRideStatus(rideData.id, "ACTIVE");
+    router.push(`/map/${rideData.id}`);
+  };
+
+  const finalizarCorrida = async () => {
+    console.log("Finalizando corrida...");
+    await changeRideStatus(rideData.id, "COMPLETED");
+    router.push(`/map/${rideData.id}`);
   };
 
   return (
@@ -322,6 +335,29 @@ const RideInfoCard = ({
           </View>
         )}
 
+        {/* Owner Actions */}
+        {isOwner && (
+          <View style={styles.feedbackSection}>
+            <Text style={styles.sectionTitle}>Ações do Proprietário</Text>
+            <TouchableOpacity
+              style={{
+                backgroundColor: theme.primary,
+                padding: 12,
+                borderRadius: 8,
+                alignItems: "center",
+              }}
+              onPress={() => {
+                rideData.status === "ACTIVE" ? finalizarCorrida() : startRide();
+              }}
+            >
+              <Text style={{ color: "white", fontWeight: "600" }}>
+                {rideData.status === "ACTIVE"
+                  ? "Finalizar Corrida"
+                  : "Iniciar Corrida"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
         {/* Bottom padding for better scrolling */}
         <View style={styles.bottomPadding} />
       </BottomSheetScrollView>

@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  Image,
   StatusBar,
   Alert,
   useWindowDimensions,
@@ -15,7 +14,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { getRideById } from "@/src/services/ride.service";
-import { getUser } from "@/src/services/user.service";
+import { getStoredUserID, getUser } from "@/src/services/user.service";
+import CreateRideRequestModal from "./RideRequestModal";
 
 // Types
 interface RideData {
@@ -44,8 +44,8 @@ interface RideData {
   lastLocationUpdate: string | null;
   routePoints: RoutePoint[];
   requests: RideRequest[];
-  driverName: string,
-  driverProfileImg?: string
+  driverName: string;
+  driverProfileImg?: string;
 }
 
 interface RoutePoint {
@@ -102,79 +102,120 @@ const RideDetailsScreen: React.FC = () => {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const { rideId } = useLocalSearchParams();
+  const [alreadyReserved, setAlreadyReserved] = useState<boolean>(false);
 
   const [favorite, setFavorite] = useState<boolean>(false);
   const [rideData, setRideData] = useState<RideData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [isRequestModalVisible, setIsRequestModalVisible] =
+    useState<boolean>(false);
 
   // Função para formatar data
   const formatDate = useCallback((dateString: string): string => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+    return date.toLocaleDateString("pt-BR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     });
   }, []);
 
   // Função para formatar horário
   const formatTime = useCallback((dateString: string): string => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   }, []);
 
   // Função para calcular horário estimado de chegada
-  const calculateArrivalTime = useCallback((departureTime: string, duration: number): string => {
-    const departure = new Date(departureTime);
-    const arrival = new Date(departure.getTime() + (duration * 60000)); // duration em minutos
-    return arrival.toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }, []);
+  const calculateArrivalTime = useCallback(
+    (departureTime: string, duration: number): string => {
+      const departure = new Date(departureTime);
+      const arrival = new Date(departure.getTime() + duration * 60000); // duration em minutos
+      return arrival.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    },
+    []
+  );
 
   // Função para formatar endereço (pegar apenas parte principal)
   const formatAddress = useCallback((address: string): string => {
-    return address.split('–')[0].trim();
+    return address.split("–")[0].trim();
   }, []);
 
   // Função para obter nickname do endereço
-  const getAddressNickname = useCallback((address: string): string => {
-    const parts = address.split(',');
-    return parts.length > 1 ? parts[1].split(',')[0].trim() : formatAddress(address);
-  }, [formatAddress]);
+  const getAddressNickname = useCallback(
+    (address: string): string => {
+      const parts = address.split(",");
+      return parts.length > 1
+        ? parts[1].split(",")[0].trim()
+        : formatAddress(address);
+    },
+    [formatAddress]
+  );
 
   // Função para obter texto do status
-  const getStatusText = useCallback((status: RideData['status']): string => {
-    const statusMap: Record<RideData['status'], string> = {
-      PENDING: 'Aguardando passageiros',
-      ACTIVE: 'Em andamento',
-      COMPLETED: 'Concluída',
-      CANCELLED: 'Cancelada'
+  const getStatusText = useCallback((status: RideData["status"]): string => {
+    const statusMap: Record<RideData["status"], string> = {
+      PENDING: "Aguardando passageiros",
+      ACTIVE: "Em andamento",
+      COMPLETED: "Concluída",
+      CANCELLED: "Cancelada",
     };
     return statusMap[status] || status;
   }, []);
 
-  // Função para obter cor do status
-  const getStatusColor = useCallback((status: RideData['status']): { background: string; text: string } => {
-    const colorMap: Record<RideData['status'], { background: string; text: string }> = {
-      PENDING: { background: colors.softBlue, text: colors.primaryBlue },
-      ACTIVE: { background: colors.lightPink, text: colors.primaryPink },
-      COMPLETED: { background: '#E8F5E8', text: '#4CAF50' },
-      CANCELLED: { background: '#FFEBEE', text: '#F44336' }
+  const alreadyReservedRide = useCallback(async () => {
+    const userId = await getStoredUserID();
+    if (!rideData) return false;
+
+    return rideData.requests.some((request) => request.passengerId === userId);
+  }, [rideData]);
+
+  useEffect(() => {
+    const checkIfAlreadyReserved = async () => {
+      if (rideData) {
+        console.log(rideData);
+        const reserved = await alreadyReservedRide();
+        setAlreadyReserved(reserved);
+      }
     };
-    return colorMap[status] || { background: colors.lightGrey, text: colors.darkGrey };
-  }, []);
+    checkIfAlreadyReserved();
+  }, [rideData, alreadyReservedRide]);
+
+  // Função para obter cor do status
+  const getStatusColor = useCallback(
+    (status: RideData["status"]): { background: string; text: string } => {
+      const colorMap: Record<
+        RideData["status"],
+        { background: string; text: string }
+      > = {
+        PENDING: { background: colors.softBlue, text: colors.primaryBlue },
+        ACTIVE: { background: colors.lightPink, text: colors.primaryPink },
+        COMPLETED: { background: "#E8F5E8", text: "#4CAF50" },
+        CANCELLED: { background: "#FFEBEE", text: "#F44336" },
+      };
+      return (
+        colorMap[status] || {
+          background: colors.lightGrey,
+          text: colors.darkGrey,
+        }
+      );
+    },
+    []
+  );
 
   // Carregar dados da carona
   useEffect(() => {
     const loadRideData = async (): Promise<void> => {
       if (!rideId) {
-        setError('ID da carona não fornecido');
+        setError("ID da carona não fornecido");
         setLoading(false);
         return;
       }
@@ -188,12 +229,15 @@ const RideDetailsScreen: React.FC = () => {
         setRideData({
           ...data,
           driverName: name,
-          driverProfileImg: imgUrl
+          driverProfileImg: imgUrl,
         });
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar dados da carona';
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Erro ao carregar dados da carona";
         setError(errorMessage);
-        console.error('Erro ao buscar carona:', err);
+        console.error("Erro ao buscar carona:", err);
       } finally {
         setLoading(false);
       }
@@ -218,22 +262,20 @@ const RideDetailsScreen: React.FC = () => {
   }, []);
 
   const handleReserve = useCallback((): void => {
-    Alert.alert("Reservar Carona", "Você deseja reservar esta carona?", [
-      {
-        text: "Cancelar",
-        style: "cancel",
-      },
-      {
-        text: "Confirmar",
-        onPress: () => {
-          if (rideId) {
-            router.push(`/map/${rideId}`);
-            return
-          }
-        },
-      },
-    ]);
-  }, [router]);
+    console.log("Tentando reservar carona...");
+    console.log(alreadyReserved, isOwner);
+    if (isOwner || alreadyReserved) {
+      router.push(`/map/${rideId}`);
+      return;
+    }
+    console.log("Abrindo modal de solicitação de carona...");
+    setIsRequestModalVisible(true);
+  }, [alreadyReserved, isOwner, rideId]);
+
+  const handleRequestSuccess = useCallback(() => {
+    setIsRequestModalVisible(false);
+    router.push(`/map/${rideId}`);
+  }, []);
 
   const handleChat = useCallback((): void => {
     if (rideData?.driverId) {
@@ -248,6 +290,19 @@ const RideDetailsScreen: React.FC = () => {
     if (preference.toLowerCase().includes("animais")) return "pets";
     return "info";
   }, []);
+
+  const isRideOwner = async () => {
+    const userId = await getStoredUserID();
+    const isOwner = rideData?.driverId === userId;
+    setIsOwner(isOwner);
+  };
+
+  useEffect(() => {
+    const checkIfRideOwner = async () => {
+      await isRideOwner();
+    };
+    checkIfRideOwner();
+  }, [rideData]);
 
   // Loading state
   if (loading) {
@@ -283,7 +338,9 @@ const RideDetailsScreen: React.FC = () => {
         </View>
         <View style={styles.errorContainer}>
           <Icon name="error-outline" size={48} color={colors.darkGrey} />
-          <Text style={styles.errorText}>{error || 'Carona não encontrada'}</Text>
+          <Text style={styles.errorText}>
+            {error || "Carona não encontrada"}
+          </Text>
           <TouchableOpacity style={styles.retryButton} onPress={handleGoBack}>
             <Text style={styles.retryButtonText}>Voltar</Text>
           </TouchableOpacity>
@@ -292,7 +349,10 @@ const RideDetailsScreen: React.FC = () => {
     );
   }
 
-  const arrivalTime = calculateArrivalTime(rideData.departureTime, rideData.estimatedDuration);
+  const arrivalTime = calculateArrivalTime(
+    rideData.departureTime,
+    rideData.estimatedDuration
+  );
   const statusColors = getStatusColor(rideData.status);
 
   return (
@@ -336,7 +396,9 @@ const RideDetailsScreen: React.FC = () => {
                 <View style={styles.routePoint}>
                   <View style={styles.originDot} />
                   <View style={styles.routeInfo}>
-                    <Text style={styles.routeTime}>{formatTime(rideData.departureTime)}</Text>
+                    <Text style={styles.routeTime}>
+                      {formatTime(rideData.departureTime)}
+                    </Text>
                     <View>
                       <Text style={styles.routeLocation}>
                         {getAddressNickname(rideData.startAddress)}
@@ -374,11 +436,15 @@ const RideDetailsScreen: React.FC = () => {
             <View style={styles.priceAndDateContainer}>
               <View style={styles.dateContainer}>
                 <Icon name="event" size={16} color={colors.darkGrey} />
-                <Text style={styles.dateText}>{formatDate(rideData.departureTime)}</Text>
+                <Text style={styles.dateText}>
+                  {formatDate(rideData.departureTime)}
+                </Text>
               </View>
 
               <View style={styles.priceTag}>
-                <Text style={styles.priceText}>R$ {rideData.pricePerSeat.toFixed(2)}</Text>
+                <Text style={styles.priceText}>
+                  R$ {rideData.pricePerSeat.toFixed(2)}
+                </Text>
                 <Text style={styles.pricePerPerson}>por pessoa</Text>
               </View>
             </View>
@@ -429,7 +495,9 @@ const RideDetailsScreen: React.FC = () => {
                 <Icon name="schedule" size={20} color={colors.darkGrey} />
                 <View style={styles.detailTextContainer}>
                   <Text style={styles.detailLabel}>Duração estimada</Text>
-                  <Text style={styles.detailValue}>{rideData.estimatedDuration} min</Text>
+                  <Text style={styles.detailValue}>
+                    {rideData.estimatedDuration} min
+                  </Text>
                 </View>
               </View>
 
@@ -486,14 +554,13 @@ const RideDetailsScreen: React.FC = () => {
             </View>
 
             <View style={styles.statusContainer}>
-              <View style={[
-                styles.statusBadge,
-                { backgroundColor: statusColors.background }
-              ]}>
-                <Text style={[
-                  styles.statusText,
-                  { color: statusColors.text }
-                ]}>
+              <View
+                style={[
+                  styles.statusBadge,
+                  { backgroundColor: statusColors.background },
+                ]}
+              >
+                <Text style={[styles.statusText, { color: statusColors.text }]}>
                   {getStatusText(rideData.status)}
                 </Text>
               </View>
@@ -513,7 +580,9 @@ const RideDetailsScreen: React.FC = () => {
 
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Criada em:</Text>
-              <Text style={styles.infoValue}>{formatDate(rideData.createdAt)}</Text>
+              <Text style={styles.infoValue}>
+                {formatDate(rideData.createdAt)}
+              </Text>
             </View>
 
             {rideData.requests.length > 0 && (
@@ -526,7 +595,7 @@ const RideDetailsScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      {/* Footer com botão de reserva */}
+      {/* Footer with reservation button */}
       <View style={[styles.footer, { paddingBottom: insets.bottom || 16 }]}>
         <View style={styles.footerInfo}>
           <Text style={styles.availableSeatsText}>
@@ -535,27 +604,46 @@ const RideDetailsScreen: React.FC = () => {
               ? "lugar disponível"
               : "lugares disponíveis"}
           </Text>
-          <Text style={styles.priceFooterText}>R$ {rideData.pricePerSeat.toFixed(2)}</Text>
+          <Text style={styles.priceFooterText}>
+            R$ {rideData.pricePerSeat.toFixed(2)}
+          </Text>
         </View>
         <TouchableOpacity
           style={[
             styles.reserveButton,
-            { opacity: rideData.availableSeats > 0 && rideData.status === 'PENDING' ? 1 : 0.5 }
+            {
+              opacity:
+                rideData.availableSeats > 0 && rideData.status === "PENDING"
+                  ? 1
+                  : 0.5,
+            },
           ]}
           onPress={handleReserve}
           activeOpacity={0.8}
-          disabled={rideData.availableSeats === 0 || rideData.status !== 'PENDING'}
+          disabled={
+            rideData.availableSeats === 0 || rideData.status !== "PENDING"
+          }
         >
           <Text style={styles.reserveButtonText}>
-            {rideData.availableSeats > 0 && rideData.status === 'PENDING'
-              ? 'Reservar'
-              : rideData.status !== 'PENDING'
-                ? 'Indisponível'
-                : 'Esgotado'
-            }
+            {isOwner || alreadyReserved
+              ? "Ver Detalhes"
+              : rideData.availableSeats > 0 && rideData.status === "PENDING"
+              ? "Reservar"
+              : rideData.status !== "PENDING"
+              ? "Indisponível"
+              : "Esgotado"}
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Ride Request Modal */}
+      <CreateRideRequestModal
+        isVisible={isRequestModalVisible}
+        onClose={() => setIsRequestModalVisible(false)}
+        rideId={rideData.id}
+        availableSeats={rideData.availableSeats}
+        onSuccess={handleRequestSuccess}
+      />
     </View>
   );
 };
@@ -601,8 +689,8 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     marginTop: 16,
@@ -611,15 +699,15 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 32,
   },
   errorText: {
     marginTop: 16,
     fontSize: 16,
     color: colors.darkGrey,
-    textAlign: 'center',
+    textAlign: "center",
   },
   retryButton: {
     marginTop: 16,
@@ -630,7 +718,7 @@ const styles = StyleSheet.create({
   },
   retryButtonText: {
     color: colors.white,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   mainCard: {
     backgroundColor: colors.white,
@@ -869,7 +957,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.lightGrey,
   },
   statusContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   statusBadge: {
     paddingHorizontal: 12,
@@ -878,7 +966,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   additionalInfoSection: {
     paddingTop: 16,
@@ -886,9 +974,9 @@ const styles = StyleSheet.create({
     borderTopColor: colors.lightGrey,
   },
   infoItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   infoLabel: {
@@ -897,7 +985,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     color: colors.black,
   },
   footer: {

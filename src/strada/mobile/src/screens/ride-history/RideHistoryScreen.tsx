@@ -208,10 +208,8 @@ const RideHistoryScreen = () => {
     fetchRideHistory();
   }, [filter, page]); // Re-fetch when filter or page changes
 
-  const handleRidePress = () => {
-    // action when a ride is pressed
-    // For now, it's just a placeholder, but you can navigate to a detail screen
-    console.log("Ride pressed!");
+  const handleRidePress = (rideId: string) => {
+    router.push(`/map/${rideId}`);
   };
 
   return (
@@ -283,7 +281,10 @@ const RideHistoryScreen = () => {
           data={rides}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <RideItem ride={item} onPress={handleRidePress} />
+            <RideItem
+              ride={item}
+              onPress={(item) => handleRidePress(item.id)}
+            />
           )}
           contentContainerStyle={styles.rideList}
           showsVerticalScrollIndicator={false}
