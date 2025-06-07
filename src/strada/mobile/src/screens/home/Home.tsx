@@ -21,6 +21,7 @@ import { AppImages } from "@/src/assets";
 import { colors } from "@/src/constants/colors";
 import AutocompleteSearch from "@/src/components/shared/SearchBar";
 import { getPopularRoutes, searchRides } from "@/src/services/ride.service";
+import { getStoredUserID, getUser } from "@/src/services/user.service";
 
 interface PopularRoute {
   id: string;
@@ -80,6 +81,7 @@ const HomeScreen = () => {
   const [loadingRoutes, setLoadingRoutes] = useState(true);
   const [loadingRides, setLoadingRides] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [user, setUser] = useState<any | null>(null);
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
@@ -158,6 +160,21 @@ const HomeScreen = () => {
       loadAvailableRides();
     }
   }, [userLocation, loadPopularRoutes, loadAvailableRides]);
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const storedUserId = await getStoredUserID();
+        if (storedUserId) {
+          const user = await getUser(storedUserId);
+          setUser(user);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar usuário:", error);
+      }
+    }
+    fetchUser();
+  }, []);
 
   const openSearchModal = () => {
     setSearchModalVisible(true);
@@ -353,7 +370,7 @@ const HomeScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.userGreeting}>
-          <Text style={styles.greeting}>Olá, Usuário!</Text>
+          <Text style={styles.greeting}>{user?.name}</Text>
           <Text style={styles.subGreeting}>Para onde vamos hoje?</Text>
         </View>
         <TouchableOpacity
