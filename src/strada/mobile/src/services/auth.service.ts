@@ -1,9 +1,8 @@
-
 import { ICreadentials } from "../interfaces/credentials.interface";
 import { storeToken } from "./token.service";
 import { storeUserID } from "./user.service";
 import { IAccessToken } from "../interfaces/access-token.interface";
-import axiosInstance from "./helpers/interceptors";
+import { authAxios as axiosInstance } from "./helpers/interceptors";
 import { jwtDecode } from "jwt-decode";
 
 export const getAccessToken = async (credentials: ICreadentials) => {
