@@ -20,10 +20,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { AppImages } from "@/src/assets";
 import { colors } from "@/src/constants/colors";
 import AutocompleteSearch from "@/src/components/shared/SearchBar";
-import {
-  getPopularRoutes,
-  searchRides,
-} from "@/src/services/ride.service";
+import { getPopularRoutes, searchRides } from "@/src/services/ride.service";
 
 interface PopularRoute {
   id: string;
@@ -64,13 +61,12 @@ interface RideData {
   start_address: string;
   start_distance: number;
   start_point_wkt: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | string;
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED" | string;
   total_distance: number;
   updated_at: string; // ISO date string
   vehicle_color: string;
   vehicle_model: string;
 }
-
 
 const HomeScreen = () => {
   const insets = useSafeAreaInsets();
@@ -84,7 +80,10 @@ const HomeScreen = () => {
   const [loadingRoutes, setLoadingRoutes] = useState(true);
   const [loadingRides, setLoadingRides] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   const getUserLocation = useCallback(async () => {
     setUserLocation({ lat: -23.5505, lng: -46.6333 });
@@ -96,13 +95,19 @@ const HomeScreen = () => {
       if (userLocation) {
         const routes = await getPopularRoutes(
           userLocation.lat,
-          userLocation.lng,
+          userLocation.lng
         );
-        setPopularRoutes(routes);
+        routes.map((route: PopularRoute) => {
+          route.start_address = route.start_address.split(",")[0];
+          route.end_address = route.end_address.split(",")[0];
+          route.frequency = route.frequency || 0;
+          return route;
+        });
+        setPopularRoutes(routes.slice(0, 3));
       }
     } catch (error) {
-      console.error('Erro ao carregar rotas populares:', error);
-      Alert.alert('Erro', 'Não foi possível carregar as rotas populares');
+      console.error("Erro ao carregar rotas populares:", error);
+      Alert.alert("Erro", "Não foi possível carregar as rotas populares");
     } finally {
       setLoadingRoutes(false);
     }
@@ -119,15 +124,15 @@ const HomeScreen = () => {
           endLat: userLocation.lat + 3000,
           limit: 10,
           maxEndDistance: 5000,
-          sortBy: 'time' as const,
+          sortBy: "time" as const,
         };
 
         const { rides } = await searchRides(searchParams);
         setAvailableRides(rides);
       }
     } catch (error) {
-      console.error('Erro ao carregar caronas:', error);
-      Alert.alert('Erro', 'Não foi possível carregar as caronas disponíveis');
+      console.error("Erro ao carregar caronas:", error);
+      Alert.alert("Erro", "Não foi possível carregar as caronas disponíveis");
     } finally {
       setLoadingRides(false);
     }
@@ -138,7 +143,7 @@ const HomeScreen = () => {
     await Promise.all([
       getUserLocation(),
       loadPopularRoutes(),
-      loadAvailableRides()
+      loadAvailableRides(),
     ]);
     setRefreshing(false);
   }, [getUserLocation, loadPopularRoutes, loadAvailableRides]);
@@ -173,7 +178,7 @@ const HomeScreen = () => {
           limit: 20,
           maxStartDistance: 2000,
           maxEndDistance: 2000,
-          sortBy: 'time' as const,
+          sortBy: "time" as const,
         };
 
         const results = await searchRides(searchParams);
@@ -184,21 +189,24 @@ const HomeScreen = () => {
             origin: `${userLocation.lat},${userLocation.lng}`,
             destination: `${place.geometry.location.lat},${place.geometry.location.lng}`,
             destinationName: place.description,
-            results: JSON.stringify(results.data || results)
-          }
+            results: JSON.stringify(results.data || results),
+          },
         });
       } catch (error) {
-        console.error('Erro na busca:', error);
-        Alert.alert('Erro', 'Erro ao buscar caronas para este destino');
+        console.error("Erro na busca:", error);
+        Alert.alert("Erro", "Erro ao buscar caronas para este destino");
       }
     }
 
     closeSearchModal();
   };
 
-  const navigateToRideDetails = useCallback((id: string) => {
-    router.push(`/ride/${id}`);
-  }, [router]);
+  const navigateToRideDetails = useCallback(
+    (id: string) => {
+      router.push(`/ride/${id}`);
+    },
+    [router]
+  );
 
   const navigateToSearch = useCallback(() => {
     router.push("/search");
@@ -219,15 +227,21 @@ const HomeScreen = () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     if (date.toDateString() === today.toDateString()) {
-      return `Hoje, ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+      return `Hoje, ${date.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
     } else if (date.toDateString() === tomorrow.toDateString()) {
-      return `Amanhã, ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+      return `Amanhã, ${date.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
     } else {
-      return date.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit'
+      return date.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
       });
     }
   };
@@ -275,7 +289,9 @@ const HomeScreen = () => {
           </View>
         </View>
         <View style={styles.priceContainer}>
-          <Text style={styles.priceText}>R$ {item.price_per_seat?.toFixed(2)}</Text>
+          <Text style={styles.priceText}>
+            R$ {item.price_per_seat?.toFixed(2)}
+          </Text>
         </View>
       </View>
 
@@ -298,7 +314,9 @@ const HomeScreen = () => {
         <View style={styles.rideDetails}>
           <View style={styles.rideDetailItem}>
             <Icon name="schedule" size={16} color={colors.darkGrey} />
-            <Text style={styles.detailText}>{formatDate(item.departure_time)}</Text>
+            <Text style={styles.detailText}>
+              {formatDate(item.departure_time)}
+            </Text>
           </View>
           <View style={styles.rideDetailItem}>
             <Icon name="person" size={16} color={colors.darkGrey} />
