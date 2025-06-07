@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    #image: nest-app
+    build:
+      context: ./
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/recipedb
+    env_file:
+      - .env.production.local
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    restart: always
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: recipedb
+    ports:
+      - '5432:5432'
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
