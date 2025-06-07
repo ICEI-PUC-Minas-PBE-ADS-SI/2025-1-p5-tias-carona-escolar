@@ -12,7 +12,7 @@ export class CreateUserUseCase {
   ) {}
 
   async execute(dto: IUserRequest): Promise<IUserResponse> {
-    const user = UserMapper.toEntity(dto);
+    const user = UserMapper.toPartialEntity(dto);
     await this.validateEmail(dto.email);
     await this.validateUsername(dto.username);
 
