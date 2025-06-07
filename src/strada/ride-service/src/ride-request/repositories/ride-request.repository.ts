@@ -316,12 +316,9 @@ export class RideRequestRepository {
         ST_Distance(rr.requested_pickup_point, ST_GeomFromText('${centerPoint}', 4326)) as distance_from_center,
         r.start_address,
         r.end_address,
-        r.departure_time,
-        u.name as passenger_name,
-        u.rating as passenger_rating
+        r.departure_time
       FROM ride_requests rr
       JOIN rides r ON rr.ride_id = r.id
-      JOIN users u ON rr.passenger_id = u.id
       WHERE rr.requested_pickup_point IS NOT NULL
       AND ST_DWithin(rr.requested_pickup_point, ST_GeomFromText('${centerPoint}', 4326), ${radiusMeters})
       AND rr.status = 'PENDING'

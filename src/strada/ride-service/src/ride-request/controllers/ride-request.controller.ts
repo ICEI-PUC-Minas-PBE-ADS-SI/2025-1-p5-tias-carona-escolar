@@ -2,12 +2,13 @@ import {
   Controller,
   Get,
   Post,
-  Put, Body,
+  Put,
+  Body,
   Param,
   Query,
   HttpStatus,
   HttpCode,
-  ValidationPipe
+  ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -57,7 +58,7 @@ class RouteSearchDto {
   offset?: number;
 }
 
-class OptimalPickupDto {
+export class OptimalPickupDto {
   passengerStart: {
     latitude: number;
     longitude: number;
@@ -313,9 +314,9 @@ export class RideRequestController {
     @Query(ValidationPipe) searchParams: SearchNearbyDto,
   ) {
     return await this.rideRequestService.getRequestsWithinRadius({
-      latitude: searchParams.latitude,
-      longitude: searchParams.longitude,
-      radiusMeters: searchParams.radiusMeters,
+      latitude: +searchParams.latitude,
+      longitude: +searchParams.longitude,
+      radiusMeters: +searchParams.radiusMeters,
     });
     // Observação: O serviço não suporta 'status', 'limit' ou 'offset'. Adicione suporte no serviço se necessário.
   }
@@ -372,9 +373,10 @@ export class RideRequestController {
     @Param('rideId') rideId: string,
     @Body(ValidationPipe) params: OptimalPickupDto,
   ) {
-    // Observação: Não há método correspondente no serviço. Sugiro adicionar um método como:
-    // findOptimalPickupDropoff(rideId: string, params: OptimalPickupDto)
-    throw new Error('Método não implementado no serviço');
+    return await this.rideRequestService.findOptimalPickupDropoff({
+      rideId,
+      params,
+    });
   }
 
   @Post('passengers/:passengerId/find-compatible-rides')
