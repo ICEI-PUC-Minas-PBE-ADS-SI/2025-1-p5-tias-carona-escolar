@@ -1,12 +1,13 @@
 // src/components/ride/RideInfoCard.jsx
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import BottomSheet, {
   BottomSheetHandle,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
 import { lightTheme } from "@/src/constants/theme";
+import { useRouter } from "expo-router";
 
 const RideInfoCard = ({
   rideData,
@@ -15,6 +16,7 @@ const RideInfoCard = ({
   onSheetChanges,
 }) => {
   const theme = lightTheme;
+  const router = useRouter();
 
   const renderStars = (rating) => {
     const stars = [];
@@ -123,7 +125,10 @@ const RideInfoCard = ({
         </View>
 
         {/* Driver Info */}
-        <View style={styles.driverInfoContainer}>
+        <TouchableOpacity
+          onPress={() => router.push(`/chat/${rideData.driverId}`)}
+          style={styles.driverInfoContainer}
+        >
           <View style={styles.driverInfo}>
             <Image
               source={{ uri: rideData.driverImage }}
@@ -145,7 +150,7 @@ const RideInfoCard = ({
             <Text style={styles.carColor}>{rideData.carColor}</Text>
             <Text style={styles.licensePlate}>{rideData.licensePlate}</Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Trip Details */}
         <View style={styles.tripDetailsSection}>

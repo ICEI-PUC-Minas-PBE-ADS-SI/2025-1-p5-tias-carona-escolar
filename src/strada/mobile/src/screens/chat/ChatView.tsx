@@ -15,12 +15,12 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Client, Versions } from "@stomp/stompjs";
-import { useNavigation } from "@react-navigation/native";
 import { lightTheme, Theme } from "@/src/constants/theme";
 import { getStoredToken } from "@/src/services/token.service";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { getStoredUserID, getUser } from "@/src/services/user.service";
 import { IUserRequest } from "@/src/interfaces/user-request.interface";
+import { useRouter } from "expo-router";
 
 const API_BASE_URL = "wss://chat.strada.appbr.store";
 
@@ -31,7 +31,7 @@ const ChatScreen = () => {
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const stompClient = useRef<Client | null>(null);
   const flatListRef = useRef<FlatList>(null);
-  const navigation = useNavigation();
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const theme = lightTheme;
@@ -43,6 +43,7 @@ const ChatScreen = () => {
       const currentUserId = await getStoredUserID();
       console.log(currentUserId);
       console.log(token);
+      console.log("iiiiiiiiiiiiiiiiiiii", id);
       if (!token || !currentUserId || !id) {
         console.error("No token or user ID found");
         return;
@@ -192,7 +193,7 @@ const ChatScreen = () => {
   };
 
   const handleBack = () => {
-    navigation.goBack();
+    router.back();
   };
 
   if (false) {
@@ -274,6 +275,7 @@ const getStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
       flex: 1,
+      marginTop: 25,
       backgroundColor: "#F5F6F5",
     },
     loadingContainer: {
