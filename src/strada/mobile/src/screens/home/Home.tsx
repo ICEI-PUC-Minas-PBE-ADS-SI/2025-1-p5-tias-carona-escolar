@@ -67,6 +67,8 @@ interface RideData {
   updated_at: string; // ISO date string
   vehicle_color: string;
   vehicle_model: string;
+  driverName: string;
+  driverProfileImg?: string
 }
 
 const HomeScreen = () => {
@@ -137,7 +139,20 @@ const HomeScreen = () => {
         };
 
         const { rides } = await searchRides(searchParams);
-        setAvailableRides(rides);
+        const ridesList = await Promise.all(
+          rides.map(async (ride: RideData) => {
+            console.log(ride);
+            const { name, imgUrl } = await getUser(ride.driver_id);
+
+            return {
+              ...ride,
+              driverName: name,
+              driverProfileImg: imgUrl
+            };
+          })
+        );
+
+        setAvailableRides(ridesList);
       }
     } catch (error) {
       console.error("Erro ao carregar caronas:", error);
@@ -299,11 +314,9 @@ const HomeScreen = () => {
           />
 
           <View>
-            <Text style={styles.driverName}>{item.driver?.name}</Text>
-            <View style={styles.ratingContainer}>
-              <Icon name="star" size={14} color="#FFD700" />
-              <Text style={styles.ratingText}>{item.driver?.rating}</Text>
-            </View>
+            <Text style={styles.driverName}>
+              {item.driverName}
+            </Text>
           </View>
         </View>
         <View style={styles.priceContainer}>
