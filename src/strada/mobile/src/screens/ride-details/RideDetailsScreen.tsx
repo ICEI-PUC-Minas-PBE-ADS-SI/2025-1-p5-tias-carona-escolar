@@ -141,7 +141,7 @@ const RideDetailsScreen: React.FC = () => {
 
   // Função para obter nickname do endereço
   const getAddressNickname = useCallback((address: string): string => {
-    const parts = address.split('–');
+    const parts = address.split(',');
     return parts.length > 1 ? parts[1].split(',')[0].trim() : formatAddress(address);
   }, [formatAddress]);
 
