@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { getRideById } from "@/src/services/ride.service";
+import { getUser } from "@/src/services/user.service";
 
 // Types
 interface RideData {
@@ -43,6 +44,8 @@ interface RideData {
   lastLocationUpdate: string | null;
   routePoints: RoutePoint[];
   requests: RideRequest[];
+  driverName: string,
+  driverProfileImg?: string
 }
 
 interface RoutePoint {
@@ -180,7 +183,13 @@ const RideDetailsScreen: React.FC = () => {
         setLoading(true);
         setError(null);
         const data: RideData = await getRideById(rideId as string);
-        setRideData(data);
+        const { name, imgUrl } = await getUser(data.driverId);
+
+        setRideData({
+          ...data,
+          driverName: name,
+          driverProfileImg: imgUrl
+        });
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar dados da carona';
         setError(errorMessage);
@@ -390,7 +399,7 @@ const RideDetailsScreen: React.FC = () => {
               />
               <View style={styles.driverDetails}>
                 <View style={styles.driverNameAndRating}>
-                  <Text style={styles.driverName}>{rideData.driverId}</Text>
+                  <Text style={styles.driverName}>{rideData.driverName}</Text>
                   <View style={styles.ratingContainer}>
                     <Icon name="star" size={16} color="#FFD700" />
                     <Text style={styles.ratingText}>4.8</Text>

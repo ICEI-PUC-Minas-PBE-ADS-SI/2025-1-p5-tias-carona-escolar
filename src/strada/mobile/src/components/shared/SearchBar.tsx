@@ -322,8 +322,8 @@ const AutocompleteSearch = ({
               ? colors.primaryPink
               : item.types?.includes("transit_station") ||
                 item.types?.includes("bus_station")
-              ? colors.secondaryBlue
-              : colors.primaryBlue
+                ? colors.secondaryBlue
+                : colors.primaryBlue
           }
         />
       </View>
@@ -354,8 +354,8 @@ const AutocompleteSearch = ({
               ? colors.primaryPink
               : item.types?.includes("transit_station") ||
                 item.types?.includes("bus_station")
-              ? colors.secondaryBlue
-              : colors.primaryBlue
+                ? colors.secondaryBlue
+                : colors.primaryBlue
           }
         />
       </View>
@@ -374,7 +374,6 @@ const AutocompleteSearch = ({
 
   // Renderiza itens recentes quando não há texto na busca
   const renderRecentSearches = () => {
-    console.log("Recent Searches:", recentSearches);
     if (recentSearches.length === 0) return null;
 
     return (
