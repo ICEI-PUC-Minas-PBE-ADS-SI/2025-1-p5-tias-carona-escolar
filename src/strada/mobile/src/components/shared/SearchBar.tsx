@@ -172,7 +172,6 @@ const AutocompleteSearch = ({
   // Função para obter detalhes do lugar (incluindo lat/lng)
   const getPlaceDetails = async (placeId) => {
     try {
-      console.log("Obtendo detalhes do lugar:", GOOGLE_PLACES_API_KEY);
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address,name&key=${GOOGLE_PLACES_API_KEY}`
       );
@@ -266,32 +265,7 @@ const AutocompleteSearch = ({
       // Salvar a busca recente
       await saveRecentSearch(suggestion);
 
-      onSelectPlace(selectedPlace);
-      setSearchText("");
-      Keyboard.dismiss();
-    }
-
-    setIsLoading(false);
-  };
-
-  // Função para selecionar um item das buscas recentes
-  const handleSelectRecentSearch = async (recentItem) => {
-    setIsLoading(true);
-
-    // Obter detalhes do lugar incluindo coordenadas
-    const placeDetails = await getPlaceDetails(recentItem.place_id);
-
-    if (placeDetails) {
-      const selectedPlace = {
-        ...recentItem,
-        ...placeDetails,
-        searchType,
-      };
-
-      // Mover para o topo das buscas recentes
-      await saveRecentSearch(recentItem);
-
-      onSelectPlace(selectedPlace);
+      await onSelectPlace(selectedPlace);
       setSearchText("");
       Keyboard.dismiss();
     }
