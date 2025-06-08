@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from "react";
-import { StyleSheet, StatusBar, Dimensions } from "react-native";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { StyleSheet, StatusBar, Dimensions, Alert } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useAnimatedStyle, withTiming } from "react-native-reanimated";
 
@@ -12,62 +12,149 @@ import RouteLayer from "@/src/components/map/RouteLayer";
 import { useMapLocation } from "@/src/hooks/UseMapLocation";
 import Mapbox from "@rnmapbox/maps";
 import { AppImages } from "@/src/assets";
+import { getRideById } from "@/src/services/ride.service";
+import { getUser } from "@/src/services/user.service";
 
-const sampleRideData = {
-  id: 1,
-  driverName: "Budi Susanto",
-  driverImage:
-    "https://buffer.com/library/content/images/size/w1200/2023/10/free-images.jpg",
-  carModel: "Toyota Avanza",
-  carColor: "Black",
-  licensePlate: "B 1233 YH",
-  seatsAvailable: 3,
-  rating: 4.8,
-  pricePerSeat: 14.0,
-  totalFare: 4.0,
-  departureLocation: "456 Elm Street, Springfield",
-  departureTime: "14:30",
-  duration: "30 Minutes",
-  availableSeats: 2,
-  destination: "Office - 739 Main Street, Springfield",
-  paymentMethod: "e-Wallet",
-  pickup: {
-    address: "456 Elm Street, Springfield",
-    coordinates: [-44.339732, -20.073888],
-  },
-  dropoff: {
-    address: "Office - 739 Main Street, Springfield",
-    coordinates: [-44.20075, -19.95512],
-  },
-  passengers: [
-    {
-      id: 1,
-      name: "John Doe",
-      imgUrl: "https://avatars.githubusercontent.com/u/124599?v=4",
-      rating: 4.5,
-      pickup: {
-        address: "123 Main Street, Springfield",
-        coordinates: [-44.321519, -20.074622],
-      },
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      imgUrl: "https://avatars.githubusercontent.com/u/124599?v=4",
-      rating: 4.0,
-      pickup: {
-        address: "789 Oak Avenue, Springfield",
-        coordinates: [-44.264464, -20.04228],
-      },
-    },
-  ],
-  feedback: "Driver was friendly, and the ride was smooth.",
+// Interfaces baseadas na sua API
+interface RideRequest {
+  id: string;
+  rideId: string;
+  passengerId: string;
+  seatsNeeded: number;
+  message: string;
+  status: "PENDING" | "ACCEPTED" | "REJECTED";
+  requestedPickupAddress: string;
+  requestedDropoffAddress: string;
+  createdAt: string;
+  updatedAt: string;
+  respondedAt: string | null;
+  pickupDistance: number | null;
+  dropoffDistance: number | null;
+  additionalDistance: number | null;
+  detourPercentage: number | null;
+  pickedUpAt: string | null;
+  droppedOffAt: string | null;
+}
+
+interface Driver {
+  id: string;
+  name: string;
+  email: string;
+  imgUrl: string | null;
+  username: string;
+  createdAt: string;
+  isActive: boolean;
+  cpf: string | null;
+  rg: string | null;
+  birthDate: string | null;
+  phone: string | null;
+  address: string | null;
+  cep: string | null;
+  city: string | null;
+  state: string | null;
+  userType: "ADULT" | "MINOR";
+}
+
+interface RideData {
+  id: string;
+  driverId: string;
+  startAddress: string;
+  endAddress: string;
+  departureTime: string;
+  availableSeats: number;
+  pricePerSeat: number;
+  status: "PENDING" | "ACTIVE" | "COMPLETED" | "CANCELLED";
+  vehicleModel: string;
+  vehicleColor: string;
+  licensePlate: string;
+  allowLuggage: boolean;
+  estimatedDuration: number;
+  estimatedDistance: number;
+  actualDuration: number | null;
+  actualDistance: number | null;
+  actualStartTime: string | null;
+  actualEndTime: string | null;
+  createdAt: string;
+  updatedAt: string;
+  currentLatitude: number | null;
+  currentLongitude: number | null;
+  lastLocationUpdate: string | null;
+  routePoints: number[][];
+  requests: RideRequest[];
+  startPoint: {
+    type: "Point";
+    coordinates: [number, number];
+  };
+  endPoint: {
+    type: "Point";
+    coordinates: [number, number];
+  };
+  plannedRoute: {
+    type: "LineString";
+    coordinates: [number, number][];
+  };
+  currentLocation: [number, number] | null;
+  driver?: Driver; // Dados do motorista (podem ser carregados separadamente)
+}
+
+// Função para buscar dados da corrida
+const fetchRideData = async (rideId: string): Promise<RideData | null> => {
+  try {
+    const response = await getRideById(rideId);
+    return response;
+  } catch (error) {
+    console.error("Erro ao buscar dados da corrida:", error);
+    return null;
+  }
 };
 
-const RideShareMap = () => {
-  const [rideData, setRideData] = useState(sampleRideData);
-  const [isTripActive, setIsTripActive] = useState(true);
-  const [isSearching, setIsSearching] = useState(true);
+// Função para buscar dados do motorista
+const fetchDriverData = async (driverId: string): Promise<Driver | null> => {
+  try {
+    const response = await getUser(driverId);
+    return response;
+  } catch (error) {
+    console.error("Erro ao buscar dados do motorista:", error);
+    return null;
+  }
+};
+
+// Função para buscar dados de múltiplos usuários (passageiros)
+const fetchUsersData = async (
+  userIds: string[]
+): Promise<Record<string, Driver>> => {
+  try {
+    const promises = userIds.map((id) => fetchDriverData(id));
+    const users = await Promise.all(promises);
+
+    const usersMap: Record<string, Driver> = {};
+    users.forEach((user, index) => {
+      if (user) {
+        usersMap[userIds[index]] = user;
+      }
+    });
+
+    return usersMap;
+  } catch (error) {
+    console.error("Erro ao buscar dados dos usuários:", error);
+    return {};
+  }
+};
+
+interface RideShareMapProps {
+  rideId: string; // ID da corrida a ser exibida
+}
+
+const RideShareMap: React.FC<RideShareMapProps> = ({ rideId }) => {
+  const [rideData, setRideData] = useState<RideData | null>(null);
+  const [driverData, setDriverData] = useState<Driver | null>(null);
+  const [passengersData, setPassengersData] = useState<Record<string, Driver>>(
+    {}
+  );
+  const [isTripActive, setIsTripActive] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const {
     location,
     errorMsg,
@@ -86,45 +173,88 @@ const RideShareMap = () => {
   const mapRef = useRef(null);
   const theme = lightTheme;
 
-  // When component mounts, decode route
-  React.useEffect(() => {
-    const encodedPolyline =
-      "xtoyBfbsmG|BRP{CnAMtFuAvBs@xBo@~B_@qC{LeBmIwBoJoA{E[BwAcLYmCUcBc@yA[eDOgAG_Ad@G~A]c@eCn@uFBw@}BiK`HgB`Ce@dD}@jDwA~ImEbCuAbAo@zDoB`@ShCc@nDiA|A]`KuAvCQdBCz@IrCq@|@UxXeAl@STSJYTuB]MsCi@eE_A[AuM_EeBw@aBeAwy@uk@oFiE}]iVoTaO{[yTgI}FkE{C}CaCsBkByB}BkAsAk\\cc@yKsNmBuBkGeGiAuAa@o@]w@Uu@_@cBg@uCeAgDm@mA}@sAgAiAsAcAeB}@cG}BqAo@s@k@q@u@s@kA_@cAoCyJaAiEm@{BO}@_D}LwNuk@m@oCy@{CsD_Oc@iCSkBOgCO{DUiDSwBaAeH_AyEw@aDcAiD_CkGiAiCgEuIkFcKeNyXyAaC}@kAu@y@kEcDwAsA}AgByGkIw@y@{CiCmEuCgEeCk@YmAe@mCs@gO_EcAc@_@Qy@m@s@w@s@iAq@gByFoRm@_Bo@cAm@m@cAo@qPwIwAw@eBkA_XaUuF_FiL{J{@u@{AaAeCiAaKgDmHcCmDyAmA{@yCkCoCcByImEaDgAsOkEmBs@kAi@yBqAUC_CyAkFkCkLcGqCkAqDoAyVeI_KeD_B]iEi@_AMeAUw@[]Qs@m@m@{@e@iAK[SaBWoE[{Ia@yGe@cLg@eKHe@LUPKXGZFNJN^B^E`@KZUXe@XeAPoEVcBXiFxBm@Xy@ViAP_ADcAAkA@oCEw@BsAP}D|@oANaAByDA}@JiAb@eDzBiDrBcBp@sBTcBFeEK}AJ}JpG_Bv@}Br@}FbAqAJqN}DwFcBSBMLGPBT@BpHrB_@|BCJBDBfANrAtB|HZnAh@fCIN@PLLJ?UzAMn@bB@RB";
-    decodeRoute(encodedPolyline);
-  }, []);
+  // Carregar dados da corrida quando o componente montar
+  useEffect(() => {
+    const loadRideData = async () => {
+      setLoading(true);
 
-  const handleSheetChanges = useCallback((index) => {
+      try {
+        // Buscar dados da corrida
+        const ride = await fetchRideData(rideId);
+        if (!ride) {
+          Alert.alert("Erro", "Não foi possível carregar os dados da corrida");
+          return;
+        }
+
+        setRideData(ride);
+        setIsTripActive(ride.status === "ACTIVE");
+
+        // Buscar dados do motorista
+        const driver = await fetchDriverData(ride.driverId);
+        if (driver) {
+          setDriverData(driver);
+        }
+
+        // Buscar dados dos passageiros que fizeram solicitações
+        const passengerIds = ride.requests.map((req) => req.passengerId);
+        if (passengerIds.length > 0) {
+          const passengers = await fetchUsersData(passengerIds);
+          setPassengersData(passengers);
+        }
+
+        // Configurar rota planejada
+        if (ride.plannedRoute && ride.plannedRoute.coordinates.length > 0) {
+          // Se você tiver uma função para decodificar rota, use aqui
+          // Caso contrário, use as coordenadas diretamente
+          decodeRoute(""); // Ou passe os dados da rota se necessário
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados da corrida:", error);
+        Alert.alert("Erro", "Falha ao carregar dados da corrida");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRideData();
+  }, [rideId]);
+
+  const handleSheetChanges = useCallback((index: number) => {
     setCurrentSnapIndex(index);
   }, []);
 
   const handleMapLoad = useCallback(() => {
-    // Calculate bounding box for the route
-    if (routeCoords && routeCoords.length > 0) {
-      const points = [...routeCoords];
+    if (!rideData) return;
 
-      // Add pickup, dropoff, and passenger locations to the bounding box calculation
-      if (rideData.pickup && rideData.pickup.coordinates) {
-        points.push(rideData.pickup.coordinates);
-      }
+    // Calcular bounding box para a rota
+    const points: [number, number][] = [];
 
-      if (rideData.dropoff && rideData.dropoff.coordinates) {
-        points.push(rideData.dropoff.coordinates);
-      }
-
-      if (rideData.passengers) {
-        rideData.passengers.forEach((passenger) => {
-          if (passenger.pickup && passenger.pickup.coordinates) {
-            points.push(passenger.pickup.coordinates);
-          }
-        });
-      }
-
-      const bounds = calculateBoundingBox(points);
-
-      // If we have a valid bounding box, we could use it to set the camera
-      // This is handled by the bounds prop on MapView
+    // Adicionar pontos da rota planejada
+    if (rideData.plannedRoute && rideData.plannedRoute.coordinates.length > 0) {
+      points.push(...(rideData.plannedRoute.coordinates as [number, number][]));
     }
-  }, [routeCoords, rideData]);
+
+    // Adicionar ponto de início
+    if (rideData.startPoint) {
+      points.push(rideData.startPoint.coordinates);
+    }
+
+    // Adicionar ponto de fim
+    if (rideData.endPoint) {
+      points.push(rideData.endPoint.coordinates);
+    }
+
+    // Adicionar pontos de pickup dos passageiros solicitantes
+    rideData.requests.forEach((request) => {
+      // Aqui você pode adicionar lógica para converter endereços em coordenadas
+      // se necessário, ou se você tiver coordenadas nos requests
+    });
+
+    if (points.length > 0) {
+      const bounds = calculateBoundingBox(points);
+      // O bounds será usado pelo MapView
+    }
+  }, [rideData, calculateBoundingBox]);
 
   const handleSearch = () => {
     setIsSearching(true);
@@ -145,13 +275,94 @@ const RideShareMap = () => {
     ],
   }));
 
-  // if (!hasLocationPermission) {
-  //   return (
-  //     <View style={[styles.container, { justifyContent: "center" }]}>
-  //       <ActivityIndicator size="large" color="#007bff" />
-  //     </View>
-  //   );
-  // }
+  // Converter dados da API para o formato esperado pelos componentes
+  const getFormattedRideData = () => {
+    if (!rideData || !driverData) return null;
+
+    return {
+      id: rideData.id,
+      driverName: driverData.name,
+      driverImage: driverData.imgUrl || "https://via.placeholder.com/150",
+      carModel: rideData.vehicleModel,
+      carColor: rideData.vehicleColor,
+      licensePlate: rideData.licensePlate,
+      seatsAvailable: rideData.availableSeats,
+      rating: 4.8, // Você pode adicionar rating na sua API
+      pricePerSeat: rideData.pricePerSeat,
+      totalFare: rideData.pricePerSeat * rideData.availableSeats,
+      departureLocation: rideData.startAddress,
+      departureTime: new Date(rideData.departureTime).toLocaleTimeString(
+        "pt-BR",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      ),
+      duration: `${Math.round(rideData.estimatedDuration / 60)} minutos`,
+      availableSeats: rideData.availableSeats,
+      destination: rideData.endAddress,
+      paymentMethod: "PIX", // Você pode adicionar na sua API
+      pickup: {
+        address: rideData.startAddress,
+        coordinates: rideData.startPoint.coordinates,
+      },
+      dropoff: {
+        address: rideData.endAddress,
+        coordinates: rideData.endPoint.coordinates,
+      },
+      passengers: rideData.requests
+        .filter((req) => req.status === "ACCEPTED")
+        .map((req) => ({
+          id: req.passengerId,
+          name: passengersData[req.passengerId]?.name || "Passageiro",
+          imgUrl:
+            passengersData[req.passengerId]?.imgUrl ||
+            "https://via.placeholder.com/150",
+          rating: 4.5, // Você pode adicionar na sua API
+          pickup: {
+            address: req.requestedPickupAddress,
+            coordinates: [0, 0] as [number, number], // Você precisará converter endereço para coordenadas
+          },
+        })),
+      feedback: "", // Você pode adicionar na sua API
+      status: rideData.status,
+      allowLuggage: rideData.allowLuggage,
+      estimatedDistance: rideData.estimatedDistance,
+    };
+  };
+
+  const formattedRideData = getFormattedRideData();
+
+  if (loading) {
+    return (
+      <GestureHandlerRootView
+        style={[styles.container, styles.loadingContainer]}
+      >
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor="transparent"
+          translucent
+        />
+        {/* Você pode adicionar um componente de loading aqui */}
+      </GestureHandlerRootView>
+    );
+  }
+
+  if (!formattedRideData) {
+    return (
+      <GestureHandlerRootView style={[styles.container, styles.errorContainer]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor="transparent"
+          translucent
+        />
+        {/* Você pode adicionar um componente de erro aqui */}
+      </GestureHandlerRootView>
+    );
+  }
+
+  // Usar coordenadas da rota planejada se disponível
+  const routeCoordinates = rideData?.plannedRoute?.coordinates || routeCoords;
 
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -164,10 +375,10 @@ const RideShareMap = () => {
       {/* Map Component */}
       <MapView
         bounds={
-          routeCoords && routeCoords.length > 0
+          routeCoordinates && routeCoordinates.length > 0
             ? {
-                ne: calculateBoundingBox(routeCoords)?.ne,
-                sw: calculateBoundingBox(routeCoords)?.sw,
+                ne: calculateBoundingBox(routeCoordinates)?.ne,
+                sw: calculateBoundingBox(routeCoordinates)?.sw,
               }
             : undefined
         }
@@ -190,19 +401,17 @@ const RideShareMap = () => {
         onMapLoad={handleMapLoad}
       >
         {/* Route Line */}
-        <RouteLayer routeCoords={routeCoords} lineColor={theme.primary} />
+        <RouteLayer routeCoords={routeCoordinates} lineColor={theme.primary} />
 
         {/* Pickup Location Marker */}
-        {rideData.pickup && (
+        {formattedRideData.pickup && (
           <LocationMarker
             id="pickup-marker"
-            coordinate={rideData.pickup.coordinates}
-            title="Pickup Point"
+            coordinate={formattedRideData.pickup.coordinates}
+            title="Ponto de Partida"
             markerType="pickup"
             getRef={(ref) => {
-              if (rideData.dropoff?.coordinates) {
-                pointAnnotationRefs.current["pickupLocation"] = ref;
-              }
+              pointAnnotationRefs.current["pickupLocation"] = ref;
             }}
             image={AppImages.circularpin}
             onMarkerLoad={() => {
@@ -212,16 +421,14 @@ const RideShareMap = () => {
         )}
 
         {/* Dropoff Location Marker */}
-        {rideData.dropoff && (
+        {formattedRideData.dropoff && (
           <LocationMarker
             id="dropoff-marker"
-            coordinate={rideData.dropoff.coordinates}
-            title="Destination"
+            coordinate={formattedRideData.dropoff.coordinates}
+            title="Destino"
             markerType="dropoff"
             getRef={(ref) => {
-              if (rideData.dropoff?.coordinates) {
-                pointAnnotationRefs.current["dropoffLocation"] = ref;
-              }
+              pointAnnotationRefs.current["dropoffLocation"] = ref;
             }}
             onMarkerLoad={() => {
               pointAnnotationRefs?.current?.["dropoffLocation"]?.refresh();
@@ -231,7 +438,7 @@ const RideShareMap = () => {
         )}
 
         {/* Passenger Markers */}
-        {rideData?.passengers?.map(
+        {formattedRideData?.passengers?.map(
           (passenger) =>
             passenger.pickup && (
               <LocationMarker
@@ -242,10 +449,8 @@ const RideShareMap = () => {
                 markerType="passenger"
                 image={passenger.imgUrl}
                 getRef={(ref) => {
-                  if (passenger.pickup?.coordinates) {
-                    pointAnnotationRefs.current[`passenger-${passenger.id}`] =
-                      ref;
-                  }
+                  pointAnnotationRefs.current[`passenger-${passenger.id}`] =
+                    ref;
                 }}
                 onMarkerLoad={() => {
                   pointAnnotationRefs.current[
@@ -255,13 +460,32 @@ const RideShareMap = () => {
               />
             )
         )}
+
+        {/* Current Location Marker (se a corrida estiver ativa) */}
+        {isTripActive &&
+          rideData?.currentLatitude &&
+          rideData?.currentLongitude && (
+            <LocationMarker
+              id="current-location"
+              coordinate={[rideData.currentLongitude, rideData.currentLatitude]}
+              title="Localização Atual"
+              markerType="current"
+              image={AppImages.carpin || AppImages.circularpin}
+              getRef={(ref) => {
+                pointAnnotationRefs.current["currentLocation"] = ref;
+              }}
+              onMarkerLoad={() => {
+                pointAnnotationRefs?.current?.["currentLocation"]?.refresh();
+              }}
+            />
+          )}
       </MapView>
 
       {/* Location Panel */}
       <LocationPanel
         isSearching={isSearching}
-        pickup={rideData.pickup}
-        dropoff={rideData.dropoff}
+        pickup={formattedRideData.pickup}
+        dropoff={formattedRideData.dropoff}
         currentSnapIndex={currentSnapIndex}
         animatedStyle={locationPanelStyle}
         onSearch={handleSearch}
@@ -269,7 +493,7 @@ const RideShareMap = () => {
 
       {/* Ride Info Card */}
       <RideInfoCard
-        rideData={rideData}
+        rideData={formattedRideData}
         bottomSheetRef={bottomSheetRef}
         snapPoints={snapPoints}
         onSheetChanges={handleSheetChanges}
@@ -282,6 +506,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

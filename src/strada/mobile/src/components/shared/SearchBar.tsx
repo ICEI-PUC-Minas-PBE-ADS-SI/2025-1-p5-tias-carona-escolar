@@ -9,75 +9,10 @@ import {
   FlatList,
   Keyboard,
   Dimensions,
+  Alert,
 } from "react-native";
+import * as AsyncStorage from "expo-secure-store";
 import Icon from "react-native-vector-icons/MaterialIcons";
-
-// Mockup de dados para as sugestões
-const mockSuggestions = [
-  {
-    id: "1",
-    main: "Avenida Paulista, 1578",
-    secondary: "São Paulo, SP",
-    type: "location",
-    icon: "location-on",
-  },
-  {
-    id: "2",
-    main: "Avenida Presidente Vargas",
-    secondary: "Rio de Janeiro, RJ",
-    type: "location",
-    icon: "location-on",
-  },
-  {
-    id: "3",
-    main: "Aeroporto de Congonhas",
-    secondary: "São Paulo, SP",
-    type: "airport",
-    icon: "flight",
-  },
-  {
-    id: "4",
-    main: "Avenida das Américas",
-    secondary: "Rio de Janeiro, RJ",
-    type: "location",
-    icon: "location-on",
-  },
-  {
-    id: "5",
-    main: "Terminal Rodoviário Tietê",
-    secondary: "São Paulo, SP",
-    type: "bus",
-    icon: "directions-bus",
-  },
-  {
-    id: "6",
-    main: "MASP - Museu de Arte",
-    secondary: "São Paulo, SP",
-    type: "poi",
-    icon: "location-on",
-  },
-  {
-    id: "7",
-    main: "Avenida Brigadeiro Faria Lima",
-    secondary: "São Paulo, SP",
-    type: "location",
-    icon: "location-on",
-  },
-  {
-    id: "8",
-    main: "Aeroporto Internacional de Guarulhos",
-    secondary: "Guarulhos, SP",
-    type: "airport",
-    icon: "flight",
-  },
-  {
-    id: "9",
-    main: "Terminal Rodoviário de Campinas",
-    secondary: "Campinas, SP",
-    type: "bus",
-    icon: "directions-bus",
-  },
-];
 
 // Cores já definidas no seu app
 const colors = {
@@ -97,33 +32,200 @@ const colors = {
   darkGrey: "#8C8C8C",
 };
 
-const AutocompleteSearch = ({ onSelectPlace, onBack }) => {
+// Configuração da API do Google Places
+const GOOGLE_PLACES_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+
+const STORAGE_KEY = "recent_searches";
+
+const AutocompleteSearch = ({
+  onSelectPlace,
+  onBack,
+  searchType = "destination",
+}) => {
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [recentSearches, setRecentSearches] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef(null);
   const suggestionHeight = useRef(new Animated.Value(0)).current;
   const { height: screenHeight } = Dimensions.get("window");
+  const searchTimeoutRef = useRef(null);
 
-  // Filtrar sugestões quando o texto de pesquisa muda
-  useEffect(() => {
-    if (searchText.length > 0) {
-      const filteredSuggestions = mockSuggestions.filter(
-        (item) =>
-          item.main.toLowerCase().includes(searchText.toLowerCase()) ||
-          item.secondary.toLowerCase().includes(searchText.toLowerCase())
+  // Carregar buscas recentes do AsyncStorage
+  const loadRecentSearches = async () => {
+    try {
+      const storedSearches = await AsyncStorage.getItemAsync(STORAGE_KEY);
+      if (storedSearches) {
+        const parsedSearches = JSON.parse(storedSearches);
+        setRecentSearches(parsedSearches.slice(0, 5)); // Manter apenas as últimas 5
+      }
+    } catch (error) {
+      console.error("Erro ao carregar buscas recentes:", error);
+    }
+  };
+
+  // Salvar busca recente no AsyncStorage
+  const saveRecentSearch = async (searchData) => {
+    try {
+      const storedSearches = await AsyncStorage.getItemAsync(STORAGE_KEY);
+      let searches = storedSearches ? JSON.parse(storedSearches) : [];
+
+      // Remover busca duplicada se existir
+      searches = searches.filter(
+        (search) => search.place_id !== searchData.place_id
       );
-      setSuggestions(filteredSuggestions);
 
-      // Animar a abertura do painel de sugestões
-      Animated.timing(suggestionHeight, {
-        toValue: Math.min(filteredSuggestions.length * 62, screenHeight * 0.4),
-        duration: 200,
-        useNativeDriver: false,
-      }).start();
+      // Adicionar nova busca no início
+      searches.unshift({
+        id: searchData.place_id,
+        main: searchData.main,
+        secondary: searchData.secondary,
+        description: searchData.description,
+        place_id: searchData.place_id,
+        types: searchData.types,
+        icon: searchData.icon,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Manter apenas as últimas 20 buscas no storage (para não sobrecarregar)
+      searches = searches.slice(0, 20);
+
+      await AsyncStorage.setItemAsync(STORAGE_KEY, JSON.stringify(searches));
+      setRecentSearches(searches.slice(0, 10)); // Mostrar apenas as últimas 5
+    } catch (error) {
+      console.error("Erro ao salvar busca recente:", error);
+    }
+  };
+
+  // Limpar todas as buscas recentes
+  const clearRecentSearches = async () => {
+    try {
+      await AsyncStorage.deleteItemAsync(STORAGE_KEY);
+      setRecentSearches([]);
+    } catch (error) {
+      console.error("Erro ao limpar buscas recentes:", error);
+    }
+  };
+
+  // Carregar buscas recentes quando o componente é montado
+  useEffect(() => {
+    loadRecentSearches();
+  }, []);
+
+  // Função para buscar sugestões da API do Google Places
+  const searchGooglePlaces = async (query) => {
+    if (!query || query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+          query
+        )}&key=${GOOGLE_PLACES_API_KEY}&language=pt-BR&components=country:br`
+      );
+
+      const data = await response.json();
+
+      if (data.status === "OK") {
+        const formattedSuggestions = data.predictions.map((prediction) => ({
+          id: prediction.place_id,
+          main: prediction.structured_formatting.main_text,
+          secondary: prediction.structured_formatting.secondary_text || "",
+          description: prediction.description,
+          place_id: prediction.place_id,
+          types: prediction.types,
+          icon: getIconForPlace(prediction.types),
+        }));
+
+        setSuggestions(formattedSuggestions);
+
+        // Animar a abertura do painel de sugestões
+        Animated.timing(suggestionHeight, {
+          toValue: Math.min(
+            formattedSuggestions.length * 62,
+            screenHeight * 0.4
+          ),
+          duration: 200,
+          useNativeDriver: false,
+        }).start();
+      } else {
+        console.error("Erro na API do Google Places:", data.status);
+        setSuggestions([]);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar lugares:", error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível buscar os endereços. Tente novamente."
+      );
+      setSuggestions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Função para obter detalhes do lugar (incluindo lat/lng)
+  const getPlaceDetails = async (placeId) => {
+    try {
+      console.log("Obtendo detalhes do lugar:", GOOGLE_PLACES_API_KEY);
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address,name&key=${GOOGLE_PLACES_API_KEY}`
+      );
+
+      const data = await response.json();
+
+      if (data.status === "OK") {
+        const place = data.result;
+        return {
+          latitude: place.geometry.location.lat,
+          longitude: place.geometry.location.lng,
+          address: place.formatted_address,
+          name: place.name,
+        };
+      } else {
+        throw new Error("Erro ao obter detalhes do lugar");
+      }
+    } catch (error) {
+      console.error("Erro ao obter detalhes:", error);
+      Alert.alert("Erro", "Não foi possível obter os detalhes do endereço.");
+      return null;
+    }
+  };
+
+  // Função para determinar o ícone baseado no tipo do lugar
+  const getIconForPlace = (types) => {
+    if (types.includes("airport")) return "flight";
+    if (types.includes("bus_station") || types.includes("transit_station"))
+      return "directions-bus";
+    if (types.includes("subway_station")) return "directions-subway";
+    if (types.includes("hospital")) return "local-hospital";
+    if (types.includes("school") || types.includes("university"))
+      return "school";
+    if (types.includes("shopping_mall")) return "shopping-cart";
+    if (types.includes("restaurant") || types.includes("meal_takeaway"))
+      return "restaurant";
+    if (types.includes("gas_station")) return "local-gas-station";
+    if (types.includes("bank")) return "account-balance";
+    return "location-on";
+  };
+
+  // Debounce para pesquisa
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (searchText.length > 0) {
+      searchTimeoutRef.current = setTimeout(() => {
+        searchGooglePlaces(searchText);
+      }, 300); // Aguarda 300ms após o usuário parar de digitar
     } else {
       setSuggestions([]);
-
       // Animar o fechamento do painel de sugestões
       Animated.timing(suggestionHeight, {
         toValue: 0,
@@ -131,6 +233,12 @@ const AutocompleteSearch = ({ onSelectPlace, onBack }) => {
         useNativeDriver: false,
       }).start();
     }
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
   }, [searchText]);
 
   // Foco automático no input quando o componente é montado
@@ -142,10 +250,53 @@ const AutocompleteSearch = ({ onSelectPlace, onBack }) => {
     }, 100);
   }, []);
 
-  const handleSelectSuggestion = (suggestion) => {
-    onSelectPlace(suggestion);
-    setSearchText("");
-    Keyboard.dismiss();
+  const handleSelectSuggestion = async (suggestion) => {
+    setIsLoading(true);
+
+    // Obter detalhes do lugar incluindo coordenadas
+    const placeDetails = await getPlaceDetails(suggestion.place_id);
+
+    if (placeDetails) {
+      const selectedPlace = {
+        ...suggestion,
+        ...placeDetails,
+        searchType, // 'start' ou 'destination'
+      };
+
+      // Salvar a busca recente
+      await saveRecentSearch(suggestion);
+
+      onSelectPlace(selectedPlace);
+      setSearchText("");
+      Keyboard.dismiss();
+    }
+
+    setIsLoading(false);
+  };
+
+  // Função para selecionar um item das buscas recentes
+  const handleSelectRecentSearch = async (recentItem) => {
+    setIsLoading(true);
+
+    // Obter detalhes do lugar incluindo coordenadas
+    const placeDetails = await getPlaceDetails(recentItem.place_id);
+
+    if (placeDetails) {
+      const selectedPlace = {
+        ...recentItem,
+        ...placeDetails,
+        searchType,
+      };
+
+      // Mover para o topo das buscas recentes
+      await saveRecentSearch(recentItem);
+
+      onSelectPlace(selectedPlace);
+      setSearchText("");
+      Keyboard.dismiss();
+    }
+
+    setIsLoading(false);
   };
 
   const handleClearText = () => {
@@ -167,11 +318,12 @@ const AutocompleteSearch = ({ onSelectPlace, onBack }) => {
           name={item.icon}
           size={22}
           color={
-            item.type === "location"
-              ? colors.primaryBlue
-              : item.type === "airport"
+            item.types?.includes("airport")
               ? colors.primaryPink
-              : colors.darkGrey
+              : item.types?.includes("transit_station") ||
+                item.types?.includes("bus_station")
+              ? colors.secondaryBlue
+              : colors.primaryBlue
           }
         />
       </View>
@@ -186,34 +338,64 @@ const AutocompleteSearch = ({ onSelectPlace, onBack }) => {
     </TouchableOpacity>
   );
 
-  // Renderiza itens recentes quando não há texto na busca
-  const renderRecentSearches = () => (
-    <View style={styles.recentSearchesContainer}>
-      <View style={styles.recentHeader}>
-        <Text style={styles.recentTitle}>Buscas recentes</Text>
-        <TouchableOpacity>
-          <Text style={styles.clearText}>Limpar</Text>
-        </TouchableOpacity>
+  // Renderiza cada item das buscas recentes
+  const renderRecentItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.recentItem}
+      onPress={() => handleSelectSuggestion(item)}
+      activeOpacity={0.7}
+    >
+      <View style={styles.iconContainer}>
+        <Icon
+          name={item.icon}
+          size={18}
+          color={
+            item.types?.includes("airport")
+              ? colors.primaryPink
+              : item.types?.includes("transit_station") ||
+                item.types?.includes("bus_station")
+              ? colors.secondaryBlue
+              : colors.primaryBlue
+          }
+        />
       </View>
-
-      <View style={styles.recentItemsContainer}>
-        <TouchableOpacity style={styles.recentItem}>
-          <Icon name="access-time" size={16} color={colors.darkGrey} />
-          <Text style={styles.recentItemText}>MASP - São Paulo</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.recentItem}>
-          <Icon name="access-time" size={16} color={colors.darkGrey} />
-          <Text style={styles.recentItemText}>Terminal Rodoviário Tietê</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.recentItem}>
-          <Icon name="access-time" size={16} color={colors.darkGrey} />
-          <Text style={styles.recentItemText}>Aeroporto de Congonhas</Text>
-        </TouchableOpacity>
+      <View style={styles.recentItemTextContainer}>
+        <Text style={styles.recentItemMainText} numberOfLines={1}>
+          {item.main}
+        </Text>
+        {item.secondary && (
+          <Text style={styles.recentItemSecondaryText} numberOfLines={1}>
+            {item.secondary}
+          </Text>
+        )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
+
+  // Renderiza itens recentes quando não há texto na busca
+  const renderRecentSearches = () => {
+    console.log("Recent Searches:", recentSearches);
+    if (recentSearches.length === 0) return null;
+
+    return (
+      <View style={styles.recentSearchesContainer}>
+        <View style={styles.recentHeader}>
+          <Text style={styles.recentTitle}>Buscas recentes</Text>
+          <TouchableOpacity onPress={clearRecentSearches}>
+            <Text style={styles.clearText}>Limpar</Text>
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          data={recentSearches}
+          renderItem={renderRecentItem}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          scrollEnabled={false}
+        />
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -228,7 +410,11 @@ const AutocompleteSearch = ({ onSelectPlace, onBack }) => {
           <TextInput
             ref={inputRef}
             style={styles.input}
-            placeholder="Para onde você vai?"
+            placeholder={
+              searchType === "start"
+                ? "De onde você está saindo?"
+                : "Para onde você vai?"
+            }
             placeholderTextColor={colors.darkGrey}
             value={searchText}
             onChangeText={setSearchText}
@@ -244,6 +430,11 @@ const AutocompleteSearch = ({ onSelectPlace, onBack }) => {
             >
               <Icon name="cancel" size={18} color={colors.darkGrey} />
             </TouchableOpacity>
+          )}
+          {isLoading && (
+            <View style={styles.loadingIndicator}>
+              <Text style={styles.loadingText}>...</Text>
+            </View>
           )}
         </View>
       </View>
@@ -355,6 +546,13 @@ const styles = StyleSheet.create({
   clearButton: {
     padding: 6,
   },
+  loadingIndicator: {
+    marginLeft: 8,
+  },
+  loadingText: {
+    color: colors.darkGrey,
+    fontSize: 16,
+  },
   suggestionsContainer: {
     backgroundColor: colors.white,
     borderBottomColor: colors.lightGrey,
@@ -413,18 +611,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.primaryBlue,
   },
-  recentItemsContainer: {
-    marginBottom: 8,
-  },
   recentItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 12,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.lightGrey,
   },
-  recentItemText: {
-    fontSize: 14,
+  recentItemTextContainer: {
+    flex: 1,
+  },
+  recentItemMainText: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: colors.black,
+    marginBottom: 2,
+  },
+  recentItemSecondaryText: {
+    fontSize: 13,
     color: colors.darkGrey,
-    marginLeft: 12,
   },
   commonPlacesContainer: {
     paddingHorizontal: 16,

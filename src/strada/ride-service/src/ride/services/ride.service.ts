@@ -3,6 +3,7 @@ import {
   BoundingBox,
   CreateRideData,
   GeoPoint,
+  RideHistoryFilters,
   RideRepository,
   SearchRideFilters,
 } from '../repositories/ride.repository';
@@ -33,6 +34,10 @@ export class RideService {
       date,
       seats,
     );
+  }
+
+  async getRideHistory(userId: string, filters: RideHistoryFilters) {
+    return await this.rideRepository.getRideHistory(userId, filters);
   }
 
   async findRideById(id: string) {

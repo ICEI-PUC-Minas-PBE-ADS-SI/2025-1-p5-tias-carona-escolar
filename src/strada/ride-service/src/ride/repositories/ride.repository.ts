@@ -12,6 +12,17 @@ export class LocationDto extends GeoPoint {
   address: string;
 }
 
+export class RideHistoryFilters {
+  userType: 'driver' | 'passenger';
+  status?: 'COMPLETED' | 'CANCELLED' | 'ALL';
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: 'date' | 'price' | 'distance';
+  sortOrder?: 'asc' | 'desc';
+}
+
 export class BoundingBox {
   minLat: number;
   maxLat: number;
@@ -306,7 +317,7 @@ export class RideRepository {
   }
 
   async findById(id: string) {
-    return this.prisma.ride.findUnique({
+    const ride = await this.prisma.ride.findUnique({
       where: { id },
       include: {
         routePoints: {
@@ -315,6 +326,175 @@ export class RideRepository {
         requests: true,
       },
     });
+
+    if (!ride) return null;
+
+    // Buscar dados geométricos com raw SQL
+    const geoData = await this.prisma.$queryRaw`
+      SELECT
+        ST_AsGeoJSON(start_point) as start_point,
+        ST_AsGeoJSON(end_point) as end_point,
+        ST_AsGeoJSON(planned_route) as planned_route,
+        ST_AsGeoJSON(current_location) as current_location
+      FROM rides
+      WHERE id = ${id}
+    `;
+
+    // Combinar dados
+    return {
+      ...ride,
+      startPoint: geoData[0]?.start_point ? JSON.parse(geoData[0].start_point) : null,
+      endPoint: geoData[0]?.end_point ? JSON.parse(geoData[0].end_point) : null,
+      plannedRoute: geoData[0]?.planned_route ? JSON.parse(geoData[0].planned_route) : null,
+      currentLocation: geoData[0]?.current_location ? JSON.parse(geoData[0].current_location) : null,
+    };
+  }
+
+  async getRideHistory(userId: string, filters: RideHistoryFilters) {
+    const {
+      userType,
+      status = 'ALL',
+      dateFrom,
+      dateTo,
+      page = 1,
+      limit = 10,
+      sortBy = 'date',
+      sortOrder = 'desc',
+    } = filters;
+
+    const offset = (page - 1) * limit;
+    let query = '';
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    if (userType === 'driver') {
+      // Query para motorista - busca apenas nas rides onde ele é o driver
+      query = `
+          SELECT
+            r.id,
+            r.driver_id,
+            r.start_address,
+            r.end_address,
+            r.departure_time,
+            r.available_seats,
+            r.price_per_seat,
+            r.status,
+            r.vehicle_model,
+            r.vehicle_color,
+            r.license_plate,
+            r.allow_luggage,
+            r.estimated_duration,
+            r.estimated_distance,
+            r.actual_duration,
+            r.actual_distance,
+            r.actual_start_time,
+            r.actual_end_time,
+            r.created_at,
+            r.updated_at,
+            -- Converte geometrias para texto legível
+            ST_AsText(r.start_point) as start_point_text,
+            ST_AsText(r.end_point) as end_point_text,
+            ST_AsText(r.planned_route) as planned_route_text,
+            -- Adiciona informações de coordenadas
+            ST_X(r.start_point) as start_longitude,
+            ST_Y(r.start_point) as start_latitude,
+            ST_X(r.end_point) as end_longitude,
+            ST_Y(r.end_point) as end_latitude
+          FROM rides r
+          WHERE r.driver_id = $${paramIndex++}
+        `;
+      params.push(userId);
+    } else {
+      // Query para passageiro - busca nas rides onde ele é passageiro ou fez request
+      query = `
+          SELECT DISTINCT
+            r.id,
+            r.driver_id,
+            r.start_address,
+            r.end_address,
+            r.departure_time,
+            r.available_seats,
+            r.price_per_seat,
+            r.status,
+            r.vehicle_model,
+            r.vehicle_color,
+            r.license_plate,
+            r.allow_luggage,
+            r.estimated_duration,
+            r.estimated_distance,
+            r.actual_duration,
+            r.actual_distance,
+            r.actual_start_time,
+            r.actual_end_time,
+            r.created_at,
+            r.updated_at,
+            -- Converte geometrias para texto legível
+            ST_AsText(r.start_point) as start_point_text,
+            ST_AsText(r.end_point) as end_point_text,
+            ST_AsText(r.planned_route) as planned_route_text,
+            -- Adiciona informações de coordenadas
+            ST_X(r.start_point) as start_longitude,
+            ST_Y(r.start_point) as start_latitude,
+            ST_X(r.end_point) as end_longitude,
+            ST_Y(r.end_point) as end_latitude,
+            -- Informações do passageiro (se existir)
+            rp.passenger_id,
+            rp.seats_booked,
+            rp.total_paid,
+            rp.status as passenger_status,
+            rp.joined_at,
+            rp.picked_up_at,
+            rp.dropped_off_at,
+            -- Informações do request (se existir)
+            rr.status as request_status,
+            rr.seats_needed,
+            rr.message as request_message
+          FROM rides r
+          LEFT JOIN ride_passengers rp ON r.id = rp.ride_id AND rp.passenger_id = $${paramIndex++}
+          LEFT JOIN ride_requests rr ON r.id = rr.ride_id AND rr.passenger_id = $${paramIndex++}
+          WHERE (rp.passenger_id IS NOT NULL OR rr.passenger_id IS NOT NULL)
+        `;
+      params.push(userId, userId);
+    }
+
+    // Adiciona filtro de status
+    if (status !== 'ALL') {
+      query += ` AND r.status = $${paramIndex++}`;
+      params.push(status);
+    }
+
+    // Adiciona filtros de data
+    if (dateFrom) {
+      query += ` AND DATE(r.departure_time) >= $${paramIndex++}`;
+      params.push(dateFrom);
+    }
+
+    if (dateTo) {
+      query += ` AND DATE(r.departure_time) <= $${paramIndex++}`;
+      params.push(dateTo);
+    }
+
+    // Adiciona ordenação
+    switch (sortBy) {
+      case 'date':
+        query += ` ORDER BY r.departure_time ${sortOrder.toUpperCase()}`;
+        break;
+      case 'price':
+        query += ` ORDER BY r.price_per_seat ${sortOrder.toUpperCase()}`;
+        break;
+      case 'distance':
+        query += ` ORDER BY r.estimated_distance ${sortOrder.toUpperCase()}`;
+        break;
+      default:
+        query += ` ORDER BY r.departure_time ${sortOrder.toUpperCase()}`;
+    }
+
+    // Adiciona paginação
+    query += ` LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    params.push(limit, offset);
+
+    const results = await this.prisma.$queryRawUnsafe(query, ...params);
+    return results;
   }
 
   async updateStatus(id: string, status: string) {
