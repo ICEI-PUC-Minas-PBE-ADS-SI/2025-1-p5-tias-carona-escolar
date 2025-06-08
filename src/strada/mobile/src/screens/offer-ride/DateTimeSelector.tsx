@@ -1,3 +1,4 @@
+import CustomCalendar from "@/src/components/shared/CustomCalendar";
 import { colors } from "@/src/constants/colors";
 import React, { useState } from "react";
 import {
@@ -190,14 +191,7 @@ const DateTimeSection = () => {
             minDate={new Date()}
             startDate={startDate}
             endDate={endDate}
-            dateType={dateType}
-            startEndDateChange={(start, end) => {
-              setStartDate(start);
-              if (dateType === "range") {
-                setEndDate(end);
-              }
-            }}
-            onClose={() => setShowDatePicker(false)}
+            startEndDateChange={handleStartEndDateChange}
           />
         </View>
       )}
