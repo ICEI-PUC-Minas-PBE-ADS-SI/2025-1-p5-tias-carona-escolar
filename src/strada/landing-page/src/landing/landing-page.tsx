@@ -133,14 +133,18 @@ const StradaLanding = () => {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <button
-              className="hidden sm:block px-6 py-3 rounded-full text-white font-semibold transition-all hover:scale-105 shadow-lg hover:shadow-xl"
+            <a
+              href="/strada.apk"
+              download
+              className="hidden sm:block px-6 py-3 rounded-full text-white no-underline hover:no-underline focus:no-underline visited:text-white hover:text-white active:text-white font-semibold transition-all hover:scale-105 shadow-lg hover:shadow-xl"
               style={{
                 background: `linear-gradient(135deg, ${colors.primaryPink}, ${colors.darkPink})`,
+                textDecoration: "none",
+                color: "white",
               }}
             >
               Baixar App
-            </button>
+            </a>
 
             <button
               className="lg:hidden p-2"
@@ -223,15 +227,18 @@ const StradaLanding = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <button
-                  className="flex items-center justify-center space-x-3 px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-white font-semibold text-base sm:text-lg transition-all hover:scale-105 shadow-xl hover:shadow-2xl"
+                <a
+                  href="/strada.apk"
+                  className="flex items-center justify-center space-x-3 px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-white font-semibold text-base sm:text-lg transition-all hover:scale-105 shadow-xl hover:shadow-2xl no-underline hover:no-underline focus:no-underline visited:text-white hover:text-white active:text-white"
                   style={{
                     background: `linear-gradient(135deg, ${colors.primaryPink}, ${colors.darkPink})`,
+                    textDecoration: "none",
+                    color: "white",
                   }}
                 >
                   <span>Vamos começar</span>
                   <ArrowRight className="w-5 h-5" />
-                </button>
+                </a>
 
                 <button
                   className="flex items-center justify-center space-x-3 px-6 sm:px-8 py-3 sm:py-4 rounded-2xl border-2 font-semibold text-base sm:text-lg transition-all hover:scale-105 bg-white hover:bg-gray-50"
