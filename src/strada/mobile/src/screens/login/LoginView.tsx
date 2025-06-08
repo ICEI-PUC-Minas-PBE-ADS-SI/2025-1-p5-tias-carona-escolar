@@ -89,7 +89,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
     inputRange: [0, 0.8, 1],
     outputRange: [window.width, window.width, 0],
   }) ?? new Animated.Value(0);
-  const titleTextAnim = animationController.current!.interpolate({
+  const titleTextAnim = animationController?.current?.interpolate({
     inputRange: [0, 0.6, 0.8, 1],
     outputRange: [26 * 10, 26 * 10, 26 * 10, 0],
   });

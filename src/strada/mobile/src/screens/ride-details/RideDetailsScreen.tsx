@@ -216,7 +216,12 @@ const RideDetailsScreen: React.FC = () => {
       },
       {
         text: "Confirmar",
-        onPress: () => router.push("/ride/confirm"),
+        onPress: () => {
+          if (rideId) {
+            router.push(`/map/${rideId}`);
+            return
+          }
+        },
       },
     ]);
   }, [router]);

@@ -225,23 +225,14 @@ const HomeScreen = () => {
     closeSearchModal();
   };
 
-  const navigateToRideDetails = useCallback(
-    (id: string) => {
-      router.push(`/map/${id}`);
-    },
-    [router]
-  );
+  const navigateToRideDetails = useCallback((rideId: string) => {
+    router.push(`/ride/${rideId}`);
+  }, [router])
 
   const navigateToSearch = useCallback(() => {
     router.push("/map/search");
   }, [router]);
 
-  const navigateToRideMap = useCallback(
-    (rideId: string) => {
-      router.push(`/map/${rideId}`);
-    },
-    [router]
-  );
 
   const navigateToMyRides = useCallback(() => {
     router.push("/ride-history/ride-history");
