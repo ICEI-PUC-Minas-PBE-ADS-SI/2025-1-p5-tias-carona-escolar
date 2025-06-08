@@ -141,7 +141,6 @@ const HomeScreen = () => {
         const { rides } = await searchRides(searchParams);
         const ridesList = await Promise.all(
           rides.map(async (ride: RideData) => {
-            console.log(ride);
             const { name, imgUrl } = await getUser(ride.driver_id);
 
             return {
