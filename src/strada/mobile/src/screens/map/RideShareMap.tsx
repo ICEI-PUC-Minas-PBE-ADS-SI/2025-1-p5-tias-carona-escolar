@@ -21,7 +21,7 @@ import { useMapLocation } from "@/src/hooks/UseMapLocation";
 import Mapbox from "@rnmapbox/maps";
 import { AppImages } from "@/src/assets";
 import { getRideById } from "@/src/services/ride.service";
-import { getUser } from "@/src/services/user.service";
+import { getStoredUserID, getUser } from "@/src/services/user.service";
 import { useGlobalSearchParams } from "expo-router";
 
 // Interfaces baseadas na sua API
@@ -373,6 +373,11 @@ const RideShareMap: React.FC = () => {
     );
   }
 
+  const isRideOwner = async () => {
+    const userId = await getStoredUserID();
+    return userId === rideData?.driverId;
+  };
+
   // Usar coordenadas da rota planejada se disponível
   const routeCoordinates = rideData?.plannedRoute?.coordinates || routeCoords;
 
@@ -389,9 +394,9 @@ const RideShareMap: React.FC = () => {
         bounds={
           routeCoordinates && routeCoordinates.length > 0
             ? {
-              ne: calculateBoundingBox(routeCoordinates)?.ne,
-              sw: calculateBoundingBox(routeCoordinates)?.sw,
-            }
+                ne: calculateBoundingBox(routeCoordinates)?.ne,
+                sw: calculateBoundingBox(routeCoordinates)?.sw,
+              }
             : undefined
         }
         padding={{
@@ -399,14 +404,14 @@ const RideShareMap: React.FC = () => {
             currentSnapIndex === 0
               ? 60
               : currentSnapIndex === 1
-                ? Dimensions.get("window").height * 0.2
-                : 220,
+              ? Dimensions.get("window").height * 0.2
+              : 220,
           paddingBottom:
             currentSnapIndex === 0
               ? 100
               : currentSnapIndex === 1
-                ? Dimensions.get("window").height * 0.2
-                : Dimensions.get("window").height * 0.6,
+              ? Dimensions.get("window").height * 0.2
+              : Dimensions.get("window").height * 0.6,
           paddingLeft: 50,
           paddingRight: 50,
         }}
@@ -508,6 +513,7 @@ const RideShareMap: React.FC = () => {
         rideData={formattedRideData}
         bottomSheetRef={bottomSheetRef}
         snapPoints={snapPoints}
+        isOwner={isRideOwner}
         onSheetChanges={handleSheetChanges}
       />
     </GestureHandlerRootView>

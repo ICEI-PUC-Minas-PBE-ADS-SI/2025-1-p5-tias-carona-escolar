@@ -180,12 +180,14 @@ const AutocompleteSearch = ({
 
       if (data.status === "OK") {
         const place = data.result;
-        return {
+        const location = {
           latitude: place.geometry.location.lat,
           longitude: place.geometry.location.lng,
           address: place.formatted_address,
           name: place.name,
         };
+        console.log("Localização do lugar:", location);
+        return location;
       } else {
         throw new Error("Erro ao obter detalhes do lugar");
       }
@@ -296,8 +298,8 @@ const AutocompleteSearch = ({
               ? colors.primaryPink
               : item.types?.includes("transit_station") ||
                 item.types?.includes("bus_station")
-                ? colors.secondaryBlue
-                : colors.primaryBlue
+              ? colors.secondaryBlue
+              : colors.primaryBlue
           }
         />
       </View>
@@ -328,8 +330,8 @@ const AutocompleteSearch = ({
               ? colors.primaryPink
               : item.types?.includes("transit_station") ||
                 item.types?.includes("bus_station")
-                ? colors.secondaryBlue
-                : colors.primaryBlue
+              ? colors.secondaryBlue
+              : colors.primaryBlue
           }
         />
       </View>

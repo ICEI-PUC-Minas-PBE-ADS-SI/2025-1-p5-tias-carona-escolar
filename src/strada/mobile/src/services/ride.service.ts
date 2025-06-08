@@ -189,6 +189,16 @@ export const getRideHistory = async (userId: string, filters: any) => {
   }
 }
 
+export const changeRideStatus = async (rideId: string, status: "PENDING" | "ACTIVE" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED") => {
+  try {
+    const response = await rideAxios.put(`/rides/${rideId}/status`, { status: status });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 export const storeRideID = async (id: string) => {
   await SecureStore.setItemAsync("rideID", id);
 };
