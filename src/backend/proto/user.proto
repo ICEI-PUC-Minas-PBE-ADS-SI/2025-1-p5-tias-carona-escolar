@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "internal/adapters/out/repository/grpc;proto";
+
+service UserService {
+  rpc FindById(FindUserRequestDto) returns (FindUserResponseDto) {}
+}
+
+message FindUserResponseDto {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string username = 4;
+  string imgUrl = 5;
+}
+
+message FindUserRequestDto {
+  string id = 1;
+}
