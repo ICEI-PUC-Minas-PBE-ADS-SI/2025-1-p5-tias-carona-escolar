@@ -14,6 +14,7 @@ import Mapbox from "@rnmapbox/maps";
 import { AppImages } from "@/src/assets";
 import { getRideById } from "@/src/services/ride.service";
 import { getUser } from "@/src/services/user.service";
+import { useGlobalSearchParams } from "expo-router";
 
 // Interfaces baseadas na sua API
 interface RideRequest {
@@ -145,7 +146,7 @@ interface RideShareMapProps {
   rideId: string; // ID da corrida a ser exibida
 }
 
-const RideShareMap: React.FC<RideShareMapProps> = ({ rideId }) => {
+const RideShareMap: React.FC<RideShareMapProps> = () => {
   const [rideData, setRideData] = useState<RideData | null>(null);
   const [driverData, setDriverData] = useState<Driver | null>(null);
   const [passengersData, setPassengersData] = useState<Record<string, Driver>>(
@@ -172,6 +173,7 @@ const RideShareMap: React.FC<RideShareMapProps> = ({ rideId }) => {
   const [currentSnapIndex, setCurrentSnapIndex] = useState(1);
   const mapRef = useRef(null);
   const theme = lightTheme;
+  const { rideId } = useGlobalSearchParams<{ rideId: string }>();
 
   // Carregar dados da corrida quando o componente montar
   useEffect(() => {

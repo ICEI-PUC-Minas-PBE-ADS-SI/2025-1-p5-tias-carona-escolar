@@ -82,6 +82,9 @@ const HomeScreen = () => {
   const [loadingRides, setLoadingRides] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [user, setUser] = useState<any | null>(null);
+  const [seeAll, setSeeAll] = useState<"all" | "routes" | "popular-routes">(
+    "all"
+  );
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
@@ -105,7 +108,11 @@ const HomeScreen = () => {
           route.frequency = route.frequency || 0;
           return route;
         });
-        setPopularRoutes(routes.slice(0, 3));
+        if (seeAll === "all") {
+          setPopularRoutes(routes.slice(0, 3));
+        } else if (seeAll === "popular-routes") {
+          setPopularRoutes(routes);
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar rotas populares:", error);
@@ -113,7 +120,7 @@ const HomeScreen = () => {
     } finally {
       setLoadingRoutes(false);
     }
-  }, [userLocation]);
+  }, [userLocation, seeAll]);
 
   const loadAvailableRides = useCallback(async () => {
     try {
@@ -220,18 +227,21 @@ const HomeScreen = () => {
 
   const navigateToRideDetails = useCallback(
     (id: string) => {
-      router.push(`/ride/${id}`);
+      router.push(`/map/${id}`);
     },
     [router]
   );
 
   const navigateToSearch = useCallback(() => {
-    router.push("/search");
+    router.push("/map/search");
   }, [router]);
 
-  const navigateToRideMap = useCallback(() => {
-    router.push("/map/map");
-  }, [router]);
+  const navigateToRideMap = useCallback(
+    (rideId: string) => {
+      router.push(`/map/${rideId}`);
+    },
+    [router]
+  );
 
   const navigateToMyRides = useCallback(() => {
     router.push("/ride-history/ride-history");
@@ -387,7 +397,10 @@ const HomeScreen = () => {
           <Icon name="search" size={22} color={colors.darkGrey} />
           <Text style={styles.searchPlaceholder}>Para onde você vai?</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.mapButton} onPress={navigateToRideMap}>
+        <TouchableOpacity
+          style={styles.mapButton}
+          onPress={() => navigateToSearch()}
+        >
           <Icon name="map" size={22} color={colors.white} />
         </TouchableOpacity>
       </View>
@@ -401,7 +414,6 @@ const HomeScreen = () => {
         <AutocompleteSearch
           onSelectPlace={handlePlaceSelected}
           onBack={closeSearchModal}
-          currentLocation={userLocation}
         />
       </Modal>
 
@@ -468,67 +480,82 @@ const HomeScreen = () => {
         </View>
 
         {/* Popular Routes */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Rotas Populares</Text>
-            <TouchableOpacity onPress={() => router.push("/routes")}>
-              <Text style={styles.seeAllText}>Ver todas</Text>
-            </TouchableOpacity>
-          </View>
-
-          {loadingRoutes ? (
-            renderLoadingCard()
-          ) : popularRoutes.length > 0 ? (
-            <FlatList
-              data={popularRoutes}
-              renderItem={renderPopularRouteItem}
-              keyExtractor={(item, index) => `route-${item.id}-${index}`}
-              scrollEnabled={false}
-              removeClippedSubviews={false}
-            />
-          ) : (
-            <View style={styles.emptyState}>
-              <Icon name="route" size={48} color={colors.grey} />
-              <Text style={styles.emptyStateText}>
-                Nenhuma rota popular encontrada na sua região
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Available Rides */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Caronas Disponíveis</Text>
-            <TouchableOpacity onPress={() => router.push("/rides")}>
-              <Text style={styles.seeAllText}>Ver todas</Text>
-            </TouchableOpacity>
-          </View>
-
-          {loadingRides ? (
-            renderLoadingCard()
-          ) : availableRides.length > 0 ? (
-            <FlatList
-              data={availableRides}
-              renderItem={renderRideItem}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-            />
-          ) : (
-            <View style={styles.emptyState}>
-              <Icon name="directions-car" size={48} color={colors.grey} />
-              <Text style={styles.emptyStateText}>
-                Nenhuma carona disponível no momento
-              </Text>
+        {(seeAll === "all" || seeAll === "popular-routes") && (
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Rotas Populares</Text>
               <TouchableOpacity
-                style={styles.refreshButton}
-                onPress={onRefresh}
+                onPress={() => {
+                  seeAll === "popular-routes"
+                    ? setSeeAll("all")
+                    : setSeeAll("popular-routes"),
+                    loadPopularRoutes();
+                }}
               >
-                <Text style={styles.refreshButtonText}>Atualizar</Text>
+                <Text style={styles.seeAllText}>Ver todas</Text>
               </TouchableOpacity>
             </View>
-          )}
-        </View>
+            {loadingRoutes ? (
+              renderLoadingCard()
+            ) : popularRoutes.length > 0 ? (
+              <FlatList
+                data={popularRoutes}
+                renderItem={renderPopularRouteItem}
+                keyExtractor={(item, index) => `route-${item.id}-${index}`}
+                scrollEnabled={false}
+                removeClippedSubviews={false}
+              />
+            ) : (
+              <View style={styles.emptyState}>
+                <Icon name="route" size={48} color={colors.grey} />
+                <Text style={styles.emptyStateText}>
+                  Nenhuma rota popular encontrada na sua região
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Available Rides */}
+        {(seeAll === "all" || seeAll === "routes") && (
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Caronas Disponíveis</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  seeAll === "routes" ? setSeeAll("all") : setSeeAll("routes");
+                }}
+              >
+                <Text style={styles.seeAllText}>Ver todas</Text>
+              </TouchableOpacity>
+            </View>
+            {loadingRides ? (
+              renderLoadingCard()
+            ) : availableRides.length > 0 ? (
+              <FlatList
+                data={availableRides}
+                renderItem={renderRideItem}
+                keyExtractor={(item) => item.id}
+                scrollEnabled={false}
+              />
+            ) : (
+              <View style={styles.emptyState}>
+                <Icon name="directions-car" size={48} color={colors.grey} />
+                <Text style={styles.emptyStateText}>
+                  Nenhuma carona disponível no momento
+                </Text>
+                <TouchableOpacity
+                  style={styles.refreshButton}
+                  onPress={onRefresh}
+                >
+                  <Text style={styles.refreshButtonText}>Atualizar</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Loading Card Placeholder */}
       </ScrollView>
     </View>
   );
