@@ -104,6 +104,15 @@ Atualizado em: 11/05/2025
 | Vinicius | Apresentação   |11/05/2025     | 11/05/2025 | ✔️    | 11/05/2025                |
 
 
+#### Sprint 4
+
+Atualizado em: 08/06/2025
+
+| Responsável   | Tarefa/Requisito | Iniciado em    | Prazo      | Status | Terminado em    |
+| :----         |    :----         |      :----:    | :----:     | :----: | :----:          |
+| Vinicius | Serviço de corrida   |04/06/2025     | 08/06/2025 | ✔️    | 08/06/2025                |
+
+
 
 Legenda:
 - ✔️: terminado
