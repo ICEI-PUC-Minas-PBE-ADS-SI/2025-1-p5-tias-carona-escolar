@@ -116,10 +116,7 @@ const CenterNextButton: React.FC<Props> = ({
           { transform: [{ translateY: loginTextMoveAnimation }] },
         ]}
       >
-        <Text style={{ color: "grey", fontFamily: "WorkSans-Regular" }}>
-          Already have an account?{" "}
-        </Text>
-        <Text style={styles.loginText}>Login</Text>
+        <Text style={{ color: "grey", fontFamily: "WorkSans-Regular" }}></Text>
       </Animated.View>
     </Animated.View>
   );

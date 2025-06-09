@@ -1,0 +1,32 @@
+image:
+    repository: gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner
+    tag: v4.0.0
+
+nfs:
+  server: 34.125.142.3
+  path: /mnt/nfs_share
+
+storageClass:
+  name: nfs-client
+  defaultClass: true
+  reclaimPolicy: Delete
+  archiveOnDelete: false
+  accessModes: ReadWriteMany
+
+
+rbac:
+  create: true
+
+provisionerName: cluster.local/nfs-client-provisioner
+
+resources:
+  requests:
+    memory: 20Mi
+    cpu: 10m
+  limits:
+    memory: 30Mi
+    cpu: 20m
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

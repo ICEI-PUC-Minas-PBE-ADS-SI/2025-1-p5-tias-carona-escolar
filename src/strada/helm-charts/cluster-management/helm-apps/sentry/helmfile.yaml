@@ -1,0 +1,13 @@
+repositories:
+  - name: sentry
+    url: https://sentry-kubernetes.github.io/charts
+
+releases:
+- name: sentry
+  namespace: sentry
+  chart: sentry/sentry
+  installed: true
+  timeout: 630
+  values:
+    - values.yaml
+

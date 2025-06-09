@@ -1,6 +1,5 @@
-import MapboxMap from "../screens/map/MapboxMap";
+import { SplashScreen } from "@/src/screens/splash";
 
 export default function Index() {
-  //return <GreetingsTab />;
-  return <MapboxMap />;
+  return <SplashScreen />;
 }

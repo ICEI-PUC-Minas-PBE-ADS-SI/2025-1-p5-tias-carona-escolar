@@ -1,12 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	config "github.com/244Walyson/shared-ride/configs/db"
+	"github.com/244Walyson/shared-ride/internal/adapters/dto"
 	"github.com/244Walyson/shared-ride/internal/adapters/in/api"
 	"github.com/244Walyson/shared-ride/internal/adapters/in/api/routes"
+	"github.com/244Walyson/shared-ride/internal/adapters/in/websocket/dispatcher"
+	"github.com/244Walyson/shared-ride/internal/adapters/in/websocket/handlers"
+	"github.com/244Walyson/shared-ride/internal/adapters/in/websocket/websocket"
 	"github.com/244Walyson/shared-ride/internal/adapters/out/repository"
 	"github.com/244Walyson/shared-ride/internal/application/core/services"
 	"google.golang.org/grpc"
@@ -53,7 +58,7 @@ func main() {
 	rideRequestService.SetRideService(rideService)
 	rideRequestService.SetUserService(userService)
 
-	// dispatcher := dispatcher.NewDispatcher()
+	dispatcher := dispatcher.NewDispatcher()
 	// dispatcher.Register("find_near_rides", dto.PayloadIdDTO{}, func(data any, ctx context.Context) (any, error) {
 	// 	return rideService.FindNear(ctx, data.(dto.PayloadIdDTO).ID)
 	// })
@@ -71,7 +76,12 @@ func main() {
 	// 	return rideRequest, err
 	// })
 
-	//websocket := websocket.NewWebsocketRoute(dispatcher)
+	dispatcher.Register("share_location", dto.LocationDto{}, func(data any, ctx context.Context) (any, error) {
+		shareLocation, err := handlers.ShareLocationHandler(*data.(*dto.LocationDto), ctx)
+		return shareLocation, err
+	})
+
+	websocket := websocket.NewWebsocketRoute(dispatcher)
 
 	createRideRequestRoute := routes.NewCreateRideRequest(rideRequestService)
 	findNearRideRequestRoute := routes.NewFindNearRideRequest(rideRequestService)
@@ -88,6 +98,7 @@ func main() {
 		createRideRoute,
 		findRideById,
 		findRideRequestById,
+		websocket,
 	}
 
 	for _, route := range routes {

@@ -35,7 +35,17 @@ var upgrader = websocket.Upgrader{
 
 func (f *WebsocketRoute) Handle(c *gin.Context, d *dispatcher.Dispatcher) {
 	ctx := c.Request.Context()
+	userID := c.Query("user_id")
+	if userID == "" {
+		c.JSON(400, gin.H{"error": "user_id is required"})
+		return
+	}
+
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+
+	manager := dispatcher.GetConnectionManager()
+	manager.Add(userID, conn)
+
 	if err != nil {
 		log.Println(err)
 		return
@@ -51,7 +61,13 @@ func (f *WebsocketRoute) Handle(c *gin.Context, d *dispatcher.Dispatcher) {
 
 		response := handleMessages(d, message, ctx)
 
-		conn.WriteJSON(response)
+		privateConn, ok := manager.Get(response.TargetID)
+
+		if !ok {
+			log.Println("Connection not found for user:", response.TargetID)
+			continue
+		}
+		privateConn.WriteJSON(response)
 	}
 }
 
@@ -65,7 +81,12 @@ func handleMessages(d *dispatcher.Dispatcher, data []byte, ctx context.Context) 
 
 	response := d.Dispatch(binded.Command, binded.Payload, ctx)
 
-	return response
+	return &dto.DispatchResponseDTO{
+		Command:  binded.Command,
+		Status:   response.Status,
+		Data:     response.Data,
+		TargetID: binded.TargetID,
+	}
 }
 
 func bindRequest(data []byte) (dto.WebsocketRequestDTO, error) {
@@ -77,14 +98,20 @@ func bindRequest(data []byte) (dto.WebsocketRequestDTO, error) {
 	return dto, nil
 }
 
-func (f *WebsocketRoute) Name() string {
+func (f *WebsocketRoute) GetName() string {
 	return f.name
 }
 
-func (f *WebsocketRoute) Path() string {
+func (f *WebsocketRoute) GetPath() string {
 	return f.path
 }
 
-func (f *WebsocketRoute) Method() string {
+func (f *WebsocketRoute) GetMethod() string {
 	return f.method
+}
+
+func (f *WebsocketRoute) GetHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		f.Handle(c, f.dispatcher)
+	}
 }

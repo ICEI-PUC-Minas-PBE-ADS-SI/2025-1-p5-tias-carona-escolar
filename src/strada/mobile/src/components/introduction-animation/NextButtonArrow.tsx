@@ -1,4 +1,5 @@
 import MyPressable from "@/src/components/MyPressable";
+import { lightTheme, Theme } from "@/src/constants/theme";
 import React, { useRef } from "react";
 import { StyleSheet, Text, Animated } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -19,7 +20,10 @@ const NextButtonArrow: React.FC<Props> = ({
     })
   );
 
-  // for transition from arrow to sign up
+  const theme = lightTheme;
+
+  const styles = getStyles(theme);
+
   const transitionAnim = arrowAnim.current.interpolate({
     inputRange: [0, 0.85, 1],
     outputRange: [36, 0, 0],
@@ -77,7 +81,7 @@ const NextButtonArrow: React.FC<Props> = ({
             },
           ]}
         >
-          <Text style={styles.signupText}>Sign Up</Text>
+          <Text style={styles.signupText}>Entrar agora</Text>
           <Icon name="arrow-forward" size={24} color="white" />
         </Animated.View>
 
@@ -97,26 +101,27 @@ const NextButtonArrow: React.FC<Props> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    height: 58,
-    backgroundColor: "rgb(21, 32, 54)",
-    overflow: "hidden",
-  },
-  signupContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-  },
-  signupText: {
-    fontSize: 18,
-    fontFamily: "WorkSans-Medium",
-    color: "white",
-  },
-  icon: {
-    position: "absolute",
-    alignSelf: "center",
-  },
-});
+const getStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      height: 58,
+      backgroundColor: theme.primary,
+      overflow: "hidden",
+    },
+    signupContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingHorizontal: 16,
+    },
+    signupText: {
+      fontSize: 18,
+      fontFamily: "WorkSans-Medium",
+      color: "white",
+    },
+    icon: {
+      position: "absolute",
+      alignSelf: "center",
+    },
+  });
 
 export default NextButtonArrow;

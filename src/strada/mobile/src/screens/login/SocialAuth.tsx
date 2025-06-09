@@ -8,7 +8,6 @@ import {
   getAccessTokenWithGithubCode,
   getAccessTokenWithGoogleToken,
 } from "@/src/services/auth.service";
-import { CommonActions } from "@react-navigation/native";
 
 const GOOGLE_CLIENT_ID_ANDROID =
   process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID;
@@ -43,15 +42,12 @@ const SocialAuth = () => {
       const { id_token } = response.params;
       getAccessTokenWithGoogleToken(id_token)
         .then((_) => {
-          navigation.dispatch(
-            CommonActions.reset({
-              routes: [{ key: "(tabs)", name: "(tabs)" }],
-            })
-          );
+          console.log("aaaaaaaaaaaaaaaaaaaaaa", _);
+          router.replace("/home");
         })
         .catch((error) => {
           console.error("Erro no login com Google:", error);
-          router.replace("/greetings/1");
+          router.replace("/login");
         });
     }
   };
@@ -88,11 +84,7 @@ const SocialAuth = () => {
       const code = extractCodeFromUrl(url);
       if (!code) return;
       getAccessTokenWithGithubCode(code).then((_) => {
-        navigation.dispatch(
-          CommonActions.reset({
-            routes: [{ key: "(tabs)", name: "(tabs)" }],
-          })
-        );
+        router.replace("/home");
       });
     }
   };

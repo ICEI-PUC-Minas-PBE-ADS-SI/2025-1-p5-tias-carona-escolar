@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"sync"
 
 	"github.com/244Walyson/shared-ride/configs/logger"
 	"github.com/244Walyson/shared-ride/internal/adapters/dto"
+	"github.com/244Walyson/shared-ride/internal/adapters/in/websocket/manager"
 	"go.uber.org/zap"
 )
 
@@ -27,6 +29,11 @@ func NewDispatcher() *Dispatcher {
 		handlers: make(map[string]CommandHandler),
 	}
 }
+
+var (
+	connManager     *manager.ConnectionManager
+	connManagerOnce sync.Once
+)
 
 func (d *Dispatcher) Register(command string, expectedType any, fn HandlerFunc) {
 	d.handlers[command] = CommandHandler{
@@ -59,4 +66,11 @@ func (d *Dispatcher) Dispatch(command string, rawData json.RawMessage, ctx conte
 		Status:  "success",
 		Data:    result,
 	}
+}
+
+func GetConnectionManager() *manager.ConnectionManager {
+	connManagerOnce.Do(func() {
+		connManager = manager.NewConnectionManager()
+	})
+	return connManager
 }

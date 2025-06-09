@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -6,22 +6,25 @@ import {
   useWindowDimensions,
   StyleProp,
   ViewStyle,
-} from 'react-native';
-import MultiSlider, { LabelProps } from '@ptomasroos/react-native-multi-slider';
-
-const customMarker = (triangleStyle: StyleProp<ViewStyle>) => (
-  <View style={styles.shadowBg}>
-    <View style={styles.markerStyle}>
-      <View style={triangleStyle} />
-    </View>
-  </View>
-);
+} from "react-native";
+import MultiSlider, { LabelProps } from "@ptomasroos/react-native-multi-slider";
+import { lightTheme, Theme } from "@/src/constants/theme";
 
 const RangeSliderView: React.FC = () => {
   const { width } = useWindowDimensions();
+  const theme = lightTheme;
+
+  const styles = getStyles(theme);
 
   const { containerStyle, trackStyle, selectedStyle } = styles;
 
+  const customMarker = (triangleStyle: StyleProp<ViewStyle>) => (
+    <View style={styles.shadowBg}>
+      <View style={styles.markerStyle}>
+        <View style={triangleStyle} />
+      </View>
+    </View>
+  );
   const customLabel = useCallback(
     (prop: LabelProps) => {
       const {
@@ -47,7 +50,7 @@ const RangeSliderView: React.FC = () => {
               <View
                 style={[
                   styles.sliderLabel,
-                  { left: rightLabelDistance, position: 'absolute' },
+                  { left: rightLabelDistance, position: "absolute" },
                 ]}
               >
                 <Text style={styles.sliderLabelText}>${twoMarkerValue}</Text>
@@ -56,97 +59,97 @@ const RangeSliderView: React.FC = () => {
         </View>
       );
     },
-    [width],
+    [width]
   );
 
   return (
     <MultiSlider
       {...{ containerStyle, trackStyle, selectedStyle }}
       markerContainerStyle={{ height: 52 }}
-      values={[100, 800]}
+      values={[0, 100]}
       sliderLength={width - 40}
-      max={1000}
+      max={100}
       allowOverlap
       isMarkersSeparated
-      customMarkerLeft={_ => customMarker(styles.triangleLeftStyle)}
-      customMarkerRight={_ => customMarker(styles.triangleRightStyle)}
+      customMarkerLeft={(_) => customMarker(styles.triangleLeftStyle)}
+      customMarkerRight={(_) => customMarker(styles.triangleRightStyle)}
       enableLabel
       customLabel={customLabel}
     />
   );
 };
 
-const styles = StyleSheet.create({
-  containerStyle: {
-    flex: 1,
-    justifyContent: 'center',
-    marginHorizontal: 16,
-    marginBottom: 8,
-    alignSelf: 'center',
-  },
-  trackStyle: {
-    backgroundColor: 'lightgrey',
-    height: 4,
-    borderRadius: 8,
-  },
-  selectedStyle: {
-    backgroundColor: '#54D3C2',
-    height: 6,
-    borderRadius: 8,
-  },
-  sliderLabel: { minWidth: 50, padding: 8 },
-  sliderLabelText: {
-    color: 'black',
-    textAlign: 'center',
-  },
-  triangleRightStyle: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 8,
-    borderBottomWidth: 5,
-    borderTopWidth: 5,
-    borderStyle: 'solid',
-    backgroundColor: 'transparent',
-    borderLeftColor: 'white',
-    borderBottomColor: 'transparent',
-    borderTopColor: 'transparent',
-    marginLeft: 7,
-  },
-  triangleLeftStyle: {
-    width: 0,
-    height: 0,
-    borderRightWidth: 8,
-    borderBottomWidth: 5,
-    borderTopWidth: 5,
-    borderStyle: 'solid',
-    backgroundColor: 'transparent',
-    borderRightColor: 'white',
-    borderBottomColor: 'transparent',
-    borderTopColor: 'transparent',
-    marginLeft: 5,
-  },
-  markerStyle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#54D3C2',
-    borderColor: 'white',
-    borderWidth: 2,
-    justifyContent: 'center',
-    shadowColor: 'black',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 7.49,
-  },
-  shadowBg: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    // backgroundColor: 'rgba(128, 128, 128, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 12,
-  },
-});
+const getStyles = (theme: Theme) =>
+  StyleSheet.create({
+    containerStyle: {
+      flex: 1,
+      justifyContent: "center",
+      marginHorizontal: 16,
+      marginBottom: 8,
+      alignSelf: "center",
+    },
+    trackStyle: {
+      backgroundColor: "lightgrey",
+      height: 4,
+      borderRadius: 8,
+    },
+    selectedStyle: {
+      backgroundColor: theme.primary,
+      height: 6,
+      borderRadius: 8,
+    },
+    sliderLabel: { minWidth: 50, padding: 8 },
+    sliderLabelText: {
+      color: "black",
+      textAlign: "center",
+    },
+    triangleRightStyle: {
+      width: 0,
+      height: 0,
+      borderLeftWidth: 8,
+      borderBottomWidth: 5,
+      borderTopWidth: 5,
+      borderStyle: "solid",
+      backgroundColor: "transparent",
+      borderLeftColor: "white",
+      borderBottomColor: "transparent",
+      borderTopColor: "transparent",
+      marginLeft: 7,
+    },
+    triangleLeftStyle: {
+      width: 0,
+      height: 0,
+      borderRightWidth: 8,
+      borderBottomWidth: 5,
+      borderTopWidth: 5,
+      borderStyle: "solid",
+      backgroundColor: "transparent",
+      borderRightColor: "white",
+      borderBottomColor: "transparent",
+      borderTopColor: "transparent",
+      marginLeft: 5,
+    },
+    markerStyle: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: theme.background,
+      borderColor: "white",
+      borderWidth: 2,
+      justifyContent: "center",
+      shadowColor: "black",
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.5,
+      shadowRadius: 7.49,
+    },
+    shadowBg: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      justifyContent: "center",
+      alignItems: "center",
+      elevation: 12,
+    },
+  });
 
 export default RangeSliderView;

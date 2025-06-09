@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import CustomCalendar from "./CustomCalendar";
 import MyPressable from "@/src/components/MyPressable";
+import { lightTheme, Theme } from "@/src/constants/theme";
 
 interface Props {
   showCal: boolean;
@@ -46,6 +47,8 @@ const CustomerCalendar: React.FC<Props> = ({
 }) => {
   const [startDate, setStartDate] = useState(initialStartDate);
   const [endDate, setEndDate] = useState(initialEndDate);
+  const theme = lightTheme;
+  const styles = getStyles(theme);
 
   const formattedDate = (date: Date | null) => {
     return date
@@ -87,7 +90,9 @@ const CustomerCalendar: React.FC<Props> = ({
                   </Text>
                 </View>
               </View>
-              <View style={{ height: 0.5, backgroundColor: "lightgrey" }} />
+              <View
+                style={{ height: 0.5, backgroundColor: theme.backgroundAccent }}
+              />
 
               <CustomCalendar
                 minDate={minimumDate}
@@ -121,61 +126,62 @@ const CustomerCalendar: React.FC<Props> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  containerStyle: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0, 0.5)",
-  },
-  timelineContainerStyle: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  fromToTextStyle: {
-    fontSize: 16,
-    fontFamily: "WorkSans-Regular",
-    color: "rgba(128, 128, 128, 0.8)",
-    marginBottom: 4,
-  },
-  startEndDateTextStyles: {
-    color: "black",
-    fontSize: 16,
-    fontFamily: "WorkSans-Bold",
-  },
-  applyBtnContainer: {
-    backgroundColor: "#54D3C2",
-    borderRadius: 24,
-    elevation: 8,
-    overflow: "hidden",
-  },
-  applyBtn: {
-    height: 48,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 24,
-  },
-  applyBtnShadow: {
-    backgroundColor: "#54D3C2",
-    borderRadius: 24,
-    margin: 16,
-    marginTop: 8,
-    shadowColor: "grey",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-  },
-  applyBtnText: {
-    fontSize: 18,
-    color: "white",
-    fontFamily: "WorkSans-Medium",
-  },
-  verticleDivider: {
-    height: 74,
-    width: 1,
-    backgroundColor: "grey",
-    opacity: 0.4,
-  },
-});
+const getStyles = (theme: Theme) =>
+  StyleSheet.create({
+    containerStyle: {
+      flex: 1,
+      justifyContent: "center",
+      backgroundColor: theme.background,
+    },
+    timelineContainerStyle: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    fromToTextStyle: {
+      fontSize: 16,
+      fontFamily: "WorkSans-Regular",
+      color: theme.blue,
+      marginBottom: 4,
+    },
+    startEndDateTextStyles: {
+      color: theme.primary,
+      fontSize: 16,
+      fontFamily: "WorkSans-Bold",
+    },
+    applyBtnContainer: {
+      backgroundColor: theme.primary,
+      borderRadius: 24,
+      elevation: 8,
+      overflow: "hidden",
+    },
+    applyBtn: {
+      height: 48,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 24,
+    },
+    applyBtnShadow: {
+      backgroundColor: theme.primary,
+      borderRadius: 24,
+      margin: 16,
+      marginTop: 8,
+      shadowColor: theme.backgroundAccent,
+      shadowOffset: { width: 4, height: 4 },
+      shadowOpacity: 0.6,
+      shadowRadius: 8,
+    },
+    applyBtnText: {
+      fontSize: 18,
+      color: theme.white,
+      fontFamily: "WorkSans-Medium",
+    },
+    verticleDivider: {
+      height: 74,
+      width: 1,
+      backgroundColor: theme.backgroundAccent,
+      opacity: 0.4,
+    },
+  });
 
 export default CustomerCalendar;

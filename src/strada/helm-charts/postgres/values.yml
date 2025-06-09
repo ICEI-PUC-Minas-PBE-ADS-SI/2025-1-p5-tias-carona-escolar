@@ -1,0 +1,5 @@
+postgresqlUsername: myuser        # Defina o nome de usuário aqui
+postgresqlPassword: mypassword    # Defina a senha aqui
+postgresqlDatabase: mydatabase    # Defina o banco de dados inicial (opcional)
+
+# postgresql://recipeUser:XXRecipePass@postgres-postgresql.db.svc.cluster.local:5432/recipesdb

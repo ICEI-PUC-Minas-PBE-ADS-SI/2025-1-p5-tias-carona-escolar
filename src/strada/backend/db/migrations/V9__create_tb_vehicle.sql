@@ -1,0 +1,11 @@
+CREATE TABLE tb_vehicles (
+    id SERIAL PRIMARY KEY,
+    driver_id INT NOT NULL,
+    make VARCHAR(100) NOT NULL,
+    model VARCHAR(100) NOT NULL,
+    year INT NOT NULL,
+    license_plate VARCHAR(20) NOT NULL UNIQUE,
+    fuel_type VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

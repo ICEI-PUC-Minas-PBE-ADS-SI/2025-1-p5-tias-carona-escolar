@@ -1,0 +1,105 @@
+replicaCount: 1
+
+kraft:
+  clusterId: "ClusterId1"
+  controllerPassword: KAFKA_PASSWORD
+
+persistence:
+  enabled: true
+  #storageClass: longhorn
+  accessMode: "ReadWriteOnce"
+
+listeners:
+  client:
+    containerPort: 9092
+    protocol: PLAINTEXT
+    name: CLIENT
+  external:
+    containerPort: 9095
+    protocol: PLAINTEXT
+    name: EXTERNAL
+  interbroker:
+    containerPort: 9094
+    protocol: PLAINTEXT
+    name: INTERNAL
+    sslClientAuth: ""
+
+
+
+
+sasl:
+  enabled: false
+
+# tls:
+#   enabled: true
+#   existingSecret: kafka-jks
+#   password: jksPassword
+
+externalAccess:
+  enabled: false
+  controller:
+    service:
+      type: LoadBalancer
+      ports:
+        external: 9094
+      domain: "kafka.api.waly.dev.br"
+      loadBalancerIPs:
+        - 34.125.222.139
+        - 34.16.160.183
+        - 34.16.138.200
+  broker:
+    service:
+      type: LoadBalancer
+      ports:
+        external: 9094
+      domain: "kafka.api.waly.dev.br"
+      loadBalancerIPs:
+        - 34.125.222.139
+        - 34.16.160.183
+        - 34.16.138.200
+
+
+autoDiscovery:
+  enabled: true
+
+serviceAccount:
+  create: true
+
+rbac:
+  create: true
+
+metrics:
+  jmx:
+    enabled: true
+
+ingress:
+  enabled: false
+  tcp:
+    9094: "kafka/kafka-0-external:9094"
+
+
+kafka:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+
+
+# kubectl run -i --tty --rm kafkacat --image=confluentinc/cp-kafkacat --restart=Never -- bash
+
+#client
+#EggdAAgCUXwaly
+# kafkacat -b kafka-controller-headless.kafka.svc.cluster.local:9092 -X sasl.mechanism=PLAIN -X security.protocol=SASL_PLAINTEXT -X sasl.username=user1 -X sasl.password=mypass -t hello -P
+
+# kafkacat -b kafka-controller-headless.kafka.svc.cluster.local:9092 -X sasl.mechanism=PLAIN -X security.protocol=SASL_PLAINTEXT -X sasl.username=user1 -X sasl.password=mypass -L
+
+# kafkacat -b kafka-controller-headless.kafka.svc.cluster.local:9092 -L
+
+
+# kubectl get secret --namespace "kafka" kafka-user-passwords -o jsonpath="{.data}"
+
+# helm upgrade kafka kafka/kafka -n kafka -f values.yaml

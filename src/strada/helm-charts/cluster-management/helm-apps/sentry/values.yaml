@@ -1,0 +1,76 @@
+user:
+  create: true
+  email: walyson@local.com
+  password: aaaa
+
+kafka:
+  zookeeper:
+    enabled: false
+  kraft:
+    enabled: true
+    clusterId: "1"
+
+ingress:
+  enabled: true
+  hostname: sentry.api.waly.dev.br
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  tls:
+  - secretName: sentry-tls
+    hosts: 
+       - sentry.api.waly.dev.br
+
+
+global:
+  postgresql:
+    auth:
+      postgresPassword: "12qwaszx"
+
+service:
+  type: ClusterIP
+  nodePort:
+
+persistence:
+  enabled: true
+  #storageClass: nfs-client
+  accessMode: "ReadWriteOnce"
+
+hooks:
+  enabled: true
+  removeOnSuccess: true
+  activeDeadlineSeconds: 1800
+
+
+
+
+# kafka:
+#   enabled: false
+# externalKafka:
+#   enabled: true
+#   brokers: ["your-external-kafka-broker1:9092", "your-external-kafka-broker2:9092"]
+#   username: "your-kafka-username"
+#   password: "your-kafka-password"
+
+# helm repo add sentry https://sentry-kubernetes.github.io/charts
+# helm repo update
+# helm upgrade sentry sentry/sentry -f values.yaml --namespace sentry
+# helm install sentry sentry/sentry -f values.yaml --namespace sentry --create-namespace --timeout 30m
+
+# kubectl exec -it sentry-web-6fb48f747d-ptrxq -n sentry  -- bash
+# sentry upgrade
+
+# kubectl rollout restart deployment sentry-web -n sentry
+# kubectl rollout restart deployment sentry-worker -n sentry
+# kubectl rollout restart deployment sentry-cron -n sentry
+# kubectl rollout restart deployment sentry-cron -n sentry
+
+# kubectl run postgres-debug --image=postgres:latest --rm -it -- /bin/bash
+
+# sentry-sentry-postgresql-hl
+
+
+# sentry-sentry-postgresql
+
+
+
