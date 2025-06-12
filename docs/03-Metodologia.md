@@ -57,6 +57,12 @@ Discuta como a configuração do projeto foi feita na ferramenta de versionament
 - Desenvolvedor _back-end_: Walyson, Vinicius Henrique
 - Testes: Tiago Rafael
 
+- #### Sprint 4
+- _Scrum master_: Luisa Machado
+- Desenvolvedor _front-end_: Otávio Rocha, Guilherme Siqueira
+- Desenvolvedor _back-end_: Walyson, Vinicius Henrique
+- Testes: Tiago Rafael
+
 ###  Quadro de tarefas
 
 #### Sprint 1
@@ -102,6 +108,10 @@ Atualizado em: 11/05/2025
 | Responsável   | Tarefa/Requisito | Iniciado em    | Prazo      | Status | Terminado em    |
 | :----         |    :----         |      :----:    | :----:     | :----: | :----:          |
 | Vinicius | Apresentação   |11/05/2025     | 11/05/2025 | ✔️    | 11/05/2025                |
+| Otávio | Apresentação   |11/05/2025     | 11/05/2025 | ✔️    | 11/05/2025                |
+| Otávio | Revisão   |11/05/2025     | 11/05/2025 | ✔️    | 11/05/2025                |
+
+
 
 
 #### Sprint 4
@@ -111,8 +121,16 @@ Atualizado em: 08/06/2025
 | Responsável   | Tarefa/Requisito | Iniciado em    | Prazo      | Status | Terminado em    |
 | :----         |    :----         |      :----:    | :----:     | :----: | :----:          |
 | Vinicius | Serviço de corrida   |04/06/2025     | 08/06/2025 | ✔️    | 08/06/2025                |
+| Otávio | Serviço de auth   |11/05/2025     | 11/05/2025 | ✔️    | 11/05/2025                |
+| Otávio | Landing page e componentes front-end   |11/05/2025     | 11/05/2025 | ✔️    | 11/05/2025                |
+| Otávio | Pipeline CI github  |11/05/2025     | 11/05/2025 | ✔️    | 11/05/2025                |
 
 
+
+
+Serviço de auth
+Componentes front-end +  landing page
+Pipeline github
 
 Legenda:
 - ✔️: terminado
