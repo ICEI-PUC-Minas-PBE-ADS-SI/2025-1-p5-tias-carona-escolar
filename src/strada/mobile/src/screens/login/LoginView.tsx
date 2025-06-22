@@ -16,26 +16,32 @@ import { fonts } from "@/src/constants/fonts";
 import { AppImages } from "@/src/assets";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
-import { ICreadentials } from "@/src/interfaces/credentials.interface";
+// --- MODIFICAÇÃO: A interface de credenciais agora inclui um objeto de endereço
+import { ICreadentials, IAddress } from "@/src/interfaces/credentials.interface";
 import { getAccessToken } from "@/src/services/auth.service";
 
 interface Props {
   animationController: React.RefObject<Animated.Value>;
 }
 
+// --- MODIFICAÇÃO: Adicionado o novo passo 'register-step-3'
 type ActionType =
   | "login"
   | "register-step-1"
   | "register-step-2"
+  | "register-step-3" // Novo passo
   | "password-recovery";
 
+// --- MODIFICAÇÃO: O InputField agora aceita 'value' e 'editable' para campos controlados
 const InputField: React.FC<{
   iconName: string;
   iconLibrary: "Ionicons" | "SimpleLineIcons";
   placeholder: string;
   secureTextEntry?: boolean;
-  keyboardType?: "default" | "email-address";
+  keyboardType?: "default" | "email-address" | "numeric";
   theme: Theme;
+  value?: string; // Adicionado
+  editable?: boolean; // Adicionado
   onChangeText?: (text: string) => void;
   styles: ReturnType<typeof createStyles>;
   toggleSecure?: () => void;
@@ -47,36 +53,49 @@ const InputField: React.FC<{
   keyboardType,
   theme,
   styles,
+  value,
+  editable,
   toggleSecure,
   onChangeText,
 }) => (
-    <View style={styles.inputContainer}>
-      {iconLibrary === "Ionicons" ? (
-        <Ionicons name={iconName} size={30} color={theme.blue} />
-      ) : (
-        <SimpleLineIcons name={iconName} size={30} color={theme.blue} />
-      )}
-      <TextInput
-        style={styles.textInput}
-        placeholder={placeholder}
-        placeholderTextColor={theme.blue}
-        secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType ?? "default"}
-        onChangeText={onChangeText}
-      />
-      {toggleSecure && (
-        <TouchableOpacity onPress={toggleSecure}>
-          <SimpleLineIcons name="eye" size={20} color={theme.blue} />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
+  <View style={styles.inputContainer}>
+    {iconLibrary === "Ionicons" ? (
+      <Ionicons name={iconName} size={30} color={theme.blue} />
+    ) : (
+      <SimpleLineIcons name={iconName} size={30} color={theme.blue} />
+    )}
+    <TextInput
+      style={styles.textInput}
+      placeholder={placeholder}
+      placeholderTextColor={theme.blue}
+      secureTextEntry={secureTextEntry}
+      keyboardType={keyboardType ?? "default"}
+      value={value} // Adicionado
+      editable={editable} // Adicionado
+      onChangeText={onChangeText}
+    />
+    {toggleSecure && (
+      <TouchableOpacity onPress={toggleSecure}>
+        <SimpleLineIcons name="eye" size={20} color={theme.blue} />
+      </TouchableOpacity>
+    )}
+  </View>
+);
 
 const LoginScreen: React.FC<Props> = ({ animationController }) => {
   const [actionType, setActionType] = useState<ActionType>("login");
   const [credentials, setCredentials] = useState<ICreadentials>({
     username: "",
     password: "",
+    // --- MODIFICAÇÃO: Inicializa o estado do endereço
+    address: {
+      cep: "",
+      street: "",
+      number: "",
+      neighborhood: "",
+      city: "",
+      state: "",
+    },
   });
   const [secureEntry, setSecureEntry] = useState(true);
   const [slideAnim] = useState(new Animated.Value(0));
@@ -85,14 +104,45 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
   const window = useWindowDimensions();
   const router = useRouter();
 
-  const slideContainerAnim = animationController?.current?.interpolate({
-    inputRange: [0, 0.8, 1],
-    outputRange: [window.width, window.width, 0],
-  }) ?? new Animated.Value(0);
-  const titleTextAnim = animationController?.current?.interpolate({
-    inputRange: [0, 0.6, 0.8, 1],
-    outputRange: [26 * 10, 26 * 10, 26 * 10, 0],
-  });
+  const slideContainerAnim =
+    animationController?.current?.interpolate({
+      inputRange: [0, 0.8, 1],
+      outputRange: [window.width, window.width, 0],
+    }) ?? new Animated.Value(0);
+  const titleTextAnim =
+    animationController?.current?.interpolate({
+      inputRange: [0, 0.6, 0.8, 1],
+      outputRange: [26 * 10, 26 * 10, 26 * 10, 0],
+    });
+
+  // --- NOVO: Hook para buscar o CEP quando ele for alterado e tiver 8 dígitos
+  useEffect(() => {
+    const fetchAddress = async () => {
+      if (credentials.address?.cep?.replace(/\D/g, "").length === 8) {
+        try {
+          const response = await fetch(
+            `https://viacep.com.br/ws/${credentials.address.cep}/json/`
+          );
+          const data = await response.json();
+          if (!data.erro) {
+            setCredentials((prev) => ({
+              ...prev,
+              address: {
+                ...prev.address!,
+                street: data.logradouro,
+                neighborhood: data.bairro,
+                city: data.localidade,
+                state: data.uf,
+              },
+            }));
+          }
+        } catch (error) {
+          console.error("Erro ao buscar CEP:", error);
+        }
+      }
+    };
+    fetchAddress();
+  }, [credentials.address?.cep]);
 
   const animateSlideTransition = useCallback(
     (newActionType: ActionType, direction: "left" | "right") => {
@@ -120,18 +170,24 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
   );
 
   const handleTextChange = useCallback(
-    (key: keyof ICreadentials, value: string) => {
-      console.log(key, value);
+    (key: keyof Omit<ICreadentials, 'address'>, value: string) => {
       setCredentials((prev) => ({ ...prev, [key]: value }));
-      console.log(credentials);
     },
     [setCredentials]
   );
 
-  useEffect(() => {
-    console.log("Updated credentials:", credentials);
-  }, [credentials]);
+  // --- NOVO: Handler para atualizar os campos de endereço
+  const handleAddressChange = useCallback(
+    (key: keyof IAddress, value: string) => {
+      setCredentials((prev) => ({
+        ...prev,
+        address: { ...prev.address!, [key]: value },
+      }));
+    },
+    [setCredentials]
+  );
 
+  // --- MODIFICAÇÃO: Atualizada a lógica de navegação para incluir o step 3
   const handleSignup = useCallback(() => {
     if (actionType === "login") {
       return animateSlideTransition("register-step-1", "left");
@@ -140,9 +196,14 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
       return animateSlideTransition("register-step-2", "left");
     }
     if (actionType === "register-step-2") {
+      return animateSlideTransition("register-step-3", "left"); // Vai para o passo 3
+    }
+    if (actionType === "register-step-3") {
+      // Finaliza o cadastro
+      console.log("Dados finais do cadastro:", credentials);
       return router.push("/home");
     }
-  }, [actionType, animateSlideTransition]);
+  }, [actionType, animateSlideTransition, credentials, router]);
 
   const handleLogin = useCallback(
     (type: "local" | "github" | "google") => {
@@ -163,6 +224,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
     [credentials, animateSlideTransition]
   );
 
+  // --- MODIFICAÇÃO: Atualizada a lógica de "voltar"
   const handleGoBack = useCallback(() => {
     if (
       actionType === "register-step-1" ||
@@ -171,10 +233,13 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
       animateSlideTransition("login", "right");
     } else if (actionType === "register-step-2") {
       animateSlideTransition("register-step-1", "right");
+    } else if (actionType === "register-step-3") {
+      animateSlideTransition("register-step-2", "right"); // Volta do passo 3 para o 2
     } else {
       router.back();
     }
   }, [actionType, router, animateSlideTransition]);
+
   const renderForm = () => (
     <Animated.View
       style={[
@@ -214,7 +279,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
           </TouchableOpacity>
         </>
       )}
-      {(actionType === "register-step-2" || actionType === "login") && (
+      {actionType === "register-step-2" && (
         <>
           <InputField
             iconName="mail-outline"
@@ -235,32 +300,122 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             onChangeText={(text) => handleTextChange("password", text)}
             toggleSecure={() => setSecureEntry((prev) => !prev)}
           />
-          {actionType === "login" && (
-            <>
-              <TouchableOpacity>
-                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.loginButtonWrapper}
-                onPress={() => handleLogin("local")}
-              >
-                <Text style={styles.loginText}>Login</Text>
-              </TouchableOpacity>
-            </>
-          )}
-          {actionType === "register-step-2" && (
-            <>
-              <TouchableOpacity onPress={handleGoBack}>
-                <Text style={styles.forgotPasswordText}>Voltar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSignup}
-                style={styles.loginButtonWrapper}
-              >
-                <Text style={styles.loginText}>Sign Up</Text>
-              </TouchableOpacity>
-            </>
-          )}
+          <TouchableOpacity onPress={handleGoBack}>
+            <Text style={styles.forgotPasswordText}>Voltar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleSignup}
+            style={styles.loginButtonWrapper}
+          >
+            <Text style={styles.loginText}>Avançar</Text>
+          </TouchableOpacity>
+        </>
+      )}
+      {/* --- NOVO: Formulário para a etapa 3 (Endereço) --- */}
+      {actionType === "register-step-3" && (
+        <>
+          <InputField
+            iconName="map-outline"
+            iconLibrary="Ionicons"
+            placeholder="CEP"
+            keyboardType="numeric"
+            theme={theme}
+            styles={styles}
+            value={credentials.address?.cep}
+            onChangeText={(text) => handleAddressChange("cep", text)}
+          />
+          <InputField
+            iconName="location-outline"
+            iconLibrary="Ionicons"
+            placeholder="Rua"
+            theme={theme}
+            styles={styles}
+            value={credentials.address?.street}
+            onChangeText={(text) => handleAddressChange("street", text)}
+            editable={false} // Desabilita edição
+          />
+           <InputField
+            iconName="location-outline"
+            iconLibrary="Ionicons"
+            placeholder="Bairro"
+            theme={theme}
+            styles={styles}
+            value={credentials.address?.neighborhood}
+            onChangeText={(text) => handleAddressChange("neighborhood", text)}
+            editable={false} // Desabilita edição
+          />
+          <InputField
+            iconName="business-outline"
+            iconLibrary="Ionicons"
+            placeholder="Cidade"
+            theme={theme}
+            styles={styles}
+            value={credentials.address?.city}
+            onChangeText={(text) => handleAddressChange("city", text)}
+            editable={false} // Desabilita edição
+          />
+          <InputField
+            iconName="flag-outline"
+            iconLibrary="Ionicons"
+            placeholder="Estado"
+            theme={theme}
+            styles={styles}
+            value={credentials.address?.state}
+            onChangeText={(text) => handleAddressChange("state", text)}
+            editable={false} // Desabilita edição
+          />
+          <InputField
+            iconName="home-outline"
+            iconLibrary="Ionicons"
+            placeholder="Número"
+            keyboardType="numeric"
+            theme={theme}
+            styles={styles}
+            value={credentials.address?.number}
+            onChangeText={(text) => handleAddressChange("number", text)}
+          />
+          <TouchableOpacity onPress={handleGoBack}>
+            <Text style={styles.forgotPasswordText}>Voltar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleSignup}
+            style={styles.loginButtonWrapper}
+          >
+            <Text style={styles.loginText}>Sign Up</Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      {actionType === "login" && (
+        <>
+          <InputField
+            iconName="mail-outline"
+            iconLibrary="Ionicons"
+            placeholder="Seu email"
+            keyboardType="email-address"
+            theme={theme}
+            onChangeText={(text) => handleTextChange("username", text)}
+            styles={styles}
+          />
+          <InputField
+            iconName="lock"
+            iconLibrary="SimpleLineIcons"
+            placeholder="Sua senha"
+            secureTextEntry={secureEntry}
+            theme={theme}
+            styles={styles}
+            onChangeText={(text) => handleTextChange("password", text)}
+            toggleSecure={() => setSecureEntry((prev) => !prev)}
+          />
+          <TouchableOpacity>
+            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.loginButtonWrapper}
+            onPress={() => handleLogin("local")}
+          >
+            <Text style={styles.loginText}>Login</Text>
+          </TouchableOpacity>
         </>
       )}
     </Animated.View>
@@ -315,7 +470,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
               <Text style={styles.accountText}>Não tem uma conta? Sign up</Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={() => handleLogin("local")}>
+            <TouchableOpacity onPress={() => animateSlideTransition("login", "right")}>
               <Text style={styles.accountText}>Ja tem uma conta? Login</Text>
             </TouchableOpacity>
           )}
@@ -327,6 +482,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
 
 export default LoginScreen;
 
+// Os estilos permanecem os mesmos
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
@@ -371,6 +527,7 @@ const createStyles = (theme: Theme) =>
       flex: 1,
       paddingHorizontal: 10,
       fontFamily: fonts.Light,
+      color: theme.blue, // Adicionado para melhor visualização do texto
     },
     forgotPasswordText: {
       textAlign: "right",
