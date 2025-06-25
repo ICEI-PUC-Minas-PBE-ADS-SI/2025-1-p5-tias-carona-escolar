@@ -1,3 +1,7 @@
 # Conclusão
 
-Apresente, aqui, a conclusão do trabalho, que deve conter uma síntese dos principais resultados obtidos com a melhoria dos processos, uma discussão das limitações da solução proposta e sugestões de novas linhas de estudo.
+Diante dos desafios enfrentados na mobilidade estudantil, especialmente em áreas urbanas, o projeto Strada se apresenta como uma solução segura e sustentável. Ao integrar tecnologia e praticidade, a plataforma visa otimizar o transporte escolar por meio do compartilhamento de caronas, reduzindo o número de veículos nas vias e promovendo maior segurança para os estudantes. Os resultados esperados vão além da comodidade, abrangendo impactos ambientais positivos, como a redução do tráfego nas imediações escolares e a diminuição da emissão de poluentes.
+
+No entanto, a solução ainda apresenta algumas limitações, como a dependência de adesão ativa por parte dos usuários para garantir o funcionamento pleno da plataforma, além de desafios técnicos relacionados à escalabilidade e à manutenção da precisão nas correspondências de rota. Outro ponto a ser considerado é a necessidade de maior envolvimento das instituições escolares na validação e fiscalização dos usuários cadastrados.
+
+Como aprimoramentos futuros, recomenda-se o aprofundamento em funcionalidades que ampliem a segurança e a confiabilidade da plataforma, como chamadas diretas para a polícia, alertas automáticos em casos de desvios de rota. Além disso, novas pesquisas podem explorar a expansão do sistema para outros contextos de mobilidade urbana e o uso de inteligência artificial para otimização dos deslocamentos.
