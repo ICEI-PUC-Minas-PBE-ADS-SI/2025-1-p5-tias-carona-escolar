@@ -4,6 +4,8 @@ import { IUserRequest } from "../interfaces/user-request.interface";
 
 export const createUser = async (user: IUserRequest) => {
   try {
+    console.log(user);
+    console.log(authAxios.defaults);
     const response = await authAxios.post(`/users`, user);
     return response.data;
   } catch (error) {
@@ -25,7 +27,7 @@ export const getUser = async (id: string) => {
 export const updateUser = async (id: string, user: IUserRequest) => {
   try {
     const response = await authAxios.put(`/users/${id}`, user);
-    storeUser(response.data)
+    storeUser(response.data);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -34,16 +36,16 @@ export const updateUser = async (id: string, user: IUserRequest) => {
 };
 
 export const storeUserID = async (id: string) => {
-    await SecureStore.setItemAsync("userID", id);
+  await SecureStore.setItemAsync("userID", id);
 };
 
 export const getStoredUser = async () => {
   return await SecureStore.getItemAsync("user");
-}
+};
 
 export const storeUser = async (user: Partial<IUserRequest>) => {
   await SecureStore.setItemAsync("user", JSON.stringify(user));
-}
+};
 
 export const getStoredUserID = async () => {
   return await SecureStore.getItemAsync("userID");

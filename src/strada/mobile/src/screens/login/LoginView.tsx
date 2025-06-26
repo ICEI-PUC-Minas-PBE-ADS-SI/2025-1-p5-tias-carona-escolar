@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   View,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState, useCallback, useEffect } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -16,23 +18,22 @@ import { fonts } from "@/src/constants/fonts";
 import { AppImages } from "@/src/assets";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
-// --- MODIFICAÇÃO: A interface de credenciais agora inclui um objeto de endereço
-import { ICreadentials, IAddress } from "@/src/interfaces/credentials.interface";
+import { ICreadentials } from "@/src/interfaces/credentials.interface";
 import { getAccessToken } from "@/src/services/auth.service";
+import { IUserRequest } from "@/src/interfaces/user-request.interface";
+import { createUser } from "@/src/services/user.service";
 
 interface Props {
   animationController: React.RefObject<Animated.Value>;
 }
 
-// --- MODIFICAÇÃO: Adicionado o novo passo 'register-step-3'
 type ActionType =
   | "login"
   | "register-step-1"
   | "register-step-2"
-  | "register-step-3" // Novo passo
+  | "register-step-3"
   | "password-recovery";
 
-// --- MODIFICAÇÃO: O InputField agora aceita 'value' e 'editable' para campos controlados
 const InputField: React.FC<{
   iconName: string;
   iconLibrary: "Ionicons" | "SimpleLineIcons";
@@ -40,8 +41,8 @@ const InputField: React.FC<{
   secureTextEntry?: boolean;
   keyboardType?: "default" | "email-address" | "numeric";
   theme: Theme;
-  value?: string; // Adicionado
-  editable?: boolean; // Adicionado
+  value?: string;
+  editable?: boolean;
   onChangeText?: (text: string) => void;
   styles: ReturnType<typeof createStyles>;
   toggleSecure?: () => void;
@@ -70,8 +71,8 @@ const InputField: React.FC<{
       placeholderTextColor={theme.blue}
       secureTextEntry={secureTextEntry}
       keyboardType={keyboardType ?? "default"}
-      value={value} // Adicionado
-      editable={editable} // Adicionado
+      value={value}
+      editable={editable}
       onChangeText={onChangeText}
     />
     {toggleSecure && (
@@ -85,18 +86,19 @@ const InputField: React.FC<{
 const LoginScreen: React.FC<Props> = ({ animationController }) => {
   const [actionType, setActionType] = useState<ActionType>("login");
   const [credentials, setCredentials] = useState<ICreadentials>({
+    name: "",
     username: "",
+    email: "",
     password: "",
-    // --- MODIFICAÇÃO: Inicializa o estado do endereço
-    address: {
-      cep: "",
-      street: "",
-      number: "",
-      neighborhood: "",
-      city: "",
-      state: "",
-    },
+    cep: "",
+    street: "",
+    number: "",
+    neighborhood: "",
+    city: "",
+    state: "",
   });
+
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [secureEntry, setSecureEntry] = useState(true);
   const [slideAnim] = useState(new Animated.Value(0));
   const theme = lightTheme;
@@ -109,31 +111,31 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
       inputRange: [0, 0.8, 1],
       outputRange: [window.width, window.width, 0],
     }) ?? new Animated.Value(0);
+
   const titleTextAnim =
     animationController?.current?.interpolate({
       inputRange: [0, 0.6, 0.8, 1],
       outputRange: [26 * 10, 26 * 10, 26 * 10, 0],
-    });
+    }) ?? new Animated.Value(0);
 
-  // --- NOVO: Hook para buscar o CEP quando ele for alterado e tiver 8 dígitos
   useEffect(() => {
     const fetchAddress = async () => {
-      if (credentials.address?.cep?.replace(/\D/g, "").length === 8) {
+      const cep = credentials.cep?.replace(/\D/g, "");
+      if (cep?.length === 8) {
         try {
-          const response = await fetch(
-            `https://viacep.com.br/ws/${credentials.address.cep}/json/`
-          );
+          const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+          if (!response.ok) {
+            console.error(`Erro na API do ViaCEP. Status: ${response.status}.`);
+            return;
+          }
           const data = await response.json();
           if (!data.erro) {
             setCredentials((prev) => ({
               ...prev,
-              address: {
-                ...prev.address!,
-                street: data.logradouro,
-                neighborhood: data.bairro,
-                city: data.localidade,
-                state: data.uf,
-              },
+              street: data.logradouro,
+              neighborhood: data.bairro,
+              city: data.localidade,
+              state: data.uf,
             }));
           }
         } catch (error) {
@@ -142,7 +144,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
       }
     };
     fetchAddress();
-  }, [credentials.address?.cep]);
+  }, [credentials.cep]);
 
   const animateSlideTransition = useCallback(
     (newActionType: ActionType, direction: "left" | "right") => {
@@ -170,25 +172,13 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
   );
 
   const handleTextChange = useCallback(
-    (key: keyof Omit<ICreadentials, 'address'>, value: string) => {
+    (key: keyof ICreadentials, value: string) => {
       setCredentials((prev) => ({ ...prev, [key]: value }));
     },
-    [setCredentials]
+    []
   );
 
-  // --- NOVO: Handler para atualizar os campos de endereço
-  const handleAddressChange = useCallback(
-    (key: keyof IAddress, value: string) => {
-      setCredentials((prev) => ({
-        ...prev,
-        address: { ...prev.address!, [key]: value },
-      }));
-    },
-    [setCredentials]
-  );
-
-  // --- MODIFICAÇÃO: Atualizada a lógica de navegação para incluir o step 3
-  const handleSignup = useCallback(() => {
+  const handleSignup = useCallback(async () => {
     if (actionType === "login") {
       return animateSlideTransition("register-step-1", "left");
     }
@@ -196,35 +186,57 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
       return animateSlideTransition("register-step-2", "left");
     }
     if (actionType === "register-step-2") {
-      return animateSlideTransition("register-step-3", "left"); // Vai para o passo 3
+      return animateSlideTransition("register-step-3", "left");
     }
     if (actionType === "register-step-3") {
-      // Finaliza o cadastro
-      console.log("Dados finais do cadastro:", credentials);
-      return router.push("/home");
+      setIsCreatingUser(true);
+
+      const userData: IUserRequest = {
+        name: credentials.name,
+        email: credentials.email,
+        username: credentials.username,
+        password: credentials.password,
+        imgUrl: "",
+        address: `${credentials.street}, ${credentials.number}`,
+        cep: credentials.cep,
+        city: credentials.city,
+        state: credentials.state,
+      };
+
+      try {
+        await createUser(userData);
+        Alert.alert("Sucesso!", "Seu cadastro foi realizado com sucesso.", [
+          { text: "OK", onPress: () => animateSlideTransition("login", "right") }
+        ]);
+      } catch (error) {
+        Alert.alert("Erro no Cadastro", "Não foi possível criar seu usuário. Por favor, tente novamente.");
+      } finally {
+        setIsCreatingUser(false);
+      }
     }
-  }, [actionType, animateSlideTransition, credentials, router]);
+  }, [actionType, animateSlideTransition, credentials]);
 
   const handleLogin = useCallback(
     (type: "local" | "github" | "google") => {
       if (type === "local") {
-        getAccessToken(credentials)
+        const loginCredentials = { username: credentials.email!, password: credentials.password! };
+        getAccessToken(loginCredentials)
           .then((tokens) => {
             console.log("Login com sucesso", tokens);
             router.replace("/home");
           })
           .catch((error) => {
             console.error("Erro no login:", error);
+            Alert.alert("Erro de Login", "Email ou senha inválidos.");
           });
         return;
       }
       animateSlideTransition("login", "left");
       router.push(`/social-auth/${type}`);
     },
-    [credentials, animateSlideTransition]
+    [credentials.email, credentials.password, animateSlideTransition, router]
   );
 
-  // --- MODIFICAÇÃO: Atualizada a lógica de "voltar"
   const handleGoBack = useCallback(() => {
     if (
       actionType === "register-step-1" ||
@@ -234,7 +246,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
     } else if (actionType === "register-step-2") {
       animateSlideTransition("register-step-1", "right");
     } else if (actionType === "register-step-3") {
-      animateSlideTransition("register-step-2", "right"); // Volta do passo 3 para o 2
+      animateSlideTransition("register-step-2", "right");
     } else {
       router.back();
     }
@@ -252,16 +264,20 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
           <InputField
             iconName="person-outline"
             iconLibrary="Ionicons"
-            placeholder="Seu nome"
+            placeholder="Seu nome completo"
             theme={theme}
             styles={styles}
+            value={credentials.name}
+            onChangeText={(text) => handleTextChange("name", text)}
           />
           <InputField
             iconName="person-outline"
             iconLibrary="Ionicons"
-            placeholder="Seu nome de usuario"
+            placeholder="Seu nome de usuário"
             theme={theme}
             styles={styles}
+            value={credentials.username}
+            onChangeText={(text) => handleTextChange("username", text)}
           />
           <TouchableOpacity onPress={handleGoBack}>
             <Text style={styles.forgotPasswordText}>Voltar</Text>
@@ -279,6 +295,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
           </TouchableOpacity>
         </>
       )}
+
       {actionType === "register-step-2" && (
         <>
           <InputField
@@ -287,8 +304,9 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             placeholder="Seu email"
             keyboardType="email-address"
             theme={theme}
-            onChangeText={(text) => handleTextChange("username", text)}
             styles={styles}
+            value={credentials.email}
+            onChangeText={(text) => handleTextChange("email", text)}
           />
           <InputField
             iconName="lock"
@@ -297,6 +315,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             secureTextEntry={secureEntry}
             theme={theme}
             styles={styles}
+            value={credentials.password}
             onChangeText={(text) => handleTextChange("password", text)}
             toggleSecure={() => setSecureEntry((prev) => !prev)}
           />
@@ -311,7 +330,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
           </TouchableOpacity>
         </>
       )}
-      {/* --- NOVO: Formulário para a etapa 3 (Endereço) --- */}
+
       {actionType === "register-step-3" && (
         <>
           <InputField
@@ -321,8 +340,8 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             keyboardType="numeric"
             theme={theme}
             styles={styles}
-            value={credentials.address?.cep}
-            onChangeText={(text) => handleAddressChange("cep", text)}
+            value={credentials.cep}
+            onChangeText={(text) => handleTextChange("cep", text)}
           />
           <InputField
             iconName="location-outline"
@@ -330,19 +349,17 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             placeholder="Rua"
             theme={theme}
             styles={styles}
-            value={credentials.address?.street}
-            onChangeText={(text) => handleAddressChange("street", text)}
-            editable={false} // Desabilita edição
+            value={credentials.street}
+            editable={false}
           />
-           <InputField
+          <InputField
             iconName="location-outline"
             iconLibrary="Ionicons"
             placeholder="Bairro"
             theme={theme}
             styles={styles}
-            value={credentials.address?.neighborhood}
-            onChangeText={(text) => handleAddressChange("neighborhood", text)}
-            editable={false} // Desabilita edição
+            value={credentials.neighborhood}
+            editable={false}
           />
           <InputField
             iconName="business-outline"
@@ -350,9 +367,8 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             placeholder="Cidade"
             theme={theme}
             styles={styles}
-            value={credentials.address?.city}
-            onChangeText={(text) => handleAddressChange("city", text)}
-            editable={false} // Desabilita edição
+            value={credentials.city}
+            editable={false}
           />
           <InputField
             iconName="flag-outline"
@@ -360,9 +376,8 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             placeholder="Estado"
             theme={theme}
             styles={styles}
-            value={credentials.address?.state}
-            onChangeText={(text) => handleAddressChange("state", text)}
-            editable={false} // Desabilita edição
+            value={credentials.state}
+            editable={false}
           />
           <InputField
             iconName="home-outline"
@@ -371,17 +386,22 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             keyboardType="numeric"
             theme={theme}
             styles={styles}
-            value={credentials.address?.number}
-            onChangeText={(text) => handleAddressChange("number", text)}
+            value={credentials.number}
+            onChangeText={(text) => handleTextChange("number", text)}
           />
           <TouchableOpacity onPress={handleGoBack}>
             <Text style={styles.forgotPasswordText}>Voltar</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleSignup}
-            style={styles.loginButtonWrapper}
+            style={[styles.loginButtonWrapper, isCreatingUser && styles.disabledButton]}
+            disabled={isCreatingUser}
           >
-            <Text style={styles.loginText}>Sign Up</Text>
+            {isCreatingUser ? (
+              <ActivityIndicator color={theme.background} />
+            ) : (
+              <Text style={styles.loginText}>Finalizar Cadastro</Text>
+            )}
           </TouchableOpacity>
         </>
       )}
@@ -394,8 +414,9 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             placeholder="Seu email"
             keyboardType="email-address"
             theme={theme}
-            onChangeText={(text) => handleTextChange("username", text)}
             styles={styles}
+            value={credentials.email}
+            onChangeText={(text) => handleTextChange("email", text)}
           />
           <InputField
             iconName="lock"
@@ -404,6 +425,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             secureTextEntry={secureEntry}
             theme={theme}
             styles={styles}
+            value={credentials.password}
             onChangeText={(text) => handleTextChange("password", text)}
             toggleSecure={() => setSecureEntry((prev) => !prev)}
           />
@@ -471,7 +493,7 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={() => animateSlideTransition("login", "right")}>
-              <Text style={styles.accountText}>Ja tem uma conta? Login</Text>
+              <Text style={styles.accountText}>Já tem uma conta? Login</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -482,7 +504,6 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
 
 export default LoginScreen;
 
-// Os estilos permanecem os mesmos
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
@@ -527,7 +548,7 @@ const createStyles = (theme: Theme) =>
       flex: 1,
       paddingHorizontal: 10,
       fontFamily: fonts.Light,
-      color: theme.blue, // Adicionado para melhor visualização do texto
+      color: theme.blue,
     },
     forgotPasswordText: {
       textAlign: "right",
@@ -542,6 +563,9 @@ const createStyles = (theme: Theme) =>
       justifyContent: "center",
       borderRadius: 100,
       marginTop: 20,
+    },
+    disabledButton: {
+      backgroundColor: "#a9a9a9", // Um cinza para o botão desabilitado
     },
     loginText: {
       color: theme.background,
