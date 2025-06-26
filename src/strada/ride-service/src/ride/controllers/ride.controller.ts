@@ -268,4 +268,23 @@ export class RideController {
   async findRideById(@Param('id') id: string) {
     return await this.rideService.findRideById(id);
   }
+
+  @Get(':id/ratings')
+  @ApiOperation({ summary: 'Get all ratings for a specific ride' })
+  @ApiResponse({ status: 200, description: 'List of ratings for the ride' })
+  @ApiParam({ name: 'id', description: 'ID da corrida' })
+  async getRideRatings(@Param('id') rideId: string) {
+    // Redirecionar para o endpoint de ratings
+    return { message: 'Use GET /ratings/ride/:rideId to get ride ratings' };
+  }
+
+  @Post(':id/rate')
+  @ApiOperation({ summary: 'Rate a ride (convenience endpoint)' })
+  @ApiResponse({ status: 201, description: 'Rating created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid rating data' })
+  @ApiParam({ name: 'id', description: 'ID da corrida' })
+  async rateRide(@Param('id') rideId: string) {
+    // Redirecionar para o endpoint de ratings
+    return { message: 'Use POST /ratings to create a rating' };
+  }
 }

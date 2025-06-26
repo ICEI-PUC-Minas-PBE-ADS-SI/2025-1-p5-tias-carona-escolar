@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaService } from './utils/prisma.service';
 import { RideModule } from './ride/ride.module';
 import { RideRequestModule } from './ride-request/ride-request.module';
+import { RatingModule } from './rating/rating.module';
 
 @Module({
   controllers: [HealthCheckController],
@@ -13,6 +14,7 @@ import { RideRequestModule } from './ride-request/ride-request.module';
     }),
     RideModule,
     RideRequestModule,
+    RatingModule,
   ],
   providers: [PrismaService],
   exports: [PrismaService],
