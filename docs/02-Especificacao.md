@@ -66,7 +66,7 @@ As tabelas a seguir apresentam os requisitos funcionais e não funcionais que de
 | ID | Requisito Funcional | Prioridade |
 | :--- | :--- | :--- |
 | **RF-001** | **Cadastro e Gestão de Usuários**: O sistema deve permitir um cadastro de usuário unificado. Todo usuário inicia como "Responsável" e pode se tornar "Motorista" ao oferecer uma rota. | **ALTA** |
-| **RF-002** | **Validação de Segurança do Motorista**: (mock) O sistema deve ter um processo de validação de identidade e da CNH (Carteira Nacional de Habilitação) quando um usuário se candidata a "Motorista". | **ALTA** |
+| **RF-002** | **Login de Usuário**: O sistema deve permitir que usuários previamente cadastrados realizem login informando e-mail e senha. | **ALTA** |
 | **RF-003** | **Cadastro de Alunos (Passageiros)**: O sistema deve permitir que um "Responsável" cadastre um ou mais alunos (filhos) em sua conta, vinculando-os ao seu perfil. | **ALTA** |
 | **RF-004** | **Criação e Gerenciamento de Rotas (Motorista)**: O sistema deve permitir que o "Motorista" cadastre suas rotas de ou para a escola Educare, definindo informações básicas sobre a carona. | **ALTA** |
 | **RF-005** | **Busca e Correspondência de Rotas (Responsável)**: O sistema deve permitir que o "Responsável" busque por motoristas cujas rotas sejam compatíveis com a necessidade do aluno (proximidade e horário). | **ALTA** |
@@ -76,6 +76,7 @@ As tabelas a seguir apresentam os requisitos funcionais e não funcionais que de
 | **RF-009** | **Sistema de Avaliação e Feedback**: O sistema deve permitir que responsáveis e motoristas se avaliem mutuamente após a conclusão de uma carona. | **MÉDIA** |
 | **RF-010** | **Agendamento de Caronas Recorrentes**: O sistema deve permitir que o "Responsável" agende caronas de forma recorrente (ex: toda segunda e quarta) sem precisar repetir o processo manualmente. | **BAIXA** |
 | **RF-011** | **Histórico de Caronas**: O sistema deve oferecer um histórico simplificado das caronas realizadas para cada usuário. | **BAIXA** |
+| **RF-012** | **Validação de Segurança do Motorista**: (mock) O sistema deve ter um processo de validação de identidade e da CNH (Carteira Nacional de Habilitação) quando um usuário se candidata a "Motorista". | **ALTA** |
 ### Requisitos não funcionais
 
 |ID     | Descrição do Requisito  |Prioridade |
