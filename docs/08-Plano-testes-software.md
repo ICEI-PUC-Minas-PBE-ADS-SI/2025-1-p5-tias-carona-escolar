@@ -28,8 +28,8 @@ Com certeza\! Abaixo estão os casos de teste criados a partir dos requisitos fu
 | :---: | :---: |
 | **Requisito associado** | RF-001 - Cadastro e Gestão de Usuários: O sistema deve permitir um cadastro de usuário unificado. Todo usuário inicia como "Responsável" e pode se tornar "Motorista" ao oferecer uma rota. |
 | **Objetivo do teste** | Verificar se um novo usuário consegue se cadastrar na aplicação e se o seu perfil é criado com o papel padrão de "Responsável". |
-| **Passos** | - Acessar a aplicação mobile. \<br\> - Perpassar o carrosel de boas-vindas. \<br\> - Na tela de login, clicar em "Sign up"  \<br\> - Preencher as informações de 1º nível. \<br\> - Preencher as informações de 2º nível. \<br\> - Preencher as informações de 3º nível. |
-| **Critério de êxito** | - O cadastro é realizado com sucesso. \<br\> - O sistema exibe uma mensagem de boas-vindas ou redireciona para o painel principal. |
+| **Passos** | - Acessar a aplicação mobile. <br> - Clicar em "Vamos começar" <br> - Perpassar o carrosel de boas-vindas. <br> - Clicar em "Entrar agora" <br> - Na tela de login, clicar em "Sign up"  <br> - Preencher as informações de 1º nível (usuário). <br> - Preencher as informações de 2º nível. (email e senha) <br> - Preencher as informações de 3º nível. (endereço) |
+| **Critério de êxito** | - O cadastro é realizado com sucesso. \<br\> - O sistema exibe uma mensagem de sucesso ou redireciona para o login. |
 | **Responsável pela elaboração do caso de teste** | Vinicius Henrique Alves. |
 
 <br>
