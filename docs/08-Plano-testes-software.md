@@ -18,8 +18,6 @@ Por exemplo:
 | Critério de êxito | - O cadastro foi realizado com sucesso. |
 | Responsável pela elaboração do caso de teste | Nome do integrante da equipe. |
 
-Com certeza\! Abaixo estão os casos de teste criados a partir dos requisitos funcionais, seguindo o template fornecido.
-
 -----
 
 ### **Casos de Teste para os Requisitos Funcionais**
