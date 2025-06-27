@@ -18,15 +18,119 @@ Por exemplo:
 | Critério de êxito | - O cadastro foi realizado com sucesso. |
 | Responsável pela elaboração do caso de teste | Nome do integrante da equipe. |
 
+Com certeza\! Abaixo estão os casos de teste criados a partir dos requisitos funcionais, seguindo o template fornecido.
+
+-----
+
+### **Casos de Teste para os Requisitos Funcionais**
+
+| **Caso de teste** | **CT-001 – Cadastrar novo usuário** |
+| :---: | :---: |
+| **Requisito associado** | RF-001 - Cadastro e Gestão de Usuários: O sistema deve permitir um cadastro de usuário unificado. Todo usuário inicia como "Responsável" e pode se tornar "Motorista" ao oferecer uma rota. |
+| **Objetivo do teste** | Verificar se um novo usuário consegue se cadastrar na aplicação e se o seu perfil é criado com o papel padrão de "Responsável". |
+| **Passos** | - Acessar a aplicação mobile. \<br\> - Perpassar o carrosel de boas-vindas. \<br\> - Na tela de login, clicar em "Sign up"  \<br\> - Preencher as informações de 1º nível. \<br\> - Preencher as informações de 2º nível. \<br\> - Preencher as informações de 3º nível. |
+| **Critério de êxito** | - O cadastro é realizado com sucesso. \<br\> - O sistema exibe uma mensagem de boas-vindas ou redireciona para o painel principal. |
+| **Responsável pela elaboração do caso de teste** | Vinicius Henrique Alves. |
+
 <br>
 
-| **Caso de teste**  | **CT-002 – Efetuar login**  |
-|:---: |:---: |
-| Requisito associado | RF-00Y - A aplicação deve possuir opção de fazer login, sendo o login o endereço de e-mail. |
-| Objetivo do teste | Verificar se o usuário consegue realizar login. |
-| Passos | - Acessar o navegador <br> - Informar o endereço do site https://adota-pet.herokuapp.com/src/index.html <br> - Clicar no botão "Entrar" <br> - Preencher o campo de e-mail <br> - Preencher o campo de senha <br> - Clicar em "Login" |
-| Critério de êxito | - O login foi realizado com sucesso. |
-| Responsável pela elaboração do caso de teste | Nome do integrante da equipe. |
+| **Caso de teste** | **CT-002 – Validar documentação para se tornar "Motorista"** |
+| :---: | :---: |
+| **Requisito associado** | RF-002 - Validação de Segurança do Motorista: O sistema deve ter um processo de validação de identidade e da CNH (Carteira Nacional de Habilitação) quando um usuário se candidata a "Motorista". |
+| **Objetivo do teste** | Verificar se o usuário com perfil "Responsável" consegue submeter seus documentos (identidade e CNH) para validação. |
+| **Passos** | |
+| **Critério de êxito** | |
+| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+
+<br>
+
+| **Caso de teste** | **CT-003 – Cadastrar aluno no perfil do Responsável** |
+| :---: | :---: |
+| **Requisito associado** | RF-003 - Cadastro de Alunos (Passageiros): O sistema deve permitir que um "Responsável" cadastre um ou mais alunos (filhos) em sua conta, vinculando-os ao seu perfil. |
+| **Objetivo do teste** | Verificar se um usuário "Responsável" consegue adicionar um novo aluno (filho) à sua conta. |
+| **Passos** | |
+| **Critério de êxito** | |
+| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+
+<br>
+
+| **Caso de teste** | **CT-004 – Cadastrar nova rota de carona (Motorista)** |
+| :---: | :---: |
+| **Requisito associado** | RF-004 - Criação e Gerenciamento de Rotas (Motorista): O sistema deve permitir que o "Motorista" cadastre suas rotas de ou para a escola Educare. |
+| **Objetivo do teste** | Verificar se um usuário "Motorista" (com perfil já validado) consegue criar uma nova rota. |
+| **Passos** | |
+| **Critério de êxito** | |
+| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+
+<br>
+
+| **Caso de teste** | **CT-005 – Buscar rotas compatíveis (Responsável)** |
+| :---: | :---: |
+| **Requisito associado** | RF-005 - Busca e Correspondência de Rotas (Responsável): O sistema deve permitir que o "Responsável" busque por motoristas cujas rotas sejam compatíveis com a necessidade do aluno. |
+| **Objetivo do teste** | Verificar se o "Responsável" consegue buscar e encontrar rotas que atendam às suas necessidades de local e horário. |
+| **Passos** | |
+| **Critério de êxito** | |
+| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+
+<br>
+
+| **Caso de teste** | **CT-006 – Solicitar agendamento de carona (Responsável)** |
+| :---: | :---: |
+| **Requisito associado** | RF-006 - Agendamento de Carona (Responsável): O sistema deve permitir que o "Responsável" solicite e agende uma carona para um aluno com um motorista compatível. |
+| **Objetivo do teste** | Verificar se o "Responsável" consegue solicitar uma vaga na rota de um motorista para um de seus alunos. |
+| **Passos** | |
+| **Critério de êxito** | |
+| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+
+<br>
+
+| **Caso de teste** | **CT-007 – Aceitar solicitação de carona (Motorista)** |
+| :---: | :---: |
+| **Requisito associado** | RF-007 - Gestão de Solicitações de Carona (Motorista): O sistema deve permitir que o "Motorista" visualize, aceite ou recuse as solicitações de carona recebidas. |
+| **Objetivo do teste** | Verificar se o "Motorista" consegue visualizar e aceitar uma solicitação de carona pendente. |
+| **Passos** | |
+| **Critério de êxito** | |
+| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+
+<br>
+
+| **Caso de teste** | **CT-008 – Editar informações do perfil** |
+| :---: | :---: |
+| **Requisito associado** | RF-008 - Gestão de Perfil do Usuário: O sistema deve permitir que os usuários editem informações básicas de seus perfis. |
+| **Objetivo do teste** | Verificar se o usuário consegue editar e salvar as informações de seu perfil. |
+| **Passos** | |
+| **Critério de êxito** | |
+| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+
+<br>
+
+| **Caso de teste** | **CT-009 – Avaliar uma carona concluída** |
+| :---: | :---: |
+| **Requisito associado** | RF-009 - Sistema de Avaliação e Feedback: O sistema deve permitir que responsáveis e motoristas se avaliem mutuamente após a conclusão de uma carona. |
+| **Objetivo do teste** | Verificar se, após uma carona ser marcada como concluída, o "Responsável" consegue avaliar o "Motorista". |
+| **Passos** | |
+| **Critério de êxito** | |
+| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+
+<br>
+
+| **Caso de teste** | **CT-010 – Agendar carona recorrente** |
+| :---: | :---: |
+| **Requisito associado** | RF-010 - Agendamento de Caronas Recorrentes: O sistema deve permitir que o "Responsável" agende caronas de forma recorrente. |
+| **Objetivo do teste** | Verificar se o "Responsável" consegue agendar uma carona para várias datas de uma só vez (ex: toda segunda e quarta-feira). |
+| **Passos** | |
+| **Critério de êxito** | |
+| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+
+<br>
+
+| **Caso de teste** | **CT-011 – Visualizar histórico de caronas** |
+| :---: | :---: |
+| **Requisito associado** | RF-011 - Histórico de Caronas: O sistema deve oferecer um histórico simplificado das caronas realizadas para cada usuário. |
+| **Objetivo do teste** | Verificar se o usuário consegue acessar e visualizar a lista de caronas passadas (concluídas ou canceladas). |
+| **Passos** | |
+| **Critério de êxito** | |
+| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
 
 
 ## Ferramentas de testes (opcional)
