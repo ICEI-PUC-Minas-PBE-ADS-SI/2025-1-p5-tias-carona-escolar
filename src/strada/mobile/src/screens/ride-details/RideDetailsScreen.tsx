@@ -261,6 +261,15 @@ const RideDetailsScreen: React.FC = () => {
     );
   }, []);
 
+  const convertAddressToLocationData = useCallback((address: string): LocationData => {
+    return {
+      latitude: 0,
+      longitude: 0,
+      address: address,
+      name: getAddressNickname(address),
+    };
+  }, [getAddressNickname]);
+
   const handleReserve = useCallback((): void => {
     console.log("Tentando reservar carona...");
     console.log(alreadyReserved, isOwner);
@@ -303,6 +312,34 @@ const RideDetailsScreen: React.FC = () => {
     };
     checkIfRideOwner();
   }, [rideData]);
+
+  // Função para obter localizações da rota da carona
+  const getRideLocations = useCallback(() => {
+    if (!rideData || !rideData.routePoints || rideData.routePoints.length === 0) {
+      return {
+        pickup: convertAddressToLocationData(rideData?.startAddress || ''),
+        dropoff: convertAddressToLocationData(rideData?.endAddress || ''),
+      };
+    }
+
+    const firstPoint = rideData.routePoints[0];
+    const lastPoint = rideData.routePoints[rideData.routePoints.length - 1];
+
+    return {
+      pickup: {
+        latitude: firstPoint.latitude,
+        longitude: firstPoint.longitude,
+        address: rideData.startAddress,
+        name: getAddressNickname(rideData.startAddress),
+      },
+      dropoff: {
+        latitude: lastPoint.latitude,
+        longitude: lastPoint.longitude,
+        address: rideData.endAddress,
+        name: getAddressNickname(rideData.endAddress),
+      },
+    };
+  }, [rideData, convertAddressToLocationData, getAddressNickname]);
 
   // Loading state
   if (loading) {
@@ -628,10 +665,10 @@ const RideDetailsScreen: React.FC = () => {
             {isOwner || alreadyReserved
               ? "Ver Detalhes"
               : rideData.availableSeats > 0 && rideData.status === "PENDING"
-              ? "Reservar"
-              : rideData.status !== "PENDING"
-              ? "Indisponível"
-              : "Esgotado"}
+                ? "Reservar"
+                : rideData.status !== "PENDING"
+                  ? "Indisponível"
+                  : "Esgotado"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -643,6 +680,8 @@ const RideDetailsScreen: React.FC = () => {
         rideId={rideData.id}
         availableSeats={rideData.availableSeats}
         onSuccess={handleRequestSuccess}
+        defaultPickupLocation={getRideLocations().pickup}
+        defaultDropoffLocation={getRideLocations().dropoff}
       />
     </View>
   );
