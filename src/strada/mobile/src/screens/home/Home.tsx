@@ -8,20 +8,19 @@ import {
   Image,
   StatusBar,
   FlatList,
-  useWindowDimensions,
   Modal,
   ActivityIndicator,
   Alert,
   RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { AppImages } from "@/src/assets";
 import { colors } from "@/src/constants/colors";
 import AutocompleteSearch from "@/src/components/shared/SearchBar";
 import { getPopularRoutes, searchRides } from "@/src/services/ride.service";
-import { getStoredUserID, getUser, storeUser } from "@/src/services/user.service";
+import { getStoredUserID, getUser } from "@/src/services/user.service";
 
 interface PopularRoute {
   id: string;
@@ -68,7 +67,7 @@ interface RideData {
   vehicle_color: string;
   vehicle_model: string;
   driverName: string;
-  driverProfileImg?: string
+  driverProfileImg?: string;
 }
 
 const HomeScreen = () => {
@@ -144,7 +143,7 @@ const HomeScreen = () => {
             return {
               ...ride,
               driverName: name,
-              driverProfileImg: imgUrl
+              driverProfileImg: imgUrl,
             };
           })
         );
@@ -180,21 +179,22 @@ const HomeScreen = () => {
     }
   }, [userLocation, loadPopularRoutes, loadAvailableRides]);
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const storedUserId = await getStoredUserID();
-        if (storedUserId) {
-          const user = await getUser(storedUserId);
-          storeUser(user);
-          setUser(user);
+  useFocusEffect(
+    useCallback(() => {
+      async function fetchUser() {
+        try {
+          const storedUserId = await getStoredUserID();
+          if (storedUserId) {
+            const user = await getUser(storedUserId);
+            setUser(user);
+          }
+        } catch (error) {
+          console.error("Erro ao carregar usuário na Home:", error);
         }
-      } catch (error) {
-        console.error("Erro ao carregar usuário:", error);
       }
-    }
-    fetchUser();
-  }, []);
+      fetchUser();
+    }, [])
+  );
 
   const openSearchModal = () => {
     setSearchModalVisible(true);
@@ -205,7 +205,7 @@ const HomeScreen = () => {
   };
 
   const handlePlaceSelected = async (place) => {
-    setLoadingRides(true)
+    setLoadingRides(true);
     if (userLocation && place) {
       try {
         const searchParams = {
@@ -219,7 +219,7 @@ const HomeScreen = () => {
           sortBy: "time" as const,
         };
 
-        setSeeAll("routes")
+        setSeeAll("routes");
         closeSearchModal();
         const { rides } = await searchRides(searchParams);
         const ridesList = await Promise.all(
@@ -229,31 +229,46 @@ const HomeScreen = () => {
             return {
               ...ride,
               driverName: name,
-              driverProfileImg: imgUrl
+              driverProfileImg: imgUrl,
             };
           })
         );
 
         setAvailableRides(ridesList);
-        return
+        return;
       } catch (error) {
         Alert.alert("Erro", "Erro ao buscar caronas para este destino");
       } finally {
-        setLoadingRides(false)
+        setLoadingRides(false);
       }
     }
 
     closeSearchModal();
   };
 
-  const navigateToRideDetails = useCallback((rideId: string) => {
-    router.push(`/ride/${rideId}`);
-  }, [router])
+  const handleGoToProfile = async () => {
+    const userId = await getStoredUserID();
+
+    if (userId) {
+      router.push(`/profile/${userId}`);
+    } else {
+      console.error(
+        "ID do usuário não encontrado, redirecionando para o login."
+      );
+      router.push("/login");
+    }
+  };
+
+  const navigateToRideDetails = useCallback(
+    (rideId: string) => {
+      router.push(`/ride/${rideId}`);
+    },
+    [router]
+  );
 
   const navigateToSearch = useCallback(() => {
     router.push("/map/search");
   }, [router]);
-
 
   const navigateToMyRides = useCallback(() => {
     router.push("/ride-history/ride-history");
@@ -320,9 +335,7 @@ const HomeScreen = () => {
           />
 
           <View>
-            <Text style={styles.driverName}>
-              {item.driverName}
-            </Text>
+            <Text style={styles.driverName}>{item.driverName}</Text>
           </View>
         </View>
         <View style={styles.priceContainer}>
@@ -395,7 +408,7 @@ const HomeScreen = () => {
         </View>
         <TouchableOpacity
           style={styles.profileButton}
-          onPress={() => router.push("/profile/1")}
+          onPress={handleGoToProfile}
         >
           <Image source={AppImages.github} style={styles.profileImage} />
         </TouchableOpacity>

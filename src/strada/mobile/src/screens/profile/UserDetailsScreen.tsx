@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useRouter, useGlobalSearchParams } from "expo-router";
+import { getStoredToken } from "@/src/services/token.service";
 import { removeTokens } from "@/src/services/token.service";
 import { getStoredUserID, getUser } from "@/src/services/user.service";
 
@@ -74,6 +75,9 @@ const UserDetailsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [showAllDependents, setShowAllDependents] = useState(false);
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableUserData, setEditableUserData] = useState<UserData | null>(null);
+
   // Estados do Modal
   const [showAddDependentModal, setShowAddDependentModal] = useState(false);
   const [addingDependent, setAddingDependent] = useState(false);
@@ -103,6 +107,7 @@ const UserDetailsScreen = () => {
       const response = await getUser(userID);
       console.log(response);
       setUserData(response);
+      setEditableUserData(response);
     } catch (error) {
       console.error("Erro ao buscar dados do usuário:", error);
       Alert.alert("Erro", "Não foi possível carregar os dados do usuário");
@@ -128,6 +133,65 @@ const UserDetailsScreen = () => {
   const handleEmail = () => {
     if (userData?.email) {
       Linking.openURL(`mailto:${userData.email}`);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!editableUserData || !userId) return;
+
+    setLoading(true);
+    try {
+      const token = await getStoredToken();
+      if (!token) {
+        throw new Error("Usuário não autenticado.");
+      }
+
+      const apiUrl = `https://auth.${process.env.EXPO_PUBLIC_BASE_DOMAIN}/users/${userId}`;
+
+
+      const requestBody = {
+        name: editableUserData.name,
+        email: editableUserData.email,
+        username: editableUserData.username,
+        imgUrl: editableUserData.imgUrl,
+        phone: editableUserData.phone,
+        address: editableUserData.address,
+        city: editableUserData.city,
+        state: editableUserData.state,
+        cep: editableUserData.cep,
+        birthDate: editableUserData.birthDate,
+      };
+
+      const response = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        // Enviamos o objeto completo
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Falha ao atualizar o perfil.');
+      }
+
+      const updatedUser = await response.json();
+
+      delete updatedUser.password;
+
+      setUserData(updatedUser);
+      setEditableUserData(updatedUser);
+      setIsEditing(false);
+
+      Alert.alert('Sucesso!', 'Seu perfil foi atualizado.');
+
+    } catch (error: any) {
+      console.error("Erro ao salvar o perfil:", error);
+      Alert.alert('Erro', error.message || 'Não foi possível salvar as alterações.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -387,16 +451,46 @@ const UserDetailsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Informações Pessoais</Text>
 
+          {isEditing ? (
+            // Botões SALVAR e CANCELAR (no modo de edição)
+            <View style={{ flexDirection: 'row', gap: 15 }}>
+              <TouchableOpacity onPress={() => {
+                setIsEditing(false);
+                setEditableUserData(userData); // Descarta alterações
+              }}>
+                <Text style={{ color: '#D9534F', fontWeight: '600' }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleSaveChanges()}>
+                <Text style={{ color: '#4A80F0', fontWeight: '600' }}>Salvar</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            // Botão EDITAR (no modo de visualização)
+            <TouchableOpacity onPress={() => setIsEditing(true)}>
+              <Text style={{ color: '#4A80F0', fontWeight: '600' }}>Editar</Text>
+            </TouchableOpacity>
+          )}
+
+
           <View style={styles.infoRow}>
             <View style={styles.infoIconContainer}>
               <Feather name="user" size={16} color="#666" />
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Nome completo</Text>
-              <Text style={styles.infoValue}>{userData.name}</Text>
+              {isEditing ? (
+                <TextInput
+                  style={styles.textInput} // Reutilizando o estilo do modal
+                  value={editableUserData?.name || ''}
+                  onChangeText={(text) =>
+                    setEditableUserData(prev => prev ? { ...prev, name: text } : null)
+                  }
+                />
+              ) : (
+                <Text style={styles.infoValue}>{userData.name}</Text>
+              )}
             </View>
           </View>
-          <View style={styles.divider} />
 
           <View style={styles.infoRow}>
             <View style={styles.infoIconContainer}>
@@ -407,7 +501,6 @@ const UserDetailsScreen = () => {
               <Text style={styles.infoValue}>{userData.email}</Text>
             </View>
           </View>
-          <View style={styles.divider} />
 
           <View style={styles.infoRow}>
             <View style={styles.infoIconContainer}>
@@ -415,40 +508,66 @@ const UserDetailsScreen = () => {
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Telefone</Text>
-              <Text style={styles.infoValue}>
-                {userData.phone || "Não informado"}
-              </Text>
+              {isEditing ? (
+                <TextInput
+                  style={styles.textInput}
+                  value={editableUserData?.phone || ''}
+                  placeholder="Não informado"
+                  keyboardType="phone-pad"
+                  onChangeText={(text) => setEditableUserData(prev => prev ? { ...prev, phone: text } : null)}
+                />
+              ) : (
+                <Text style={styles.infoValue}>{userData.phone || "Não informado"}</Text>
+              )}
             </View>
           </View>
-          <View style={styles.divider} />
-
-          {fullAddress && (
-            <>
-              <View style={styles.infoRow}>
-                <View style={styles.infoIconContainer}>
-                  <Feather name="map-pin" size={16} color="#666" />
-                </View>
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Endereço</Text>
-                  <Text style={styles.infoValue}>{fullAddress}</Text>
-                  {userData.cep && (
-                    <Text style={styles.infoSubValue}>CEP: {userData.cep}</Text>
-                  )}
-                </View>
-              </View>
-              <View style={styles.divider} />
-            </>
-          )}
 
           <View style={styles.infoRow}>
             <View style={styles.infoIconContainer}>
-              <Feather name="calendar" size={16} color="#666" />
+              <Feather name="map-pin" size={16} color="#666" />
             </View>
             <View style={styles.infoContent}>
-              <Text style={styles.infoLabel}>Data de nascimento</Text>
-              <Text style={styles.infoValue}>
-                {formatDate(userData.birthDate)}
-              </Text>
+              <Text style={styles.infoLabel}>Endereço</Text>
+              {isEditing ? (
+                <View>
+                  <TextInput
+                    style={[styles.textInput, { marginBottom: 8 }]}
+                    placeholder="Endereço, número"
+                    value={editableUserData?.address || ''}
+                    onChangeText={(text) => setEditableUserData(prev => prev ? { ...prev, address: text } : null)}
+                  />
+                  <TextInput
+                    style={[styles.textInput, { marginBottom: 8 }]}
+                    placeholder="CEP"
+                    keyboardType="numeric"
+                    value={editableUserData?.cep || ''}
+                    onChangeText={(text) => setEditableUserData(prev => prev ? { ...prev, cep: text } : null)}
+                  />
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <TextInput
+                      style={[styles.textInput, { flex: 2 }]}
+                      placeholder="Cidade"
+                      value={editableUserData?.city || ''}
+                      onChangeText={(text) => setEditableUserData(prev => prev ? { ...prev, city: text } : null)}
+                    />
+                    <TextInput
+                      style={[styles.textInput, { flex: 1 }]}
+                      placeholder="Estado"
+                      maxLength={2}
+                      autoCapitalize="characters"
+                      value={editableUserData?.state || ''}
+                      onChangeText={(text) => setEditableUserData(prev => prev ? { ...prev, state: text } : null)}
+                    />
+                  </View>
+                </View>
+              ) : (
+                <>
+                  <Text style={styles.infoValue}>{fullAddress || "Não informado"}</Text>
+                  {userData.cep && (
+                    <Text style={styles.infoSubValue}>CEP: {userData.cep}</Text>
+                  )}
+                </>
+              )}
             </View>
           </View>
 
@@ -487,15 +606,15 @@ const UserDetailsScreen = () => {
               </TouchableOpacity>
             </View>
 
-            {userData.minors.length === 0 ? (
+            {!userData.minors || userData.minors.length === 0 ? (
               <Text style={styles.noDependentsText}>
                 Nenhum dependente cadastrado
               </Text>
             ) : (
               <>
                 {userData.minors
-                  .slice(0, showAllDependents ? userData.minors.length : 2)
-                  .map((minor) => (
+                  ?.slice(0, showAllDependents ? userData.minors.length : 2)
+                  ?.map((minor) => (
                     <View key={minor.id} style={styles.dependentCard}>
                       <View style={styles.dependentHeader}>
                         <View style={styles.dependentIconContainer}>
@@ -532,7 +651,7 @@ const UserDetailsScreen = () => {
                     </View>
                   ))}
 
-                {userData.minors.length > 2 && (
+                {userData.minors?.length > 2 && (
                   <TouchableOpacity
                     style={styles.showMoreButton}
                     onPress={() => setShowAllDependents(!showAllDependents)}
@@ -540,7 +659,7 @@ const UserDetailsScreen = () => {
                     <Text style={styles.showMoreText}>
                       {showAllDependents
                         ? "Mostrar menos"
-                        : `Ver todos (${userData.minors.length})`}
+                        : `Ver todos (${userData.minors?.length})`}
                     </Text>
                     <Feather
                       name={showAllDependents ? "chevron-up" : "chevron-down"}
@@ -555,7 +674,7 @@ const UserDetailsScreen = () => {
         )}
 
         {/* Seção de Responsáveis (para menores) */}
-        {userData.userType === "MINOR" && userData.guardians.length > 0 && (
+        {userData.userType === "MINOR" && userData.guardians?.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Responsáveis</Text>
             {userData.guardians.map((guardianData) => (
@@ -778,7 +897,7 @@ const UserDetailsScreen = () => {
                       style={[
                         styles.relationshipOption,
                         dependentForm.relationship === option.value &&
-                          styles.relationshipOptionSelected,
+                        styles.relationshipOptionSelected,
                       ]}
                       onPress={() =>
                         setDependentForm((prev) => ({
@@ -791,7 +910,7 @@ const UserDetailsScreen = () => {
                         style={[
                           styles.relationshipOptionText,
                           dependentForm.relationship === option.value &&
-                            styles.relationshipOptionTextSelected,
+                          styles.relationshipOptionTextSelected,
                         ]}
                       >
                         {option.label}
@@ -872,7 +991,7 @@ const UserDetailsScreen = () => {
           </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 };
 
