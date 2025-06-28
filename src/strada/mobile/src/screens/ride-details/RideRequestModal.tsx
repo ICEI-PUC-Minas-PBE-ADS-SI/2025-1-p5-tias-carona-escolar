@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Modal,
   View,
@@ -52,6 +52,8 @@ interface CreateRideRequestModalProps {
   rideId: string;
   availableSeats: number;
   onSuccess: () => void;
+  defaultPickupLocation?: LocationData;
+  defaultDropoffLocation?: LocationData;
 }
 
 const CreateRideRequestModal: React.FC<CreateRideRequestModalProps> = ({
@@ -60,15 +62,17 @@ const CreateRideRequestModal: React.FC<CreateRideRequestModalProps> = ({
   rideId,
   availableSeats,
   onSuccess,
+  defaultPickupLocation,
+  defaultDropoffLocation,
 }) => {
   const insets = useSafeAreaInsets();
   const [seatsNeeded, setSeatsNeeded] = useState<string>("1");
   const [message, setMessage] = useState<string>("");
   const [pickupLocation, setPickupLocation] = useState<LocationData | null>(
-    null
+    defaultPickupLocation || null
   );
   const [dropoffLocation, setDropoffLocation] = useState<LocationData | null>(
-    null
+    defaultDropoffLocation || null
   );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +80,15 @@ const CreateRideRequestModal: React.FC<CreateRideRequestModalProps> = ({
   const [searchType, setSearchType] = useState<"origin" | "destination">(
     "origin"
   );
+
+  useEffect(() => {
+    if (defaultPickupLocation) {
+      setPickupLocation(defaultPickupLocation);
+    }
+    if (defaultDropoffLocation) {
+      setDropoffLocation(defaultDropoffLocation);
+    }
+  }, [defaultPickupLocation, defaultDropoffLocation]);
 
   const handleCreateRequest = useCallback(async () => {
     setError(null);
@@ -135,10 +148,10 @@ const CreateRideRequestModal: React.FC<CreateRideRequestModalProps> = ({
   const resetForm = useCallback(() => {
     setSeatsNeeded("1");
     setMessage("");
-    setPickupLocation(null);
-    setDropoffLocation(null);
+    setPickupLocation(defaultPickupLocation || null);
+    setDropoffLocation(defaultDropoffLocation || null);
     setError(null);
-  }, []);
+  }, [defaultPickupLocation, defaultDropoffLocation]);
 
   const openSearchModal = useCallback((type: "origin" | "destination") => {
     setSearchType(type);
