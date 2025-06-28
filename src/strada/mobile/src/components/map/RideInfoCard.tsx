@@ -1,6 +1,6 @@
 // src/components/ride/RideInfoCard.jsx
-import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import BottomSheet, {
   BottomSheetHandle,
@@ -9,8 +9,60 @@ import BottomSheet, {
 import { lightTheme } from "@/src/constants/theme";
 import { useRouter } from "expo-router";
 import { changeRideStatus } from "@/src/services/ride.service";
+import { getStoredUserID } from "@/src/services/user.service";
+import {
+  rateRide,
+  getRatingsByRideId
+} from "@/src/services/rating.service";
 
-const RideInfoCard = ({
+// Interfaces TypeScript
+interface Passenger {
+  id: string;
+  name: string;
+  imgUrl: string;
+  rating: number;
+  pickup?: {
+    address: string;
+  };
+}
+
+interface RideData {
+  id: string;
+  status: string;
+  driverId: string;
+  driverName: string;
+  driverImage: string;
+  rating: number;
+  carModel: string;
+  carColor: string;
+  licensePlate: string;
+  departureTime: string;
+  duration: string;
+  estimatedDistance: number;
+  availableSeats: number;
+  paymentMethod: string;
+  allowLuggage: boolean;
+  pricePerSeat: number;
+  totalFare?: number;
+  pickup?: {
+    address: string;
+  };
+  dropoff?: {
+    address: string;
+  };
+  passengers?: Passenger[];
+  feedback?: string;
+}
+
+interface RideInfoCardProps {
+  rideData: RideData;
+  bottomSheetRef: any;
+  snapPoints: string[];
+  onSheetChanges: (index: number) => void;
+  isOwner?: boolean;
+}
+
+const RideInfoCard: React.FC<RideInfoCardProps> = ({
   rideData,
   bottomSheetRef,
   snapPoints,
@@ -20,7 +72,42 @@ const RideInfoCard = ({
   const theme = lightTheme;
   const router = useRouter();
 
-  const renderStars = (rating) => {
+  // Estados para avaliação
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [rideRatings, setRideRatings] = useState<any[]>([]);
+
+  // Verificar se o usuário já avaliou a corrida
+  useEffect(() => {
+    const checkIfUserRated = async () => {
+      try {
+        const userId = await getStoredUserID();
+        setCurrentUserId(userId);
+
+        if (userId && rideData.id) {
+          // Verificar se já existe uma avaliação do usuário
+
+          // Buscar avaliações da corrida
+          try {
+            const ratingsResponse = await getRatingsByRideId(rideData.id);
+            setRideRatings(ratingsResponse.data || []);
+          } catch (error) {
+            console.error("Erro ao buscar avaliações da corrida:", error);
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao verificar avaliação:", error);
+      }
+    };
+
+    checkIfUserRated();
+  }, [rideData.id, isOwner, rideData.driverId]);
+
+  const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
@@ -57,7 +144,7 @@ const RideInfoCard = ({
     return stars;
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "ACTIVE":
         return "#4CAF50";
@@ -72,7 +159,7 @@ const RideInfoCard = ({
     }
   };
 
-  const getStatusText = (status) => {
+  const getStatusText = (status: string) => {
     switch (status) {
       case "ACTIVE":
         return "Em Andamento";
@@ -87,7 +174,7 @@ const RideInfoCard = ({
     }
   };
 
-  const formatDistance = (distance) => {
+  const formatDistance = (distance: number) => {
     if (!distance) return "--";
     if (distance >= 1000) {
       return `${(distance / 1000).toFixed(1)} km`;
@@ -104,6 +191,144 @@ const RideInfoCard = ({
     console.log("Finalizando corrida...");
     await changeRideStatus(rideData.id, "COMPLETED");
     router.push(`/map/${rideData.id}`);
+  };
+
+  const handleRatingPress = (selectedRating: number) => {
+    setRating(selectedRating);
+  };
+
+  const handleSubmitRating = async () => {
+    if (rating === 0) {
+      Alert.alert("Avaliação", "Por favor, selecione uma avaliação.");
+      return;
+    }
+
+    if (!currentUserId) {
+      Alert.alert("Erro", "Usuário não identificado.");
+      return;
+    }
+
+    setIsSubmittingRating(true);
+    try {
+      // Determinar quem está sendo avaliado
+      let ratedId: string;
+      let ratingType: "DRIVER_TO_PASSENGER" | "PASSENGER_TO_DRIVER";
+
+      if (isOwner) {
+        // Motorista avaliando passageiros - avaliar todos os passageiros
+        if (rideData.passengers && rideData.passengers.length > 0) {
+          for (const passenger of rideData.passengers) {
+            await rateRide(
+              rideData.id,
+              passenger.id,
+              rating,
+              comment,
+              "DRIVER_TO_PASSENGER"
+            );
+          }
+        }
+      } else {
+        // Passageiro avaliando motorista
+        ratedId = rideData.driverId;
+        ratingType = "PASSENGER_TO_DRIVER";
+
+        await rateRide(
+          rideData.id,
+          ratedId,
+          rating,
+          comment,
+          ratingType
+        );
+      }
+
+      setHasRated(true);
+      setShowRatingModal(false);
+      setRating(0);
+      setComment("");
+
+      // Atualizar lista de avaliações
+      try {
+        const ratingsResponse = await getRatingsByRideId(rideData.id);
+        setRideRatings(ratingsResponse.data || []);
+      } catch (error) {
+        console.error("Erro ao atualizar avaliações:", error);
+      }
+
+      Alert.alert(
+        "Avaliação Enviada",
+        "Obrigado por avaliar sua corrida!",
+        [{ text: "OK" }]
+      );
+    } catch (error) {
+      console.error("Erro ao enviar avaliação:", error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível enviar sua avaliação. Tente novamente.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
+
+  const canRateRide = () => {
+    // Só pode avaliar se:
+    // 1. A corrida está concluída
+    // 2. O usuário não é o motorista
+    // 3. O usuário ainda não avaliou
+    // 4. O usuário é um passageiro da corrida OU é o motorista avaliando passageiros
+    console.log("Status da corrida:", rideData.status);
+    console.log("É proprietário:", isOwner);
+    console.log("Já avaliou:", hasRated);
+    console.log("Usuário atual:", currentUserId);
+    console.log("Passageiros:", rideData.passengers);
+
+    // Verificar se é passageiro
+    const isPassenger = rideData.passengers?.some((passenger: Passenger) => passenger.id === currentUserId);
+    console.log("É passageiro:", isPassenger);
+
+    return (
+      rideData.status === "COMPLETED" &&
+      !hasRated &&
+      currentUserId &&
+      (isPassenger || isOwner) // Permitir que motorista também avalie
+    );
+  };
+
+  // Renderizar avaliações da corrida
+  const renderRideRatings = () => {
+    if (!rideRatings || rideRatings.length === 0) return null;
+
+    return (
+      <View style={styles.ratingsSection}>
+        <Text style={styles.sectionTitle}>
+          Avaliações da Corrida ({rideRatings.length})
+        </Text>
+        {rideRatings.slice(0, 3).map((rating: any, index: number) => (
+          <View key={rating.id || index} style={styles.ratingCard}>
+            <View style={styles.ratingHeader}>
+              <Text style={styles.ratingAuthor}>
+                {rating.raterName || "Usuário"}
+              </Text>
+              <View style={styles.ratingStars}>
+                {renderStars(rating.rating)}
+              </View>
+            </View>
+            {rating.comment && (
+              <Text style={styles.ratingComment}>{rating.comment}</Text>
+            )}
+            <Text style={styles.ratingDate}>
+              {new Date(rating.createdAt).toLocaleDateString('pt-BR')}
+            </Text>
+          </View>
+        ))}
+        {rideRatings.length > 3 && (
+          <Text style={styles.moreRatingsText}>
+            +{rideRatings.length - 3} mais avaliações
+          </Text>
+        )}
+      </View>
+    );
   };
 
   return (
@@ -272,7 +497,7 @@ const RideInfoCard = ({
               Passageiros ({rideData.passengers.length})
             </Text>
 
-            {rideData.passengers.map((passenger) => (
+            {rideData.passengers.map((passenger: Passenger) => (
               <View key={passenger.id} style={styles.passengerCard}>
                 <Image
                   source={{ uri: passenger.imgUrl }}
@@ -325,7 +550,50 @@ const RideInfoCard = ({
           </View>
         </View>
 
-        {/* Feedback */}
+        {/* Rating Section */}
+        {canRateRide() && (
+          <View style={styles.ratingSection}>
+            <Text style={styles.sectionTitle}>
+              Avaliar Corrida
+            </Text>
+            <TouchableOpacity
+              style={styles.rateButton}
+              onPress={() => setShowRatingModal(true)}
+            >
+              <FontAwesome name="star" size={16} color="#FFD700" />
+              <Text style={styles.rateButtonText}>
+                Avaliar Corrida
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Mostrar se já avaliou */}
+        {hasRated && (
+          <View style={styles.ratingSection}>
+            <Text style={styles.sectionTitle}>Sua Avaliação</Text>
+            <View style={styles.userRatingContainer}>
+              <View style={styles.userRatingStars}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <FontAwesome
+                    key={star}
+                    name="star"
+                    size={16}
+                    color="#FFD700"
+                  />
+                ))}
+              </View>
+              <Text style={styles.userRatingText}>
+                Obrigado por avaliar esta corrida!
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Ride Ratings Section */}
+        {renderRideRatings()}
+
+        {/* Feedback - MOVER PARA DEPOIS DA AVALIAÇÃO */}
         {rideData.feedback && (
           <View style={styles.feedbackSection}>
             <Text style={styles.sectionTitle}>Avaliação</Text>
@@ -335,7 +603,7 @@ const RideInfoCard = ({
           </View>
         )}
 
-        {/* Owner Actions */}
+        {/* Owner Actions - MANTER NO FINAL */}
         {isOwner && (
           <View style={styles.feedbackSection}>
             <Text style={styles.sectionTitle}>Ações do Proprietário</Text>
@@ -358,9 +626,86 @@ const RideInfoCard = ({
             </TouchableOpacity>
           </View>
         )}
+
         {/* Bottom padding for better scrolling */}
         <View style={styles.bottomPadding} />
       </BottomSheetScrollView>
+
+      {/* Rating Modal */}
+      {showRatingModal && (
+        <View style={styles.ratingModalOverlay}>
+          <View style={styles.ratingModal}>
+            <View style={styles.ratingModalHeader}>
+              <Text style={styles.ratingModalTitle}>Avaliar Corrida</Text>
+              <TouchableOpacity
+                onPress={() => setShowRatingModal(false)}
+                style={styles.closeRatingButton}
+              >
+                <FontAwesome name="times" size={20} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.ratingStarsContainer}>
+              <Text style={styles.ratingLabel}>Sua avaliação:</Text>
+              <View style={styles.starsRow}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <TouchableOpacity
+                    key={star}
+                    onPress={() => handleRatingPress(star)}
+                    style={styles.starButton}
+                  >
+                    <FontAwesome
+                      name={star <= rating ? "star" : "star-o"}
+                      size={32}
+                      color={star <= rating ? "#FFD700" : "#DDD"}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.modalRatingText}>
+                {rating === 0 && "Toque nas estrelas para avaliar"}
+                {rating === 1 && "Ruim"}
+                {rating === 2 && "Regular"}
+                {rating === 3 && "Bom"}
+                {rating === 4 && "Muito Bom"}
+                {rating === 5 && "Excelente"}
+              </Text>
+            </View>
+
+            <View style={styles.commentContainer}>
+              <Text style={styles.commentLabel}>Comentário (opcional):</Text>
+              <TextInput
+                style={styles.commentInput}
+                value={comment}
+                onChangeText={setComment}
+                placeholder="Conte como foi sua experiência..."
+                placeholderTextColor="#999"
+                multiline
+                numberOfLines={4}
+                maxLength={500}
+              />
+              <Text style={styles.commentCounter}>
+                {comment.length}/500
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.submitRatingButton,
+                (rating === 0 || isSubmittingRating) && styles.submitRatingButtonDisabled
+              ]}
+              onPress={handleSubmitRating}
+              disabled={rating === 0 || isSubmittingRating}
+            >
+              {isSubmittingRating ? (
+                <Text style={styles.submitRatingButtonText}>Enviando...</Text>
+              ) : (
+                <Text style={styles.submitRatingButtonText}>Enviar Avaliação</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </BottomSheet>
   );
 };
@@ -668,6 +1013,184 @@ const styles = StyleSheet.create({
 
   bottomPadding: {
     height: 20,
+  },
+
+  // Rating Section
+  ratingSection: {
+    marginBottom: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  rateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8F9FA",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  rateButtonText: {
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+  },
+  userRatingContainer: {
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 12,
+  },
+  userRatingStars: {
+    flexDirection: "row",
+    marginBottom: 8,
+  },
+  userRatingText: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+  },
+
+  // Ratings Section
+  ratingsSection: {
+    marginBottom: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  ratingCard: {
+    backgroundColor: "#F8F9FA",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  ratingHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  ratingAuthor: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#333",
+  },
+  ratingStars: {
+    flexDirection: "row",
+  },
+  ratingComment: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  ratingDate: {
+    fontSize: 12,
+    color: "#999",
+  },
+  moreRatingsText: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    fontStyle: "italic",
+  },
+
+  // Rating Modal
+  ratingModalOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  ratingModal: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 24,
+    margin: 20,
+    width: "90%",
+    maxWidth: 400,
+  },
+  ratingModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  ratingModalTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#333",
+  },
+  closeRatingButton: {
+    padding: 4,
+  },
+  ratingStarsContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  ratingLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginBottom: 12,
+  },
+  starsRow: {
+    flexDirection: "row",
+    marginBottom: 8,
+  },
+  starButton: {
+    padding: 8,
+  },
+  modalRatingText: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+  },
+  commentContainer: {
+    marginBottom: 24,
+  },
+  commentLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginBottom: 8,
+  },
+  commentInput: {
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
+    color: "#333",
+    minHeight: 80,
+    textAlignVertical: "top",
+  },
+  commentCounter: {
+    fontSize: 12,
+    color: "#999",
+    textAlign: "right",
+    marginTop: 4,
+  },
+  submitRatingButton: {
+    backgroundColor: lightTheme.primary,
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  submitRatingButtonDisabled: {
+    backgroundColor: "#CCC",
+  },
+  submitRatingButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 
