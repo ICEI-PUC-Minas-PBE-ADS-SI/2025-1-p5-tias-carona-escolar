@@ -15,7 +15,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { AppImages } from "@/src/assets";
 import { colors } from "@/src/constants/colors";
@@ -180,20 +180,22 @@ const HomeScreen = () => {
     }
   }, [userLocation, loadPopularRoutes, loadAvailableRides]);
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const storedUserId = await getStoredUserID();
-        if (storedUserId) {
-          const user = await getUser(storedUserId);
-          setUser(user);
+  useFocusEffect(
+    useCallback(() => {
+      async function fetchUser() {
+        try {
+          const storedUserId = await getStoredUserID();
+          if (storedUserId) {
+            const user = await getUser(storedUserId);
+            setUser(user);
+          }
+        } catch (error) {
+          console.error("Erro ao carregar usuário na Home:", error);
         }
-      } catch (error) {
-        console.error("Erro ao carregar usuário:", error);
       }
-    }
-    fetchUser();
-  }, []);
+      fetchUser();
+    }, [])
+  );
 
   const openSearchModal = () => {
     setSearchModalVisible(true);
@@ -243,6 +245,17 @@ const HomeScreen = () => {
     }
 
     closeSearchModal();
+  };
+
+  const handleGoToProfile = async () => {
+    const userId = await getStoredUserID();
+
+    if (userId) {
+      router.push(`/profile/${userId}`);
+    } else {
+      console.error("ID do usuário não encontrado, redirecionando para o login.");
+      router.push('/login');
+    }
   };
 
   const navigateToRideDetails = useCallback((rideId: string) => {
@@ -394,7 +407,7 @@ const HomeScreen = () => {
         </View>
         <TouchableOpacity
           style={styles.profileButton}
-          onPress={() => router.push("/profile/1")}
+          onPress={handleGoToProfile}
         >
           <Image source={AppImages.github} style={styles.profileImage} />
         </TouchableOpacity>
