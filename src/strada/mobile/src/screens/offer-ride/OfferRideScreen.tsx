@@ -79,7 +79,7 @@ const OfferRideScreen = () => {
   const [startDate, setstartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState("0");
   const [availableSeats, setAvailableSeats] = useState(3);
   const [notes, setNotes] = useState("");
   const [allowPets, setAllowPets] = useState(false);
@@ -537,19 +537,6 @@ const OfferRideScreen = () => {
             <Text style={styles.sectionTitle}>Preço e Assentos</Text>
           </View>
 
-          <View style={styles.priceInputContainer}>
-            <Text style={styles.currencySymbol}>R$</Text>
-            <TextInput
-              style={styles.priceInput}
-              value={price}
-              onChangeText={setPrice}
-              placeholder="0,00"
-              keyboardType="numeric"
-              placeholderTextColor={colors.darkGrey}
-            />
-            <Text style={styles.perPersonText}>por pessoa</Text>
-          </View>
-
           <View style={styles.seatsContainer}>
             <Text style={styles.seatsLabel}>Assentos disponíveis</Text>
             <View style={styles.seatsSelector}>
@@ -577,145 +564,6 @@ const OfferRideScreen = () => {
                   size={20}
                   color={availableSeats >= 42 ? colors.grey : colors.darkGrey}
                 />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        {/* Seção: Preferências */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Icon name="tune" size={20} color={colors.primaryPink} />
-            <Text style={styles.sectionTitle}>Preferências</Text>
-          </View>
-
-          <View style={styles.preferencesContainer}>
-            <View style={styles.preferenceRow}>
-              <View style={styles.preferenceInfo}>
-                <Icon name="smoke-free" size={20} color={colors.darkGrey} />
-                <Text style={styles.preferenceLabel}>Permitir fumar</Text>
-              </View>
-              <Switch
-                value={allowSmoking}
-                onValueChange={setAllowSmoking}
-                trackColor={{ false: colors.grey, true: colors.lightPink }}
-                thumbColor={allowSmoking ? colors.primaryPink : colors.white}
-              />
-            </View>
-
-            <View style={styles.preferenceRow}>
-              <View style={styles.preferenceInfo}>
-                <Icon name="pets" size={20} color={colors.darkGrey} />
-                <Text style={styles.preferenceLabel}>Permitir animais</Text>
-              </View>
-              <Switch
-                value={allowPets}
-                onValueChange={setAllowPets}
-                trackColor={{ false: colors.grey, true: colors.lightPink }}
-                thumbColor={allowPets ? colors.primaryPink : colors.white}
-              />
-            </View>
-
-            <View style={styles.preferenceRow}>
-              <View style={styles.preferenceInfo}>
-                <Icon name="luggage" size={20} color={colors.darkGrey} />
-                <Text style={styles.preferenceLabel}>Permitir bagagem</Text>
-              </View>
-              <Switch
-                value={allowLuggage}
-                onValueChange={setAllowLuggage}
-                trackColor={{ false: colors.grey, true: colors.lightPink }}
-                thumbColor={allowLuggage ? colors.primaryPink : colors.white}
-              />
-            </View>
-
-            <View style={styles.preferenceRow}>
-              <View style={styles.preferenceInfo}>
-                <Icon name="more-horiz" size={20} color={colors.darkGrey} />
-                <Text style={styles.preferenceLabel}>Pode fazer paradas</Text>
-              </View>
-              <Switch
-                value={canMakeStops}
-                onValueChange={setCanMakeStops}
-                trackColor={{ false: colors.grey, true: colors.lightPink }}
-                thumbColor={canMakeStops ? colors.primaryPink : colors.white}
-              />
-            </View>
-          </View>
-
-          <View style={styles.luggageSizeContainer}>
-            <Text style={styles.luggageLabel}>Tamanho máximo de bagagem:</Text>
-            <View style={styles.luggageOptions}>
-              <TouchableOpacity
-                style={[
-                  styles.luggageOption,
-                  luggageSize === "small" && styles.luggageSelected,
-                ]}
-                onPress={() => setLuggageSize("small")}
-              >
-                <Icon
-                  name="work"
-                  size={18}
-                  color={
-                    luggageSize === "small" ? colors.white : colors.darkGrey
-                  }
-                />
-                <Text
-                  style={[
-                    styles.luggageText,
-                    luggageSize === "small" && styles.luggageTextSelected,
-                  ]}
-                >
-                  Pequena
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.luggageOption,
-                  luggageSize === "medium" && styles.luggageSelected,
-                ]}
-                onPress={() => setLuggageSize("medium")}
-              >
-                <Icon
-                  name="work"
-                  size={22}
-                  color={
-                    luggageSize === "medium" ? colors.white : colors.darkGrey
-                  }
-                />
-                <Text
-                  style={[
-                    styles.luggageText,
-                    luggageSize === "medium" && styles.luggageTextSelected,
-                  ]}
-                >
-                  Média
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.luggageOption,
-                  luggageSize === "large" && styles.luggageSelected,
-                ]}
-                onPress={() => setLuggageSize("large")}
-              >
-                <Icon
-                  name="luggage"
-                  size={24}
-                  color={
-                    luggageSize === "large" ? colors.white : colors.darkGrey
-                  }
-                />
-                <Text
-                  style={[
-                    styles.luggageText,
-                    luggageSize === "large" && styles.luggageTextSelected,
-                  ]}
-                >
-                  Grande
-                </Text>
               </TouchableOpacity>
             </View>
           </View>
