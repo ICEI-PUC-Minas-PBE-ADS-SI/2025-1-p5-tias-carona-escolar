@@ -63,20 +63,17 @@ As tabelas a seguir apresentam os requisitos funcionais e não funcionais que de
 
 ### Requisitos funcionais
 
-| ID | Requisito Funcional | Prioridade |
-| :--- | :--- | :--- |
-| **RF-001** | **Cadastro e Gestão de Usuários**: O sistema deve permitir um cadastro de usuário unificado. Todo usuário inicia como "Responsável" e pode se tornar "Motorista" ao oferecer uma rota. | **ALTA** |
-| **RF-002** | **Login de Usuário**: O sistema deve permitir que usuários previamente cadastrados realizem login informando e-mail e senha. | **ALTA** |
-| **RF-003** | **Cadastro de Alunos (Passageiros)**: O sistema deve permitir que um "Responsável" cadastre um ou mais alunos (filhos) em sua conta, vinculando-os ao seu perfil. | **ALTA** |
-| **RF-004** | **Criação e Gerenciamento de Rotas (Motorista)**: O sistema deve permitir que o "Motorista" cadastre suas rotas de ou para a escola Educare, definindo informações básicas sobre a carona. | **ALTA** |
-| **RF-005** | **Busca e Correspondência de Rotas (Responsável)**: O sistema deve permitir que o "Responsável" busque por motoristas cujas rotas sejam compatíveis com a necessidade do aluno (proximidade e horário). | **ALTA** |
-| **RF-006** | **Agendamento de Carona (Responsável)**: O sistema deve permitir que o "Responsável" solicite e agende uma carona para um aluno com um motorista compatível. | **ALTA** |
-| **RF-007** | **Gestão de Solicitações de Carona (Motorista)**: O sistema deve permitir que o "Motorista" visualize, aceite ou recuse as solicitações de carona recebidas. | **ALTA** |
-| **RF-008** | **Gestão de Perfil do Usuário**: O sistema deve permitir que os usuários editem informações básicas de seus perfis. | **MÉDIA** |
-| **RF-009** | **Sistema de Avaliação e Feedback**: O sistema deve permitir que responsáveis e motoristas se avaliem mutuamente após a conclusão de uma carona. | **MÉDIA** |
-| **RF-010** | **Agendamento de Caronas Recorrentes**: O sistema deve permitir que o "Responsável" agende caronas de forma recorrente (ex: toda segunda e quarta) sem precisar repetir o processo manualmente. | **BAIXA** |
-| **RF-011** | **Histórico de Caronas**: O sistema deve oferecer um histórico simplificado das caronas realizadas para cada usuário. | **BAIXA** |
-| **RF-012** | **Validação de Segurança do Motorista**: (mock) O sistema deve ter um processo de validação de identidade e da CNH (Carteira Nacional de Habilitação) quando um usuário se candidata a "Motorista". | **ALTA** |
+|ID    | Descrição do Requisito  | Prioridade |
+|------|-----------------------------------------|----|
+|RF-001| Permitir o cadastro de pais, alunos e motoristas com verificação de identidade. | ALTA | 
+|RF-002| Permitir que os usuários avaliem e deixem feedback sobre as caronas realizadas.   | MÉDIA |
+|RF-003| Implementar um sistema de correspondência de rotas com base em proximidade e horários.   | ALTA |
+|RF-004| Permitir que os motoristas visualizem solicitações de carona em sua rota.	   | ALTA |
+|RF-005| Implementar um sistema de chat para comunicação entre motoristas e passageiros.   | MÉDIA |
+|RF-006| Permitir que os administradores gerenciem usuários e caronas.   | ALTA |
+|RF-007| Oferecer uma funcionalidade de histórico de caronas realizadas.   | BAIXA |
+|RF-008| Permitir que os usuários editem seus perfis e preferências de carona.   | BAIXA |
+
 ### Requisitos não funcionais
 
 |ID     | Descrição do Requisito  |Prioridade |
