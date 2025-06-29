@@ -36,9 +36,9 @@
 | :---: | :---: |
 | **Requisito associado** | RF-004 - Criação e Gerenciamento de Rotas (Motorista): O sistema deve permitir que o "Motorista" cadastre suas rotas de ou para a escola Educare. |
 | **Objetivo do teste** | Verificar se um usuário "Motorista" (com perfil já validado) consegue criar uma nova rota. |
-| **Passos** | |
-| **Critério de êxito** | |
-| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+| **Passos** | - Acessar a aplicação mobile. <br> - Clicar em "Vamos começar" <br> - Perpassar o carrosel de boas-vindas. <br> - Clicar em "Entrar agora". <br> - Fazer login com a conta de usuário  <br> - Clicar em "Oferecer". <br> - Escolher ponto de partida. <br> - Definir quantidade e preço dos assentos. <br> - Definir preferências da viagem (permitir fumar; permitir animais; permitir bagagem; permitir paradas). <br> - Clicar em "Publicar Carona". |
+| **Critério de êxito** | - O usuário é redirecionado para a tela de Histórico, onde pode acessar a corrida. <br> - Na tela de histórico, o motorista pode verificar algumas informações sobre a viagem, tal qual o status, que quando criado é "Aguardando". |
+| **Responsável pela elaboração do caso de teste** | Vinicius Henrique Alves. |
 
 <br>
 
