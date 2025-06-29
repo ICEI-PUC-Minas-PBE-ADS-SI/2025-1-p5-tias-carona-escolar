@@ -23,15 +23,51 @@ Diferentemente de aplicativos de carona tradicionais, este serviço será dedica
 
 * Amália Soares Vieira de Vasconcelos
 
-## Instruções de utilização
+# Instruções de utilização
 
-Assim que a primeira versão do sistema estiver disponível, deverá complementar com as instruções de utilização. Descreva como instalar eventuais dependências e como executar a aplicação.
+## Requisitos para executar a aplicação
 
-Não deixe de informar o link onde a aplicação estará disponível para acesso (por exemplo: https://adota-pet.herokuapp.com/src/index.html).
+- Node.js versão 18 ou superior  
+- NPM ou Yarn instalado  
+- Expo CLI (instalado globalmente ou via npx)  
+- Emulador Android configurado (Android Studio) ou dispositivo Android físico conectado via USB com depuração ativada  
+- Banco de dados PostgreSQL (versão 13 ou superior recomendado)  
+- Servidor backend rodando localmente ou remotamente  
 
-Se houver usuário de teste, o login e a senha também deverão ser informados aqui (por exemplo: usuário - admin / senha - admin).
+## Passos para instalação e execução
 
-O link e o usuário/senha descritos acima são apenas exemplos de como tais informações deverão ser apresentadas.
+### Clone o repositório:
+
+git clone https://github.com/ICEI-PUC-Minas-PBE-ADS-SI/2025-1-p5-tias-carona-escolar
+cd 2025-1-p5-tias-carona-escolar
+
+### Backend:
+
+Entre na pasta do backend:
+
+cd src\strada\backend
+npm install
+
+### Inicie o backend:
+
+npm run start
+
+### Frontend (React Native com Expo):
+Entre na pasta do app mobile:
+
+cd src\strada\mobile
+npm install
+Para rodar o app no emulador Android ou dispositivo físico, execute:
+
+### Inicie o Frontend:
+
+npx expo run:android
+
+## Usuário de teste
+
+| Tipo        | Usuário (email)     | Senha  | Observações               |
+|-------------|---------------------|--------|--------------------------|
+| Usuário     | luisa@email.com     | 1234   | Usuário padrão para testes|
 
 # Documentação
 

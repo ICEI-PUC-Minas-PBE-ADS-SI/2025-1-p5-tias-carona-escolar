@@ -44,3 +44,15 @@ Objetivando respeitar as diretrizes da Lei Geral de Proteção de Dados, as info
 > - [Planejando testes de usabilidade: o que (e o que não) fazer](https://imasters.com.br/design-ux/planejando-testes-de-usabilidade-o-que-e-o-que-nao-fazer/)
 > - [Ferramentas de testes de usabilidade](https://www.usability.gov/how-to-and-tools/resources/templates.html)
 > - [UX Tools](https://uxdesign.cc/ux-user-research-and-user-testing-tools-2d339d379dc7)
+
+
+## Cenários de teste de usabilidade
+
+| Nº do cenário | Descrição do cenário |
+|---------------|----------------------|
+| 1             | Acesse o aplicativo pela primeira vez e realize o cadastro como um novo usuário, preenchendo as informações básicas solicitadas na tela de registro. |
+| 2             | Acesse sua conta como motorista e crie uma rota de carona, informando os dados do trajeto, como horário de saída, local de partida e destino. |
+| 3             | Acesse o histórico de caronas e visualize os detalhes de uma carona realizada anteriormente, como participantes, horário e trajeto. |
+| 4             | Entre na sua conta de motorista, visualize as solicitações de carona recebidas e aceite uma das solicitações pendentes. |
+| 5             | Após finalizar uma viagem de carona, acesse o histórico da corrida e preencha uma avaliação para o outro usuário que participou da viagem. |
+| 6             | Como responsável, acesse o mapa dentro do aplicativo para acompanhar em tempo real o trajeto da carona que está sendo realizada. |
