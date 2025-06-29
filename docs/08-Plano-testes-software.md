@@ -26,8 +26,8 @@
 | :---: | :---: |
 | **Requisito associado** | RF-003 - Cadastro de Alunos (Passageiros): O sistema deve permitir que um "Responsável" cadastre um ou mais alunos (filhos) em sua conta, vinculando-os ao seu perfil. |
 | **Objetivo do teste** | Verificar se um usuário "Responsável" consegue adicionar um novo aluno (filho) à sua conta. |
-| **Passos** | |
-| **Critério de êxito** | |
+| **Passos** | - Acessar o sistema com um usuário do tipo "Responsável". <br> - Navegar até a aba Perfil do Usuário. <br> - Localizar a seção Dependentes. <br> - Clicar no botão Adicionar. <br> - Preencher os dados obrigatórios do dependente (ex: nome, data de nascimento, etc.). <br> - Clicar em Salvar.|
+| **Critério de êxito** | - O sistema exibe a mensagem "Válida". |
 | **Responsável pela elaboração do caso de teste** | Walyson Moises Barbosa. |
 
 <br>
