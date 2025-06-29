@@ -28,7 +28,7 @@
 | **Objetivo do teste** | Verificar se um usuário "Responsável" consegue adicionar um novo aluno (filho) à sua conta. |
 | **Passos** | |
 | **Critério de êxito** | |
-| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+| **Responsável pela elaboração do caso de teste** | Walyson Moises Barbosa. |
 
 <br>
 
