@@ -8,4 +8,8 @@ export interface IUserRequest {
   cep?: string;
   city?: string;
   state?: string;
+  cnh?: string;
+  vehicle_model?: string;
+  vehicle_color?: string;
+  license_plate?: string;
 }

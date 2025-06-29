@@ -17,6 +17,8 @@ export const createUser = async (user: IUserRequest) => {
 export const getUser = async (id: string) => {
   try {
     const response = await authAxios.get(`/users/${id}`);
+    console.log("getting user\n\n");
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -26,7 +28,11 @@ export const getUser = async (id: string) => {
 
 export const updateUser = async (id: string, user: IUserRequest) => {
   try {
+    console.log("updating user");
+    console.log(user);
     const response = await authAxios.put(`/users/${id}`, user);
+    console.log("sent");
+    console.log(response.data);
     storeUser(response.data);
     return response.data;
   } catch (error) {
@@ -40,7 +46,8 @@ export const storeUserID = async (id: string) => {
 };
 
 export const getStoredUser = async () => {
-  return await SecureStore.getItemAsync("user");
+  const user = await SecureStore.getItemAsync("user");
+  return user;
 };
 
 export const storeUser = async (user: Partial<IUserRequest>) => {
