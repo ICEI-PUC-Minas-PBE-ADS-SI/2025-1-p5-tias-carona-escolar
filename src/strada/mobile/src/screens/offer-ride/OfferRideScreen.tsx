@@ -63,7 +63,7 @@ interface CreateRideData {
   routePath: RoutePoint[];
 }
 
-const Maps_API_KEY = process.env.EXPO_PUBLIC_Maps_API_KEY || "";
+const MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
 const educareLocation: LocationDto = {
   latitude: educareCoordinates.latitude,
@@ -198,7 +198,7 @@ const OfferRideScreen = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Goog-Api-Key": Maps_API_KEY,
+            "X-Goog-Api-Key": MAPS_API_KEY,
             "X-Goog-FieldMask":
               "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline",
           },
