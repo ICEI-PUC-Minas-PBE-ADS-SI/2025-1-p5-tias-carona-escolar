@@ -8,7 +8,6 @@ import {
   Image,
   StatusBar,
   FlatList,
-  useWindowDimensions,
   Modal,
   ActivityIndicator,
   Alert,
@@ -68,7 +67,7 @@ interface RideData {
   vehicle_color: string;
   vehicle_model: string;
   driverName: string;
-  driverProfileImg?: string
+  driverProfileImg?: string;
 }
 
 const HomeScreen = () => {
@@ -144,7 +143,7 @@ const HomeScreen = () => {
             return {
               ...ride,
               driverName: name,
-              driverProfileImg: imgUrl
+              driverProfileImg: imgUrl,
             };
           })
         );
@@ -206,7 +205,7 @@ const HomeScreen = () => {
   };
 
   const handlePlaceSelected = async (place) => {
-    setLoadingRides(true)
+    setLoadingRides(true);
     if (userLocation && place) {
       try {
         const searchParams = {
@@ -220,7 +219,7 @@ const HomeScreen = () => {
           sortBy: "time" as const,
         };
 
-        setSeeAll("routes")
+        setSeeAll("routes");
         closeSearchModal();
         const { rides } = await searchRides(searchParams);
         const ridesList = await Promise.all(
@@ -230,17 +229,17 @@ const HomeScreen = () => {
             return {
               ...ride,
               driverName: name,
-              driverProfileImg: imgUrl
+              driverProfileImg: imgUrl,
             };
           })
         );
 
         setAvailableRides(ridesList);
-        return
+        return;
       } catch (error) {
         Alert.alert("Erro", "Erro ao buscar caronas para este destino");
       } finally {
-        setLoadingRides(false)
+        setLoadingRides(false);
       }
     }
 
@@ -253,19 +252,23 @@ const HomeScreen = () => {
     if (userId) {
       router.push(`/profile/${userId}`);
     } else {
-      console.error("ID do usuário não encontrado, redirecionando para o login.");
-      router.push('/login');
+      console.error(
+        "ID do usuário não encontrado, redirecionando para o login."
+      );
+      router.push("/login");
     }
   };
 
-  const navigateToRideDetails = useCallback((rideId: string) => {
-    router.push(`/ride/${rideId}`);
-  }, [router])
+  const navigateToRideDetails = useCallback(
+    (rideId: string) => {
+      router.push(`/ride/${rideId}`);
+    },
+    [router]
+  );
 
   const navigateToSearch = useCallback(() => {
     router.push("/map/search");
   }, [router]);
-
 
   const navigateToMyRides = useCallback(() => {
     router.push("/ride-history/ride-history");
@@ -332,9 +335,7 @@ const HomeScreen = () => {
           />
 
           <View>
-            <Text style={styles.driverName}>
-              {item.driverName}
-            </Text>
+            <Text style={styles.driverName}>{item.driverName}</Text>
           </View>
         </View>
         <View style={styles.priceContainer}>
