@@ -76,9 +76,9 @@
 | :---: | :---: |
 | **Requisito associado** | RF-008 - Gestão de Perfil do Usuário: O sistema deve permitir que os usuários editem informações básicas de seus perfis. |
 | **Objetivo do teste** | Verificar se o usuário consegue editar e salvar as informações de seu perfil. |
-| **Passos** | |
-| **Critério de êxito** | |
-| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+| **Passos** | - Estar logado no aplicativo. <br> - Na tela principal, clicar na aba de perfil. <br> - Clicar em “Editar”. <br> - Alterar os dados desejados (ex: nome, telefone, etc.). <br> - Clicar no botão “Salvar” <br> - Verificar se os dados foram atualizados na visualização do perfil. <br>|
+| **Critério de êxito** | Os dados são salvos com sucesso e exibidos corretamente após a edição. |
+| **Responsável pela elaboração do caso de teste** | Tiago Rafael Martins Cardoso |
 
 <br>
 
