@@ -553,9 +553,6 @@ const RideInfoCard: React.FC<RideInfoCardProps> = ({
         {/* Rating Section */}
         {canRateRide() && (
           <View style={styles.ratingSection}>
-            <Text style={styles.sectionTitle}>
-              Avaliar Corrida
-            </Text>
             <TouchableOpacity
               style={styles.rateButton}
               onPress={() => setShowRatingModal(true)}
