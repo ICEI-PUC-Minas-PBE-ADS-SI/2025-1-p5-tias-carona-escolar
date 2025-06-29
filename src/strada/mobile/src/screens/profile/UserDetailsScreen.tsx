@@ -763,7 +763,7 @@ const UserDetailsScreen = () => {
                             style={styles.removeButton}
                             onPress={() =>
                               handleRemoveDependent(
-                                relationship.id,
+                                relationship.minorId,
                                 relationship.minor.name
                               )
                             }
