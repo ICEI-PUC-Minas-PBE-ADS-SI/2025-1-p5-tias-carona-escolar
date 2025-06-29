@@ -28,6 +28,11 @@ Para cada caso de teste definido no <a href="08-Plano-testes-software.md"> Plano
 | Requisito associado | RF-004 - Criação e Gerenciamento de Rotas (Motorista): O sistema deve permitir que o "Motorista" cadastre suas rotas de ou para a escola Educare. |
 | Registro de evidência | [one-drive/ct-004](https://sgapucminasbr-my.sharepoint.com/personal/1434009_sga_pucminas_br/_layouts/15/guestaccess.aspx?share=ESC35BZM74dGrvUNCUUxjtgBsS8D-ZME3cvAqZyFHUdTKg&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=LEZ3pU) |
 
+| **Caso de teste** 	| **CT-008 – Editar informações do perfil** 	|
+|:---:	|:---:	|
+| Requisito associado | RF-008 - Gestão de Perfil do Usuário: O sistema deve permitir que os usuários editem informações básicas de seus perfis. |
+| Registro de evidência | [one-drive/ct-008](https://sgapucminasbr-my.sharepoint.com/personal/1434009_sga_pucminas_br/Documents/STRADA%20(TIAS)%20-%20Registros%20de%20testes%20de%20software/CT-008%20-%20Editar%20informa%C3%A7%C3%B5es%20do%20perfil.mkv?csf=1&web=1&e=AgDGD6) |
+
 | **Caso de teste** 	| **CT-009 – Avaliar uma carona concluída** 	|
 |:---:	|:---:	|
 | Requisito associado | RF-009 - Sistema de Avaliação e Feedback: O sistema deve permitir que responsáveis e motoristas se avaliem mutuamente após a conclusão de uma carona. |
