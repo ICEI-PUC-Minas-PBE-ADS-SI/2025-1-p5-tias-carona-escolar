@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   View,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState, useCallback, useEffect } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -18,6 +20,8 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import { ICreadentials } from "@/src/interfaces/credentials.interface";
 import { getAccessToken } from "@/src/services/auth.service";
+import { IUserRequest } from "@/src/interfaces/user-request.interface";
+import { createUser } from "@/src/services/user.service";
 
 interface Props {
   animationController: React.RefObject<Animated.Value>;
@@ -27,6 +31,7 @@ type ActionType =
   | "login"
   | "register-step-1"
   | "register-step-2"
+  | "register-step-3"
   | "password-recovery";
 
 const InputField: React.FC<{
@@ -34,8 +39,10 @@ const InputField: React.FC<{
   iconLibrary: "Ionicons" | "SimpleLineIcons";
   placeholder: string;
   secureTextEntry?: boolean;
-  keyboardType?: "default" | "email-address";
+  keyboardType?: "default" | "email-address" | "numeric";
   theme: Theme;
+  value?: string;
+  editable?: boolean;
   onChangeText?: (text: string) => void;
   styles: ReturnType<typeof createStyles>;
   toggleSecure?: () => void;
@@ -47,37 +54,51 @@ const InputField: React.FC<{
   keyboardType,
   theme,
   styles,
+  value,
+  editable,
   toggleSecure,
   onChangeText,
 }) => (
-    <View style={styles.inputContainer}>
-      {iconLibrary === "Ionicons" ? (
-        <Ionicons name={iconName} size={30} color={theme.blue} />
-      ) : (
-        <SimpleLineIcons name={iconName} size={30} color={theme.blue} />
-      )}
-      <TextInput
-        style={styles.textInput}
-        placeholder={placeholder}
-        placeholderTextColor={theme.blue}
-        secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType ?? "default"}
-        onChangeText={onChangeText}
-      />
-      {toggleSecure && (
-        <TouchableOpacity onPress={toggleSecure}>
-          <SimpleLineIcons name="eye" size={20} color={theme.blue} />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
+  <View style={styles.inputContainer}>
+    {iconLibrary === "Ionicons" ? (
+      <Ionicons name={iconName} size={30} color={theme.blue} />
+    ) : (
+      <SimpleLineIcons name={iconName} size={30} color={theme.blue} />
+    )}
+    <TextInput
+      style={styles.textInput}
+      placeholder={placeholder}
+      placeholderTextColor={theme.blue}
+      secureTextEntry={secureTextEntry}
+      keyboardType={keyboardType ?? "default"}
+      value={value}
+      editable={editable}
+      onChangeText={onChangeText}
+    />
+    {toggleSecure && (
+      <TouchableOpacity onPress={toggleSecure}>
+        <SimpleLineIcons name="eye" size={20} color={theme.blue} />
+      </TouchableOpacity>
+    )}
+  </View>
+);
 
 const LoginScreen: React.FC<Props> = ({ animationController }) => {
   const [actionType, setActionType] = useState<ActionType>("login");
   const [credentials, setCredentials] = useState<ICreadentials>({
+    name: "",
     username: "",
+    email: "",
     password: "",
+    cep: "",
+    street: "",
+    number: "",
+    neighborhood: "",
+    city: "",
+    state: "",
   });
+
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [secureEntry, setSecureEntry] = useState(true);
   const [slideAnim] = useState(new Animated.Value(0));
   const theme = lightTheme;
@@ -85,14 +106,45 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
   const window = useWindowDimensions();
   const router = useRouter();
 
-  const slideContainerAnim = animationController?.current?.interpolate({
-    inputRange: [0, 0.8, 1],
-    outputRange: [window.width, window.width, 0],
-  }) ?? new Animated.Value(0);
-  const titleTextAnim = animationController?.current?.interpolate({
-    inputRange: [0, 0.6, 0.8, 1],
-    outputRange: [26 * 10, 26 * 10, 26 * 10, 0],
-  });
+  const slideContainerAnim =
+    animationController?.current?.interpolate({
+      inputRange: [0, 0.8, 1],
+      outputRange: [window.width, window.width, 0],
+    }) ?? new Animated.Value(0);
+
+  const titleTextAnim =
+    animationController?.current?.interpolate({
+      inputRange: [0, 0.6, 0.8, 1],
+      outputRange: [26 * 10, 26 * 10, 26 * 10, 0],
+    }) ?? new Animated.Value(0);
+
+  useEffect(() => {
+    const fetchAddress = async () => {
+      const cep = credentials.cep?.replace(/\D/g, "");
+      if (cep?.length === 8) {
+        try {
+          const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+          if (!response.ok) {
+            console.error(`Erro na API do ViaCEP. Status: ${response.status}.`);
+            return;
+          }
+          const data = await response.json();
+          if (!data.erro) {
+            setCredentials((prev) => ({
+              ...prev,
+              street: data.logradouro,
+              neighborhood: data.bairro,
+              city: data.localidade,
+              state: data.uf,
+            }));
+          }
+        } catch (error) {
+          console.error("Erro ao buscar CEP:", error);
+        }
+      }
+    };
+    fetchAddress();
+  }, [credentials.cep]);
 
   const animateSlideTransition = useCallback(
     (newActionType: ActionType, direction: "left" | "right") => {
@@ -121,18 +173,12 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
 
   const handleTextChange = useCallback(
     (key: keyof ICreadentials, value: string) => {
-      console.log(key, value);
       setCredentials((prev) => ({ ...prev, [key]: value }));
-      console.log(credentials);
     },
-    [setCredentials]
+    []
   );
 
-  useEffect(() => {
-    console.log("Updated credentials:", credentials);
-  }, [credentials]);
-
-  const handleSignup = useCallback(() => {
+  const handleSignup = useCallback(async () => {
     if (actionType === "login") {
       return animateSlideTransition("register-step-1", "left");
     }
@@ -140,27 +186,55 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
       return animateSlideTransition("register-step-2", "left");
     }
     if (actionType === "register-step-2") {
-      return router.push("/home");
+      return animateSlideTransition("register-step-3", "left");
     }
-  }, [actionType, animateSlideTransition]);
+    if (actionType === "register-step-3") {
+      setIsCreatingUser(true);
+
+      const userData: IUserRequest = {
+        name: credentials.name,
+        email: credentials.email,
+        username: credentials.username,
+        password: credentials.password,
+        imgUrl: "",
+        address: `${credentials.street}, ${credentials.number}`,
+        cep: credentials.cep,
+        city: credentials.city,
+        state: credentials.state,
+      };
+
+      try {
+        await createUser(userData);
+        Alert.alert("Sucesso!", "Seu cadastro foi realizado com sucesso.", [
+          { text: "OK", onPress: () => animateSlideTransition("login", "right") }
+        ]);
+      } catch (error) {
+        Alert.alert("Erro no Cadastro", "Não foi possível criar seu usuário. Por favor, tente novamente.");
+      } finally {
+        setIsCreatingUser(false);
+      }
+    }
+  }, [actionType, animateSlideTransition, credentials]);
 
   const handleLogin = useCallback(
     (type: "local" | "github" | "google") => {
       if (type === "local") {
-        getAccessToken(credentials)
+        const loginCredentials = { username: credentials.email!, password: credentials.password! };
+        getAccessToken(loginCredentials)
           .then((tokens) => {
             console.log("Login com sucesso", tokens);
             router.replace("/home");
           })
           .catch((error) => {
             console.error("Erro no login:", error);
+            Alert.alert("Erro de Login", "Email ou senha inválidos.");
           });
         return;
       }
       animateSlideTransition("login", "left");
       router.push(`/social-auth/${type}`);
     },
-    [credentials, animateSlideTransition]
+    [credentials.email, credentials.password, animateSlideTransition, router]
   );
 
   const handleGoBack = useCallback(() => {
@@ -171,10 +245,13 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
       animateSlideTransition("login", "right");
     } else if (actionType === "register-step-2") {
       animateSlideTransition("register-step-1", "right");
+    } else if (actionType === "register-step-3") {
+      animateSlideTransition("register-step-2", "right");
     } else {
       router.back();
     }
   }, [actionType, router, animateSlideTransition]);
+
   const renderForm = () => (
     <Animated.View
       style={[
@@ -187,16 +264,20 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
           <InputField
             iconName="person-outline"
             iconLibrary="Ionicons"
-            placeholder="Seu nome"
+            placeholder="Seu nome completo"
             theme={theme}
             styles={styles}
+            value={credentials.name}
+            onChangeText={(text) => handleTextChange("name", text)}
           />
           <InputField
             iconName="person-outline"
             iconLibrary="Ionicons"
-            placeholder="Seu nome de usuario"
+            placeholder="Seu nome de usuário"
             theme={theme}
             styles={styles}
+            value={credentials.username}
+            onChangeText={(text) => handleTextChange("username", text)}
           />
           <TouchableOpacity onPress={handleGoBack}>
             <Text style={styles.forgotPasswordText}>Voltar</Text>
@@ -214,7 +295,8 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
           </TouchableOpacity>
         </>
       )}
-      {(actionType === "register-step-2" || actionType === "login") && (
+
+      {actionType === "register-step-2" && (
         <>
           <InputField
             iconName="mail-outline"
@@ -222,8 +304,9 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             placeholder="Seu email"
             keyboardType="email-address"
             theme={theme}
-            onChangeText={(text) => handleTextChange("username", text)}
             styles={styles}
+            value={credentials.email}
+            onChangeText={(text) => handleTextChange("email", text)}
           />
           <InputField
             iconName="lock"
@@ -232,35 +315,129 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
             secureTextEntry={secureEntry}
             theme={theme}
             styles={styles}
+            value={credentials.password}
             onChangeText={(text) => handleTextChange("password", text)}
             toggleSecure={() => setSecureEntry((prev) => !prev)}
           />
-          {actionType === "login" && (
-            <>
-              <TouchableOpacity>
-                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.loginButtonWrapper}
-                onPress={() => handleLogin("local")}
-              >
-                <Text style={styles.loginText}>Login</Text>
-              </TouchableOpacity>
-            </>
-          )}
-          {actionType === "register-step-2" && (
-            <>
-              <TouchableOpacity onPress={handleGoBack}>
-                <Text style={styles.forgotPasswordText}>Voltar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSignup}
-                style={styles.loginButtonWrapper}
-              >
-                <Text style={styles.loginText}>Sign Up</Text>
-              </TouchableOpacity>
-            </>
-          )}
+          <TouchableOpacity onPress={handleGoBack}>
+            <Text style={styles.forgotPasswordText}>Voltar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleSignup}
+            style={styles.loginButtonWrapper}
+          >
+            <Text style={styles.loginText}>Avançar</Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      {actionType === "register-step-3" && (
+        <>
+          <InputField
+            iconName="map-outline"
+            iconLibrary="Ionicons"
+            placeholder="CEP"
+            keyboardType="numeric"
+            theme={theme}
+            styles={styles}
+            value={credentials.cep}
+            onChangeText={(text) => handleTextChange("cep", text)}
+          />
+          <InputField
+            iconName="location-outline"
+            iconLibrary="Ionicons"
+            placeholder="Rua"
+            theme={theme}
+            styles={styles}
+            value={credentials.street}
+            editable={false}
+          />
+          <InputField
+            iconName="location-outline"
+            iconLibrary="Ionicons"
+            placeholder="Bairro"
+            theme={theme}
+            styles={styles}
+            value={credentials.neighborhood}
+            editable={false}
+          />
+          <InputField
+            iconName="business-outline"
+            iconLibrary="Ionicons"
+            placeholder="Cidade"
+            theme={theme}
+            styles={styles}
+            value={credentials.city}
+            editable={false}
+          />
+          <InputField
+            iconName="flag-outline"
+            iconLibrary="Ionicons"
+            placeholder="Estado"
+            theme={theme}
+            styles={styles}
+            value={credentials.state}
+            editable={false}
+          />
+          <InputField
+            iconName="home-outline"
+            iconLibrary="Ionicons"
+            placeholder="Número"
+            keyboardType="numeric"
+            theme={theme}
+            styles={styles}
+            value={credentials.number}
+            onChangeText={(text) => handleTextChange("number", text)}
+          />
+          <TouchableOpacity onPress={handleGoBack}>
+            <Text style={styles.forgotPasswordText}>Voltar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleSignup}
+            style={[styles.loginButtonWrapper, isCreatingUser && styles.disabledButton]}
+            disabled={isCreatingUser}
+          >
+            {isCreatingUser ? (
+              <ActivityIndicator color={theme.background} />
+            ) : (
+              <Text style={styles.loginText}>Finalizar Cadastro</Text>
+            )}
+          </TouchableOpacity>
+        </>
+      )}
+
+      {actionType === "login" && (
+        <>
+          <InputField
+            iconName="mail-outline"
+            iconLibrary="Ionicons"
+            placeholder="Seu email"
+            keyboardType="email-address"
+            theme={theme}
+            styles={styles}
+            value={credentials.email}
+            onChangeText={(text) => handleTextChange("email", text)}
+          />
+          <InputField
+            iconName="lock"
+            iconLibrary="SimpleLineIcons"
+            placeholder="Sua senha"
+            secureTextEntry={secureEntry}
+            theme={theme}
+            styles={styles}
+            value={credentials.password}
+            onChangeText={(text) => handleTextChange("password", text)}
+            toggleSecure={() => setSecureEntry((prev) => !prev)}
+          />
+          <TouchableOpacity>
+            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.loginButtonWrapper}
+            onPress={() => handleLogin("local")}
+          >
+            <Text style={styles.loginText}>Login</Text>
+          </TouchableOpacity>
         </>
       )}
     </Animated.View>
@@ -315,8 +492,8 @@ const LoginScreen: React.FC<Props> = ({ animationController }) => {
               <Text style={styles.accountText}>Não tem uma conta? Sign up</Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={() => handleLogin("local")}>
-              <Text style={styles.accountText}>Ja tem uma conta? Login</Text>
+            <TouchableOpacity onPress={() => animateSlideTransition("login", "right")}>
+              <Text style={styles.accountText}>Já tem uma conta? Login</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -371,6 +548,7 @@ const createStyles = (theme: Theme) =>
       flex: 1,
       paddingHorizontal: 10,
       fontFamily: fonts.Light,
+      color: theme.blue,
     },
     forgotPasswordText: {
       textAlign: "right",
@@ -385,6 +563,9 @@ const createStyles = (theme: Theme) =>
       justifyContent: "center",
       borderRadius: 100,
       marginTop: 20,
+    },
+    disabledButton: {
+      backgroundColor: "#a9a9a9", // Um cinza para o botão desabilitado
     },
     loginText: {
       color: theme.background,

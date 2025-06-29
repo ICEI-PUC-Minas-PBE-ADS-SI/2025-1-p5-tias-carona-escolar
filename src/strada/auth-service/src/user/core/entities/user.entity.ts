@@ -15,6 +15,12 @@ export class User {
   // Novos campos de documentos e informações pessoais (opcionais)
   cpf?: string;
   rg?: string;
+  cnh?: string;
+
+  vehicle_model?: string;
+  vehicle_color?: string;
+  license_plate?: string;
+
   birthDate?: Date;
   phone?: string;
   address?: string;

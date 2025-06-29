@@ -6,7 +6,7 @@ const BASE_DOMAIN = process.env.EXPO_PUBLIC_BASE_DOMAIN ?? "localhost:3000";
 const USE_HTTPS = process.env.EXPO_PUBLIC_USE_HTTPS === "true";
 
 const createApiUrl = (subdomain = "") => {
-  if (BASE_DOMAIN.includes("localhost")) {
+  if (BASE_DOMAIN.includes("3000")) {
     return `http://${BASE_DOMAIN}`;
   }
   const protocol = USE_HTTPS ? "https" : "http";
@@ -107,7 +107,6 @@ export const createAxiosInstance = (subdomain = "") => {
           isRefreshing = false;
         }
       }
-
 
       return Promise.reject(new Error(error.message));
     }

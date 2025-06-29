@@ -11,7 +11,6 @@ import {
   Alert,
   Modal,
   ActivityIndicator,
-  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -21,13 +20,13 @@ import CustomCalendar from "@/src/components/shared/CustomCalendar";
 import RecurringInDays from "@/src/components/offer-ride/ReccuringInDays";
 import AutocompleteSearch from "@/src/components/shared/SearchBar";
 import VehicleSelector from "./VehicleModal";
-import RouteSelector from "./RouteSelector";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import polyline from "@mapbox/polyline";
-import { getStoredUserID } from "@/src/services/user.service";
+import { getStoredUserID, getStoredUser } from "@/src/services/user.service";
 import { createRide } from "@/src/services/ride.service";
+import { educareCoordinates } from "@/src/constants/coordinates";
 
-// Tipos para os dados
+// --- INTERFACES E TIPOS ---
 interface LocationDto {
   latitude: number;
   longitude: number;
@@ -64,19 +63,26 @@ interface CreateRideData {
   routePath: RoutePoint[];
 }
 
-const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+const MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+
+const educareLocation: LocationDto = {
+  latitude: educareCoordinates.latitude,
+  longitude: educareCoordinates.longitude,
+  name: "Educare",
+  address: "Educare - Centro, Betim",
+};
 
 const OfferRideScreen = () => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  // Estados para os campos do formulário
+  // --- ESTADOS DO COMPONENTE ---
   const [originLocation, setOriginLocation] = useState<LocationDto | null>(
     null
   );
   const [destinationLocation, setDestinationLocation] =
-    useState<LocationDto | null>(null);
-  const [startDate, setstartDate] = useState(new Date());
+    useState<LocationDto | null>(educareLocation);
+  const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
   const [price, setPrice] = useState("0");
@@ -93,7 +99,7 @@ const OfferRideScreen = () => {
   const [vehicle, setVehicle] = useState<{
     model: string;
     color: string;
-    plate: string;
+    licensePlate: string;
   } | null>(null);
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [searchType, setSearchType] = useState<"origin" | "destination">(
@@ -102,44 +108,81 @@ const OfferRideScreen = () => {
   const [driverId, setDriverId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // ID do motorista - deve vir do contexto de autenticação
+  // --- LÓGICA DE CARREGAMENTO INICIAL ---
   useEffect(() => {
-    const fetchDriverId = async () => {
+    const loadInitialData = async () => {
       const userId = await getStoredUserID();
       setDriverId(userId);
+
+      const userString = await getStoredUser();
+      if (userString) {
+        const userData = JSON.parse(userString);
+        if (
+          userData.vehicle_model &&
+          userData.vehicle_color &&
+          userData.license_plate
+        ) {
+          setVehicle({
+            model: userData.vehicle_model,
+            color: userData.vehicle_color,
+            licensePlate: userData.license_plate,
+          });
+        }
+      }
     };
-    fetchDriverId();
+    loadInitialData();
   }, []);
 
+  // --- FUNÇÕES E MANIPULADORES DE EVENTOS ---
+
+  const handleGoBack = useCallback(() => {
+    router.back();
+  }, [router]);
+
+  const handleSwapLocations = useCallback(() => {
+    setOriginLocation(destinationLocation);
+    setDestinationLocation(originLocation);
+  }, [originLocation, destinationLocation]);
+
   const openSearchModal = (type: "origin" | "destination") => {
+    const isOriginFixed = originLocation?.name === educareLocation.name;
+    const isDestinationFixed =
+      destinationLocation?.name === educareLocation.name;
+
+    if (type === "origin" && isOriginFixed) {
+      Alert.alert(
+        "Ação bloqueada",
+        "A origem é a Educare. Use o botão de troca para oferecer uma carona PARA a escola."
+      );
+      return;
+    }
+
+    if (type === "destination" && isDestinationFixed) {
+      Alert.alert(
+        "Ação bloqueada",
+        "O destino é a Educare. Use o botão de troca para oferecer uma carona SAINDO da escola."
+      );
+      return;
+    }
+
     setSearchType(type);
     setSearchModalVisible(true);
   };
 
-  const closeSearchModal = () => {
-    setSearchModalVisible(false);
-  };
+  const closeSearchModal = () => setSearchModalVisible(false);
 
   const handlePlaceSelected = (place: any) => {
-    console.log("Lugar selecionado:", place);
-    setSearchModalVisible(false);
     const location: LocationDto = {
       latitude: place.latitude,
       longitude: place.longitude,
       address: place.address,
       name: place.name,
     };
-
-    if (searchType === "origin") {
-      setOriginLocation(location);
-    } else {
-      setDestinationLocation(location);
-    }
-
+    if (searchType === "origin") setOriginLocation(location);
+    else setDestinationLocation(location);
     closeSearchModal();
   };
 
-  // Função para buscar a rota no Google Maps
   const getRouteFromGoogleMaps = async (
     origin: LocationDto,
     destination: LocationDto
@@ -152,15 +195,14 @@ const OfferRideScreen = () => {
       const response = await fetch(
         `https://routes.googleapis.com/directions/v2:computeRoutes`,
         {
-          method: "POST", // ← faltava isso
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
+            "X-Goog-Api-Key": MAPS_API_KEY,
             "X-Goog-FieldMask":
               "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline",
           },
           body: JSON.stringify({
-            // ← aqui precisa ser string
             origin: {
               location: {
                 latLng: {
@@ -179,33 +221,20 @@ const OfferRideScreen = () => {
             },
             travelMode: "DRIVE",
             routingPreference: "TRAFFIC_AWARE",
-            computeAlternativeRoutes: false,
-            routeModifiers: {
-              avoidTolls: false,
-              avoidHighways: false,
-              avoidFerries: false,
-            },
-            languageCode: "en-US",
-            units: "METRIC",
           }),
         }
       );
-
       const data = await response.json();
-
-      console.log("Dados da rota:", data);
-
+      if (!data.routes || data.routes.length === 0)
+        throw new Error("Rota não encontrada");
       const route = data.routes[0];
-
-      // Decodificar polyline para obter pontos da rota
-      const routePath: RoutePoint[] = decodePolyline(
-        route.polyline.encodedPolyline
-      );
-
+      const routePath: RoutePoint[] = polyline
+        .decode(route.polyline.encodedPolyline)
+        .map((p, i) => ({ latitude: p[0], longitude: p[1], order: i }));
       return {
         routePath,
-        estimatedDuration: +route.duration.split("s")[0],
-        estimatedDistance: route.distanceMeters, // Você pode calcular a distância se necessário
+        estimatedDuration: +route.duration.slice(0, -1),
+        estimatedDistance: route.distanceMeters,
       };
     } catch (error) {
       console.error("Erro ao buscar rota:", error);
@@ -213,96 +242,15 @@ const OfferRideScreen = () => {
     }
   };
 
-  // Função para decodificar polyline do Google Maps
-  const decodePolyline = (encoded: string): RoutePoint[] => {
-    const decodedPolyline = polyline.decode(encoded);
-    return decodedPolyline.map((point, index) => ({
-      latitude: point[0],
-      longitude: point[1],
-      order: index,
-    }));
-
-    // const points: RoutePoint[] = [];
-    // let index = 0;
-    // let lat = 0;
-    // let lng = 0;
-
-    // while (index < encoded.length) {
-    //   let b;
-    //   let shift = 0;
-    //   let result = 0;
-
-    //   do {
-    //     b = encoded.charCodeAt(index++) - 63;
-    //     result |= (b & 0x1f) << shift;
-    //     shift += 5;
-    //   } while (b >= 0x20);
-
-    //   const dlat = (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
-    //   lat += dlat;
-
-    //   shift = 0;
-    //   result = 0;
-
-    //   do {
-    //     b = encoded.charCodeAt(index++) - 63;
-    //     result |= (b & 0x1f) << shift;
-    //     shift += 5;
-    //   } while (b >= 0x20);
-
-    //   const dlng = (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
-    //   lng += dlng;
-
-    //   points.push({
-    //     latitude: lat / 1e5,
-    //     longitude: lng / 1e5,
-    //     order: points.length,
-    //   });
-    // }
-
-    // return points;
-  };
-
-  // Função para criar a corrida
-  const saveRide = async (rideData: CreateRideData) => {
-    console.log("Dados da corrida:", rideData);
-    try {
-      return await createRide(rideData);
-    } catch (error) {
-      console.error("Erro ao criar corrida:", error);
-      throw error;
-    }
-  };
-
-  // Função para voltar à tela anterior
-  const handleGoBack = useCallback(() => {
-    router.back();
-  }, [router]);
-
-  // Gerenciamento dos pickers de data e hora
   const handleStartEndDateChange = (
-    startDateValue: Date | null, // Renamed to avoid conflict with state variable
-    endDateValue: Date | null // Renamed to avoid conflict with state variable
+    startDateValue: Date | null,
+    endDateValue: Date | null
   ) => {
-    setstartDate(startDateValue);
+    setStartDate(startDateValue);
     setEndDate(endDateValue);
-
-    // Now, handle the UI logic based on the *newly updated* state
-    if (!startDateValue && !endDateValue) {
-      // Both are null, meaning selection was cleared or never made
+    if (startDateValue && endDateValue) {
+      setIsRecurringRide(startDateValue.getTime() !== endDateValue.getTime());
       setShowDatePicker(false);
-      setIsRecurringRide(false); // No selection, so not recurring
-    } else if (startDateValue && !endDateValue) {
-      // Only start date is selected
-      setIsRecurringRide(false); // Not yet a recurring ride (needs an end date)
-    } else if (startDateValue && endDateValue) {
-      // Both start and end dates are selected
-      if (startDateValue.getTime() === endDateValue.getTime()) {
-        setIsRecurringRide(false);
-      } else {
-        setIsRecurringRide(true); // Different dates, not recurring
-      }
-      setShowDatePicker(false); // Close date picker once a range is selected
     }
   };
 
@@ -313,62 +261,51 @@ const OfferRideScreen = () => {
 
   const formatDate = (date: Date) => {
     if (!date) return "";
-
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = date
+    return `${date.getDate().toString().padStart(2, "0")} ${date
       .toLocaleString("pt-BR", { month: "short" })
-      .replace(".", "");
-    const year = date.getFullYear();
-
-    return `${day} ${month} ${year}`;
+      .replace(".", "")} ${date.getFullYear()}`;
   };
 
-  const formatTime = (time: Date) => {
-    return time?.toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const formatTime = (time: Date) =>
+    time?.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
+  const handleVehicleChange = (
+    newVehicleData: {
+      model: string;
+      color: string;
+      licensePlate: string;
+    } | null
+  ) => {
+    setVehicle(newVehicleData);
   };
 
-  const handleVehicleChange = (vehicle: any) => {
-    setVehicle(vehicle);
-  };
+  const decreaseSeats = () => setAvailableSeats((s) => Math.max(1, s - 1));
+  const increaseSeats = () => setAvailableSeats((s) => Math.min(42, s + 1));
 
-  // Ajustar número de assentos disponíveis
-  const decreaseSeats = () => {
-    if (availableSeats > 1) setAvailableSeats(availableSeats - 1);
-  };
-
-  const increaseSeats = () => {
-    if (availableSeats <= 42) setAvailableSeats(availableSeats + 1);
-  };
-
-  // Publicar a carona
   const handlePublishRide = useCallback(async () => {
-    // Validação básica dos campos
-    if (!originLocation || !destinationLocation || !price) {
+    if (
+      !originLocation ||
+      !destinationLocation ||
+      !price ||
+      !driverId ||
+      !vehicle
+    ) {
       Alert.alert(
         "Dados incompletos",
-        "Por favor, preencha todos os campos obrigatórios."
+        "Por favor, preencha todos os campos obrigatórios, incluindo o veículo e a CNH."
       );
       return;
     }
-
     setIsLoading(true);
-
     try {
-      // Buscar rota no Google Maps
       const routeData = await getRouteFromGoogleMaps(
         originLocation,
         destinationLocation
       );
-
-      // Criar data de partida combinando data e hora
       const departureDateTime = new Date(startDate);
       departureDateTime.setHours(time.getHours());
       departureDateTime.setMinutes(time.getMinutes());
 
-      // Preparar dados para o endpoint
       const rideData: CreateRideData = {
         driverId,
         startLocation: originLocation,
@@ -377,22 +314,17 @@ const OfferRideScreen = () => {
         availableSeats,
         pricePerSeat: parseFloat(price.replace(",", ".")),
         vehicle: {
-          model: vehicle?.model,
-          color: vehicle?.color,
-          licensePlate: vehicle?.licensePlate,
+          model: vehicle.model,
+          color: vehicle.color,
+          licensePlate: vehicle.licensePlate,
         },
-        preferences: {
-          allowSmoking,
-          allowPets,
-          allowLuggage,
-        },
+        preferences: { allowSmoking, allowPets, allowLuggage },
         estimatedDuration: routeData.estimatedDuration,
         estimatedDistance: routeData.estimatedDistance,
         routePath: routeData.routePath,
+        seats: availableSeats,
       };
-
-      // Criar a corrida
-      await saveRide(rideData);
+      await createRide(rideData); // Usando a função createRide importada
       router.push("/ride-history/ride-history");
     } catch (error) {
       Alert.alert(
@@ -413,14 +345,13 @@ const OfferRideScreen = () => {
     allowPets,
     allowLuggage,
     driverId,
+    vehicle,
     router,
   ]);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
           <Icon name="arrow-back" size={24} color={colors.black} />
@@ -434,36 +365,59 @@ const OfferRideScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
       >
-        {/* Seção: Veículo */}
         <VehicleSelector
           vehicle={vehicle}
           onVehicleChange={handleVehicleChange}
         />
 
-        {/* Seção: Rota */}
-        <RouteSelector
-          originLocation={originLocation}
-          destinationLocation={destinationLocation}
-          openSearchModal={(value) => openSearchModal(value)}
-        ></RouteSelector>
+        <View style={styles.section}>
+          <View style={styles.routeContainer}>
+            <View style={styles.routeFields}>
+              <TouchableOpacity
+                style={styles.routeLocationInput}
+                onPress={() => openSearchModal("origin")}
+              >
+                <View style={[styles.locationDot, styles.originDot]} />
+                <Text style={styles.routeLocationText} numberOfLines={1}>
+                  {originLocation?.address || "Escolher ponto de partida"}
+                </Text>
+              </TouchableOpacity>
+              <View style={styles.separatorLine} />
+              <TouchableOpacity
+                style={styles.routeLocationInput}
+                onPress={() => openSearchModal("destination")}
+              >
+                <View style={[styles.locationDot, styles.destinationDot]} />
+                <Text style={styles.routeLocationText} numberOfLines={1}>
+                  {destinationLocation?.address || "Escolher destino"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              onPress={handleSwapLocations}
+              style={styles.swapButton}
+            >
+              <Icon name="swap-vert" size={28} color={colors.primaryBlue} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <Modal
           visible={searchModalVisible}
           animationType="slide"
           onRequestClose={closeSearchModal}
         >
           <AutocompleteSearch
-            onSelectPlace={(value) => handlePlaceSelected(value)}
+            onSelectPlace={handlePlaceSelected}
             onBack={closeSearchModal}
           />
         </Modal>
 
-        {/* Seção: Data e Hora */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Icon name="schedule" size={20} color={colors.primaryPink} />
             <Text style={styles.sectionTitle}>Data e Hora</Text>
           </View>
-
           <View style={styles.dateTimeContainer}>
             <TouchableOpacity
               style={styles.dateTimeInput}
@@ -478,7 +432,6 @@ const OfferRideScreen = () => {
               </View>
               <Icon name="arrow-drop-down" size={22} color={colors.darkGrey} />
             </TouchableOpacity>
-
             <TouchableOpacity
               style={styles.dateTimeInput}
               onPress={() => setShowTimePicker(true)}
@@ -487,18 +440,15 @@ const OfferRideScreen = () => {
               <Text style={styles.dateTimeText}>{formatTime(time)}</Text>
               <Icon name="arrow-drop-down" size={22} color={colors.darkGrey} />
             </TouchableOpacity>
-
             {showTimePicker && (
               <DateTimePicker
                 value={time}
                 mode="time"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
+                display="default"
                 onChange={handleTimeChange}
               />
             )}
           </View>
-
-          {/* Pickers para data e hora (visíveis quando clicados) */}
           {showDatePicker && (
             <CustomCalendar
               minDate={new Date()}
@@ -507,19 +457,16 @@ const OfferRideScreen = () => {
               startEndDateChange={handleStartEndDateChange}
             />
           )}
-
           <View style={styles.switchContainer}>
             <Text style={styles.switchLabel}>Carona recorrente</Text>
             <Switch
               value={isRecurringRide}
               onValueChange={setIsRecurringRide}
-              disabled={(isRecurringRide && !startDate) || !endDate}
               trackColor={{ false: colors.grey, true: colors.lightPink }}
               thumbColor={isRecurringRide ? colors.primaryPink : colors.white}
             />
           </View>
           {isRecurringRide && <RecurringInDays />}
-
           <View style={styles.routeInfoContainer}>
             <Icon name="info-outline" size={16} color={colors.primaryBlue} />
             <Text style={styles.routeInfoText}>
@@ -530,13 +477,11 @@ const OfferRideScreen = () => {
           </View>
         </View>
 
-        {/* Seção: Preço e Assentos */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Icon name="payments" size={20} color={colors.primaryPink} />
             <Text style={styles.sectionTitle}>Preço e Assentos</Text>
           </View>
-
           <View style={styles.seatsContainer}>
             <Text style={styles.seatsLabel}>Assentos disponíveis</Text>
             <View style={styles.seatsSelector}>
@@ -575,12 +520,11 @@ const OfferRideScreen = () => {
             <Icon name="description" size={20} color={colors.primaryPink} />
             <Text style={styles.sectionTitle}>Observações</Text>
           </View>
-
           <TextInput
             style={styles.notesInput}
             value={notes}
             onChangeText={setNotes}
-            placeholder="Adicione informações importantes para os passageiros, como ponto de encontro, regras, etc."
+            placeholder="Adicione informações importantes para os passageiros..."
             placeholderTextColor={colors.darkGrey}
             multiline
             numberOfLines={4}
@@ -589,7 +533,6 @@ const OfferRideScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Footer com botão de publicar */}
       <View style={[styles.footer, { paddingBottom: insets.bottom || 16 }]}>
         <TouchableOpacity
           style={[
@@ -612,10 +555,7 @@ const OfferRideScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.neutralLight,
-  },
+  container: { flex: 1, backgroundColor: colors.neutralLight },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -626,24 +566,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.lightGrey,
   },
-  backButton: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.black,
-  },
-  headerRight: {
-    width: 32,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingVertical: 16,
-    paddingBottom: 100,
-  },
+  backButton: { padding: 4 },
+  headerTitle: { fontSize: 18, fontWeight: "600", color: colors.black },
+  headerRight: { width: 32 },
+  scrollView: { flex: 1 },
+  contentContainer: { paddingVertical: 16, paddingBottom: 100 },
   section: {
     backgroundColor: colors.white,
     borderRadius: 12,
@@ -667,18 +594,6 @@ const styles = StyleSheet.create({
     color: colors.black,
     marginLeft: 8,
   },
-  vehicleCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.neutralLight,
-    borderRadius: 8,
-    padding: 12,
-  },
-  vehicleImage: {
-    width: 80,
-    height: 60,
-    marginRight: 12,
-  },
   routeInfoText: {
     fontSize: 13,
     color: colors.primaryBlue,
@@ -694,86 +609,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.lightGrey,
   },
-  vehicleInfo: {
-    flex: 1,
-  },
-  vehicleModel: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: colors.black,
-    marginBottom: 2,
-  },
-  vehicleDetails: {
-    fontSize: 14,
-    color: colors.darkGrey,
-    marginBottom: 6,
-  },
-  changeVehicleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  changeVehicleText: {
-    fontSize: 14,
-    color: colors.primaryBlue,
-    marginRight: 4,
-  },
-  locationInput: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.neutralLight,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 14,
-    marginBottom: 10,
-  },
-  locationDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12,
-  },
-  originDot: {
-    backgroundColor: colors.primaryPink,
-  },
-  destinationDot: {
-    backgroundColor: colors.primaryBlue,
-  },
-  locationTextContainer: {
-    flex: 1,
-  },
-  locationLabel: {
-    fontSize: 12,
-    color: colors.darkGrey,
-    marginBottom: 2,
-  },
-  locationText: {
-    fontSize: 15,
-    color: colors.black,
-  },
-  placeholderText: {
-    color: colors.darkGrey,
-    fontStyle: "italic",
-  },
-  addStopButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: colors.primaryBlue,
-    borderRadius: 8,
-    backgroundColor: colors.white,
-    borderStyle: "dashed",
-  },
-  addStopText: {
-    fontSize: 14,
-    color: colors.primaryBlue,
-    marginLeft: 6,
-  },
-  dateTimeContainer: {
-    flexDirection: "row",
-    gap: 12,
-  },
+  dateTimeContainer: { flexDirection: "row", gap: 12 },
   dateTimeInput: {
     flex: 1,
     flexDirection: "row",
@@ -788,7 +624,6 @@ const styles = StyleSheet.create({
     color: colors.black,
     marginLeft: 8,
     marginRight: 8,
-    width: "100%",
   },
   switchContainer: {
     flexDirection: "row",
@@ -799,10 +634,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.lightGrey,
     marginTop: 16,
   },
-  switchLabel: {
-    fontSize: 15,
-    color: colors.black,
-  },
+  switchLabel: { fontSize: 15, color: colors.black },
   priceInputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -825,19 +657,13 @@ const styles = StyleSheet.create({
     color: colors.black,
     padding: 0,
   },
-  perPersonText: {
-    fontSize: 14,
-    color: colors.darkGrey,
-  },
+  perPersonText: { fontSize: 14, color: colors.darkGrey },
   seatsContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  seatsLabel: {
-    fontSize: 15,
-    color: colors.black,
-  },
+  seatsLabel: { fontSize: 15, color: colors.black },
   seatsSelector: {
     flexDirection: "row",
     alignItems: "center",
@@ -855,47 +681,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     marginHorizontal: 2,
   },
-  seatsCountContainer: {
-    paddingHorizontal: 16,
-  },
-  seatsCount: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.black,
-  },
-  preferencesContainer: {
-    gap: 16,
-  },
+  seatsCountContainer: { paddingHorizontal: 16 },
+  seatsCount: { fontSize: 18, fontWeight: "600", color: colors.black },
+  preferencesContainer: { gap: 16 },
   preferenceRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  preferenceInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  preferenceLabel: {
-    fontSize: 15,
-    color: colors.black,
-    marginLeft: 12,
-  },
+  preferenceInfo: { flexDirection: "row", alignItems: "center", flex: 1 },
+  preferenceLabel: { fontSize: 15, color: colors.black, marginLeft: 12 },
   luggageSizeContainer: {
     marginTop: 20,
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: colors.lightGrey,
   },
-  luggageLabel: {
-    fontSize: 15,
-    color: colors.black,
-    marginBottom: 12,
-  },
-  luggageOptions: {
-    flexDirection: "row",
-    gap: 8,
-  },
+  luggageLabel: { fontSize: 15, color: colors.black, marginBottom: 12 },
+  luggageOptions: { flexDirection: "row", gap: 8 },
   luggageOption: {
     flex: 1,
     flexDirection: "row",
@@ -912,14 +715,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryPink,
     borderColor: colors.primaryPink,
   },
-  luggageText: {
-    fontSize: 13,
-    color: colors.darkGrey,
-    marginLeft: 6,
-  },
-  luggageTextSelected: {
-    color: colors.white,
-  },
+  luggageText: { fontSize: 13, color: colors.darkGrey, marginLeft: 6 },
+  luggageTextSelected: { color: colors.white },
   notesInput: {
     backgroundColor: colors.neutralLight,
     borderRadius: 8,
@@ -954,11 +751,35 @@ const styles = StyleSheet.create({
     shadowOpacity: 0,
     elevation: 0,
   },
-  publishButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.white,
+  publishButtonText: { fontSize: 16, fontWeight: "600", color: colors.white },
+  routeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
+  routeFields: { flex: 1 },
+  swapButton: { padding: 8, marginLeft: 8 },
+  separatorLine: {
+    height: 1,
+    backgroundColor: colors.lightGrey,
+    marginVertical: 4,
+    marginLeft: 28,
+  },
+  routeLocationInput: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    flex: 1,
+  },
+  routeLocationText: {
+    fontSize: 16,
+    color: colors.black,
+    marginLeft: 12,
+    flexShrink: 1,
+  },
+  locationDot: { width: 12, height: 12, borderRadius: 6 },
+  originDot: { backgroundColor: colors.primaryPink },
+  destinationDot: { backgroundColor: colors.primaryBlue },
 });
 
 export default OfferRideScreen;

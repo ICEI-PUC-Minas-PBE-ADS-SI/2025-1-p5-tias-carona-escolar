@@ -23,6 +23,13 @@ export class UserMapper {
     if (data.state !== undefined) partialUser.state = data.state;
     if (data.userType !== undefined) partialUser.userType = data.userType;
     if (data.isActive !== undefined) partialUser.isActive = data.isActive;
+    if (data.cnh !== undefined) partialUser.cnh = data.cnh;
+    if (data.vehicle_model !== undefined)
+      partialUser.vehicle_model = data.vehicle_model;
+    if (data.vehicle_color !== undefined)
+      partialUser.vehicle_color = data.vehicle_color;
+    if (data.license_plate !== undefined)
+      partialUser.license_plate = data.license_plate;
 
     return partialUser;
   }

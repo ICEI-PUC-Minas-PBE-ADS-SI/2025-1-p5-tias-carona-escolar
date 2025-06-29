@@ -1,4 +1,4 @@
-import { UserType } from "@prisma/client";
+import { UserType } from '@prisma/client';
 
 export interface IUserRequest {
   name?: string;
@@ -9,6 +9,7 @@ export interface IUserRequest {
   authProvider?: string;
   cpf?: string;
   rg?: string;
+  cnh?: string;
   birthDate?: Date;
   phone?: string;
   address?: string;
@@ -17,4 +18,8 @@ export interface IUserRequest {
   state?: string;
   userType?: UserType;
   isActive?: boolean;
+
+  vehicle_model?: string;
+  vehicle_color?: string;
+  license_plate?: string;
 }
