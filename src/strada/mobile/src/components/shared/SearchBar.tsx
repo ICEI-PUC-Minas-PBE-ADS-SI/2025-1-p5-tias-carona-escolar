@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import * as AsyncStorage from "expo-secure-store";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { getStoredUser } from "@/src/services/user.service";
 
 // Cores já definidas no seu app
 const colors = {
@@ -34,7 +35,6 @@ const colors = {
 
 // Configuração da API do Google Places
 const GOOGLE_PLACES_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "";
-
 const STORAGE_KEY = "recent_searches";
 
 const AutocompleteSearch = ({
@@ -47,36 +47,57 @@ const AutocompleteSearch = ({
   const [recentSearches, setRecentSearches] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [homeLocation, setHomeLocation] = useState<{ address: string; name: string } | null>(null);
+
   const inputRef = useRef(null);
   const suggestionHeight = useRef(new Animated.Value(0)).current;
   const { height: screenHeight } = Dimensions.get("window");
   const searchTimeoutRef = useRef(null);
 
-  // Carregar buscas recentes do AsyncStorage
-  const loadRecentSearches = async () => {
-    try {
-      const storedSearches = await AsyncStorage.getItemAsync(STORAGE_KEY);
-      if (storedSearches) {
-        const parsedSearches = JSON.parse(storedSearches);
-        setRecentSearches(parsedSearches.slice(0, 5)); // Manter apenas as últimas 5
+  // Carregar buscas recentes e endereço de casa
+  useEffect(() => {
+    const loadInitialData = async () => {
+      // Carregar buscas recentes
+      try {
+        const storedSearches = await AsyncStorage.getItemAsync(STORAGE_KEY);
+        if (storedSearches) {
+          const parsedSearches = JSON.parse(storedSearches);
+          setRecentSearches(parsedSearches.slice(0, 5));
+        }
+      } catch (error) {
+        console.error("Erro ao carregar buscas recentes:", error);
       }
-    } catch (error) {
-      console.error("Erro ao carregar buscas recentes:", error);
-    }
-  };
 
-  // Salvar busca recente no AsyncStorage
+      // Carregar endereço de casa
+      try {
+        const userString = await getStoredUser();
+        if (userString) {
+          const userData = JSON.parse(userString);
+          if (userData && userData.address) {
+            setHomeLocation({ address: userData.address, name: "Casa" });
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados do usuário para endereço de casa:", error);
+      }
+    };
+    loadInitialData();
+  }, []);
+
+  // Foco automático no input
+  useEffect(() => {
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
+  }, []);
+
   const saveRecentSearch = async (searchData) => {
     try {
       const storedSearches = await AsyncStorage.getItemAsync(STORAGE_KEY);
       let searches = storedSearches ? JSON.parse(storedSearches) : [];
-
-      // Remover busca duplicada se existir
-      searches = searches.filter(
-        (search) => search.place_id !== searchData.place_id
-      );
-
-      // Adicionar nova busca no início
+      searches = searches.filter((search) => search.place_id !== searchData.place_id);
       searches.unshift({
         id: searchData.place_id,
         main: searchData.main,
@@ -84,21 +105,17 @@ const AutocompleteSearch = ({
         description: searchData.description,
         place_id: searchData.place_id,
         types: searchData.types,
-        icon: searchData.icon,
+        icon: searchData.icon || 'home',
         timestamp: new Date().toISOString(),
       });
-
-      // Manter apenas as últimas 20 buscas no storage (para não sobrecarregar)
       searches = searches.slice(0, 20);
-
       await AsyncStorage.setItemAsync(STORAGE_KEY, JSON.stringify(searches));
-      setRecentSearches(searches.slice(0, 10)); // Mostrar apenas as últimas 5
+      setRecentSearches(searches.slice(0, 5));
     } catch (error) {
       console.error("Erro ao salvar busca recente:", error);
     }
   };
 
-  // Limpar todas as buscas recentes
   const clearRecentSearches = async () => {
     try {
       await AsyncStorage.deleteItemAsync(STORAGE_KEY);
@@ -107,30 +124,29 @@ const AutocompleteSearch = ({
       console.error("Erro ao limpar buscas recentes:", error);
     }
   };
+  
+  const getIconForPlace = (types) => {
+    if (types.includes("airport")) return "flight";
+    if (types.includes("bus_station") || types.includes("transit_station")) return "directions-bus";
+    if (types.includes("subway_station")) return "directions-subway";
+    if (types.includes("hospital")) return "local-hospital";
+    if (types.includes("school") || types.includes("university")) return "school";
+    if (types.includes("shopping_mall")) return "shopping-cart";
+    if (types.includes("restaurant") || types.includes("meal_takeaway")) return "restaurant";
+    if (types.includes("gas_station")) return "local-gas-station";
+    if (types.includes("bank")) return "account-balance";
+    return "location-on";
+  };
 
-  // Carregar buscas recentes quando o componente é montado
-  useEffect(() => {
-    loadRecentSearches();
-  }, []);
-
-  // Função para buscar sugestões da API do Google Places
   const searchGooglePlaces = async (query) => {
     if (!query || query.length < 2) {
       setSuggestions([]);
       return;
     }
-
     setIsLoading(true);
-
     try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
-          query
-        )}&key=${GOOGLE_PLACES_API_KEY}&language=pt-BR&components=country:br`
-      );
-
+      const response = await fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&key=${GOOGLE_PLACES_API_KEY}&language=pt-BR&components=country:br`);
       const data = await response.json();
-
       if (data.status === "OK") {
         const formattedSuggestions = data.predictions.map((prediction) => ({
           id: prediction.place_id,
@@ -141,255 +157,163 @@ const AutocompleteSearch = ({
           types: prediction.types,
           icon: getIconForPlace(prediction.types),
         }));
-
         setSuggestions(formattedSuggestions);
-
-        // Animar a abertura do painel de sugestões
         Animated.timing(suggestionHeight, {
-          toValue: Math.min(
-            formattedSuggestions.length * 62,
-            screenHeight * 0.4
-          ),
+          toValue: Math.min(formattedSuggestions.length * 62, screenHeight * 0.4),
           duration: 200,
           useNativeDriver: false,
         }).start();
       } else {
-        console.error("Erro na API do Google Places:", data.status);
         setSuggestions([]);
       }
     } catch (error) {
-      console.error("Erro ao buscar lugares:", error);
-      Alert.alert(
-        "Erro",
-        "Não foi possível buscar os endereços. Tente novamente."
-      );
+      Alert.alert("Erro", "Não foi possível buscar os endereços. Tente novamente.");
       setSuggestions([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Função para obter detalhes do lugar (incluindo lat/lng)
+  // Debounce para pesquisa
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (searchText.length > 0) {
+      searchTimeoutRef.current = setTimeout(() => searchGooglePlaces(searchText), 300);
+    } else {
+      setSuggestions([]);
+      Animated.timing(suggestionHeight, { toValue: 0, duration: 150, useNativeDriver: false }).start();
+    }
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [searchText]);
+
   const getPlaceDetails = async (placeId) => {
     try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address,name&key=${GOOGLE_PLACES_API_KEY}`
-      );
-
+      const response = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address,name&key=${GOOGLE_PLACES_API_KEY}`);
       const data = await response.json();
-
       if (data.status === "OK") {
         const place = data.result;
-        const location = {
+        return {
           latitude: place.geometry.location.lat,
           longitude: place.geometry.location.lng,
           address: place.formatted_address,
           name: place.name,
         };
-        console.log("Localização do lugar:", location);
-        return location;
-      } else {
-        throw new Error("Erro ao obter detalhes do lugar");
       }
+      throw new Error("Erro ao obter detalhes do lugar");
     } catch (error) {
-      console.error("Erro ao obter detalhes:", error);
       Alert.alert("Erro", "Não foi possível obter os detalhes do endereço.");
       return null;
     }
   };
 
-  // Função para determinar o ícone baseado no tipo do lugar
-  const getIconForPlace = (types) => {
-    if (types.includes("airport")) return "flight";
-    if (types.includes("bus_station") || types.includes("transit_station"))
-      return "directions-bus";
-    if (types.includes("subway_station")) return "directions-subway";
-    if (types.includes("hospital")) return "local-hospital";
-    if (types.includes("school") || types.includes("university"))
-      return "school";
-    if (types.includes("shopping_mall")) return "shopping-cart";
-    if (types.includes("restaurant") || types.includes("meal_takeaway"))
-      return "restaurant";
-    if (types.includes("gas_station")) return "local-gas-station";
-    if (types.includes("bank")) return "account-balance";
-    return "location-on";
-  };
-
-  // Debounce para pesquisa
-  useEffect(() => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
-    if (searchText.length > 0) {
-      searchTimeoutRef.current = setTimeout(() => {
-        searchGooglePlaces(searchText);
-      }, 300); // Aguarda 300ms após o usuário parar de digitar
-    } else {
-      setSuggestions([]);
-      // Animar o fechamento do painel de sugestões
-      Animated.timing(suggestionHeight, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: false,
-      }).start();
-    }
-
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, [searchText]);
-
-  // Foco automático no input quando o componente é montado
-  useEffect(() => {
-    setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, 100);
-  }, []);
-
   const handleSelectSuggestion = async (suggestion) => {
     setIsLoading(true);
-
-    // Obter detalhes do lugar incluindo coordenadas
     const placeDetails = await getPlaceDetails(suggestion.place_id);
-
     if (placeDetails) {
-      const selectedPlace = {
-        ...suggestion,
-        ...placeDetails,
-        searchType, // 'start' ou 'destination'
-      };
-
-      // Salvar a busca recente
+      const selectedPlace = { ...suggestion, ...placeDetails, searchType };
       await saveRecentSearch(suggestion);
-
-      await onSelectPlace(selectedPlace);
+      onSelectPlace(selectedPlace);
       setSearchText("");
       Keyboard.dismiss();
     }
+    setIsLoading(false);
+  };
 
+  const geocodeAddress = async (address) => {
+    try {
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_PLACES_API_KEY}&language=pt-BR`);
+      const data = await response.json();
+      if (data.status === 'OK' && data.results.length > 0) {
+        const result = data.results[0];
+        return {
+          latitude: result.geometry.location.lat,
+          longitude: result.geometry.location.lng,
+          address: result.formatted_address,
+          name: "Casa",
+        };
+      }
+      throw new Error(data.error_message || "Endereço não pôde ser encontrado no mapa.");
+    } catch (error) {
+      Alert.alert("Erro de Localização", "Não foi possível encontrar as coordenadas para o seu endereço de casa.");
+      return null;
+    }
+  };
+
+  const handleSelectHome = async () => {
+    if (!homeLocation || !homeLocation.address) {
+      Alert.alert("Endereço de Casa", "Seu endereço de casa não foi encontrado. Por favor, verifique seu cadastro.");
+      return;
+    }
+    setIsLoading(true);
+    Keyboard.dismiss();
+    const geocodedHome = await geocodeAddress(homeLocation.address);
+    if (geocodedHome) {
+      const placeData = {
+        ...geocodedHome,
+        id: `home-${geocodedHome.latitude}-${geocodedHome.longitude}`,
+        place_id: `home-${geocodedHome.latitude}-${geocodedHome.longitude}`,
+        main: "Casa",
+        secondary: geocodedHome.address,
+        icon: "home",
+      };
+      await saveRecentSearch(placeData);
+      onSelectPlace(placeData);
+    }
     setIsLoading(false);
   };
 
   const handleClearText = () => {
     setSearchText("");
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (inputRef.current) inputRef.current.focus();
   };
 
-  // Renderiza cada item de sugestão
   const renderSuggestionItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.suggestionItem}
-      onPress={() => handleSelectSuggestion(item)}
-      activeOpacity={0.7}
-    >
-      <View style={styles.iconContainer}>
-        <Icon
-          name={item.icon}
-          size={22}
-          color={
-            item.types?.includes("airport")
-              ? colors.primaryPink
-              : item.types?.includes("transit_station") ||
-                item.types?.includes("bus_station")
-              ? colors.secondaryBlue
-              : colors.primaryBlue
-          }
-        />
-      </View>
+    <TouchableOpacity style={styles.suggestionItem} onPress={() => handleSelectSuggestion(item)} activeOpacity={0.7}>
+      <View style={styles.iconContainer}><Icon name={item.icon} size={22} color={colors.primaryBlue} /></View>
       <View style={styles.suggestionTextContainer}>
-        <Text style={styles.suggestionMainText} numberOfLines={1}>
-          {item.main}
-        </Text>
-        <Text style={styles.suggestionSecondaryText} numberOfLines={1}>
-          {item.secondary}
-        </Text>
+        <Text style={styles.suggestionMainText} numberOfLines={1}>{item.main}</Text>
+        <Text style={styles.suggestionSecondaryText} numberOfLines={1}>{item.secondary}</Text>
       </View>
     </TouchableOpacity>
   );
 
-  // Renderiza cada item das buscas recentes
   const renderRecentItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.recentItem}
-      onPress={() => handleSelectSuggestion(item)}
-      activeOpacity={0.7}
-    >
-      <View style={styles.iconContainer}>
-        <Icon
-          name={item.icon}
-          size={18}
-          color={
-            item.types?.includes("airport")
-              ? colors.primaryPink
-              : item.types?.includes("transit_station") ||
-                item.types?.includes("bus_station")
-              ? colors.secondaryBlue
-              : colors.primaryBlue
-          }
-        />
-      </View>
+    <TouchableOpacity style={styles.recentItem} onPress={() => handleSelectSuggestion(item)} activeOpacity={0.7}>
+      <View style={styles.iconContainer}><Icon name={item.icon || 'history'} size={18} color={colors.primaryBlue} /></View>
       <View style={styles.recentItemTextContainer}>
-        <Text style={styles.recentItemMainText} numberOfLines={1}>
-          {item.main}
-        </Text>
-        {item.secondary && (
-          <Text style={styles.recentItemSecondaryText} numberOfLines={1}>
-            {item.secondary}
-          </Text>
-        )}
+        <Text style={styles.recentItemMainText} numberOfLines={1}>{item.main}</Text>
+        {item.secondary && <Text style={styles.recentItemSecondaryText} numberOfLines={1}>{item.secondary}</Text>}
       </View>
     </TouchableOpacity>
   );
 
-  // Renderiza itens recentes quando não há texto na busca
   const renderRecentSearches = () => {
     if (recentSearches.length === 0) return null;
-
     return (
       <View style={styles.recentSearchesContainer}>
         <View style={styles.recentHeader}>
           <Text style={styles.recentTitle}>Buscas recentes</Text>
-          <TouchableOpacity onPress={clearRecentSearches}>
-            <Text style={styles.clearText}>Limpar</Text>
-          </TouchableOpacity>
+          <TouchableOpacity onPress={clearRecentSearches}><Text style={styles.clearText}>Limpar</Text></TouchableOpacity>
         </View>
-
-        <FlatList
-          data={recentSearches}
-          renderItem={renderRecentItem}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={false}
-        />
+        <FlatList data={recentSearches} renderItem={renderRecentItem} keyExtractor={(item) => item.id} showsVerticalScrollIndicator={false} scrollEnabled={false} />
       </View>
     );
   };
 
   return (
     <View style={styles.container}>
-      {/* Cabeçalho com barra de pesquisa */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <Icon name="arrow-back" size={24} color={colors.black} />
         </TouchableOpacity>
-
         <View style={styles.searchInputContainer}>
           <Icon name="search" size={22} color={colors.darkGrey} />
           <TextInput
             ref={inputRef}
             style={styles.input}
-            placeholder={
-              searchType === "start"
-                ? "De onde você está saindo?"
-                : "Para onde você vai?"
-            }
+            placeholder={searchType === "start" ? "De onde você está saindo?" : "Para onde você vai?"}
             placeholderTextColor={colors.darkGrey}
             value={searchText}
             onChangeText={setSearchText}
@@ -399,81 +323,35 @@ const AutocompleteSearch = ({
             autoCorrect={false}
           />
           {searchText.length > 0 && (
-            <TouchableOpacity
-              style={styles.clearButton}
-              onPress={handleClearText}
-            >
+            <TouchableOpacity style={styles.clearButton} onPress={handleClearText}>
               <Icon name="cancel" size={18} color={colors.darkGrey} />
             </TouchableOpacity>
           )}
-          {isLoading && (
-            <View style={styles.loadingIndicator}>
-              <Text style={styles.loadingText}>...</Text>
-            </View>
-          )}
+          {isLoading && <View style={styles.loadingIndicator}><Text style={styles.loadingText}>...</Text></View>}
         </View>
       </View>
 
-      {/* Lista de sugestões */}
-      <Animated.View
-        style={[
-          styles.suggestionsContainer,
-          {
-            height: suggestionHeight,
-            borderBottomWidth: suggestions.length > 0 ? 1 : 0,
-          },
-        ]}
-      >
-        {suggestions.length > 0 ? (
-          <FlatList
-            data={suggestions}
-            renderItem={renderSuggestionItem}
-            keyExtractor={(item) => item.id}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.suggestionsList}
-          />
-        ) : null}
+      <Animated.View style={[styles.suggestionsContainer, { height: suggestionHeight, borderBottomWidth: suggestions.length > 0 ? 1 : 0 }]}>
+        {suggestions.length > 0 && <FlatList data={suggestions} renderItem={renderSuggestionItem} keyExtractor={(item) => item.id} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.suggestionsList} />}
       </Animated.View>
 
-      {/* Mostrar buscas recentes quando não há texto */}
       {searchText.length === 0 && renderRecentSearches()}
 
-      {/* Sugestões para origem/destino quando relevante */}
       {searchText.length === 0 && (
         <View style={styles.commonPlacesContainer}>
           <Text style={styles.sectionTitle}>Locais comuns</Text>
-
-          <TouchableOpacity style={styles.commonPlaceItem}>
-            <View
-              style={[styles.iconCircle, { backgroundColor: colors.softBlue }]}
-            >
+          <TouchableOpacity style={styles.commonPlaceItem} onPress={handleSelectHome}>
+            <View style={[styles.iconCircle, { backgroundColor: colors.softBlue }]}>
               <Icon name="home" size={18} color={colors.primaryBlue} />
             </View>
             <View style={styles.commonPlaceTextContainer}>
               <Text style={styles.commonPlaceText}>Casa</Text>
-              <Text style={styles.commonPlaceDescription}>
-                Definir meu endereço de casa
+              <Text style={styles.commonPlaceDescription} numberOfLines={1}>
+                {homeLocation ? homeLocation.address : "Endereço não definido no perfil"}
               </Text>
             </View>
             <Icon name="chevron-right" size={22} color={colors.darkGrey} />
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.commonPlaceItem}>
-            <View
-              style={[styles.iconCircle, { backgroundColor: colors.lightPink }]}
-            >
-              <Icon name="work" size={18} color={colors.primaryPink} />
-            </View>
-            <View style={styles.commonPlaceTextContainer}>
-              <Text style={styles.commonPlaceText}>Trabalho</Text>
-              <Text style={styles.commonPlaceDescription}>
-                Definir meu endereço de trabalho
-              </Text>
-            </View>
-            <Icon name="chevron-right" size={22} color={colors.darkGrey} />
-          </TouchableOpacity>
-
           <TouchableOpacity style={styles.useMapButton}>
             <Icon name="map" size={18} color={colors.primaryBlue} />
             <Text style={styles.useMapText}>Selecionar no mapa</Text>

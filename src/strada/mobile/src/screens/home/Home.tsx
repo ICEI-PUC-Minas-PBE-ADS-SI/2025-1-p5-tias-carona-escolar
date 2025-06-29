@@ -21,7 +21,7 @@ import { AppImages } from "@/src/assets";
 import { colors } from "@/src/constants/colors";
 import AutocompleteSearch from "@/src/components/shared/SearchBar";
 import { getPopularRoutes, searchRides } from "@/src/services/ride.service";
-import { getStoredUserID, getUser } from "@/src/services/user.service";
+import { getStoredUserID, getUser, storeUser } from "@/src/services/user.service";
 
 interface PopularRoute {
   id: string;
@@ -186,6 +186,7 @@ const HomeScreen = () => {
         const storedUserId = await getStoredUserID();
         if (storedUserId) {
           const user = await getUser(storedUserId);
+          storeUser(user);
           setUser(user);
         }
       } catch (error) {
