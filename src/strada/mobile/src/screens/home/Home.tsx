@@ -451,7 +451,7 @@ const HomeScreen = () => {
         <View style={styles.quickActions}>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={navigateToSearch}
+            onPress={openSearchModal}
           >
             <View
               style={[styles.actionIcon, { backgroundColor: colors.softBlue }]}
