@@ -16,6 +16,13 @@ Para cada caso de teste definido no <a href="08-Plano-testes-software.md"> Plano
 | Requisito associado | RF-002 - Validação de Segurança do Motorista: O sistema deve ter um processo de validação da CNH (Carteira Nacional de Habilitação) quando um usuário se candidata a "Motorista". |
 | Registro de evidência | [one-drive/ct-002](https://sgapucminasbr-my.sharepoint.com/personal/1434009_sga_pucminas_br/_layouts/15/guestaccess.aspx?share=EV6YSJVzwrlMgUXzs-CkBbIBJOiFj_18OorZDgmRQzpD9Q&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=jfIsIU) |
 
+
+| **Caso de teste** 	| **CT-003 – Cadastrar aluno no perfil do Responsável** 	|
+|:---:	|:---:	|
+| Requisito associado | RF-003 -O sistema deve permitir que um "Responsável" cadastre um ou mais alunos (filhos) em sua conta, vinculando-os ao seu perfil. |
+| Registro de evidência | [one-drive/ct-003](https://sgapucminasbr-my.sharepoint.com/personal/1434009_sga_pucminas_br/_layouts/15/stream.aspx?id=%2Fpersonal%2F1434009%5Fsga%5Fpucminas%5Fbr%2FDocuments%2FSTRADA%20%28TIAS%29%20%2D%20Registros%20de%20testes%20de%20software%2FCT%2D003%20%E2%80%93%20Cadastrar%20aluno%20no%20perfil%20do%20Respons%C3%A1vel%2Ewebm&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2E200d82bd%2D62c5%2D47ad%2Dafbc%2Dd11476de62a6) |
+
+
 | **Caso de teste** 	| **CT-004 – Cadastrar nova rota de carona (Motorista)**	|
 |:---:	|:---:	|
 | Requisito associado | RF-004 - Criação e Gerenciamento de Rotas (Motorista): O sistema deve permitir que o "Motorista" cadastre suas rotas de ou para a escola Educare. |
