@@ -24,8 +24,14 @@ model User {
   authProvider String?   @default("local")
 
   // Informações pessoais e documentos (opcionais)
-  cpf       String?   @unique
-  rg        String?
+  cpf String? @unique
+  rg  String?
+  cnh String?
+
+  vehicle_model String?
+  vehicle_color String?
+  license_plate String?
+
   birthDate DateTime?
   phone     String?
   address   String?

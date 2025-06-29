@@ -14,6 +14,9 @@ export class UpdateUserUseCase {
   async execute(id: string, dto: IUserRequest): Promise<IUserResponse> {
     const existingUser = await this.findUserByIdUseCase.execute(id);
 
+    console.log('updating...');
+    console.log(dto);
+
     try {
       const userToUpdate = UserMapper.toPartialEntity({
         ...existingUser,
@@ -27,6 +30,9 @@ export class UpdateUserUseCase {
       if (!dto.password) {
         delete userToUpdate.password;
       }
+
+      console.log('use to update');
+      console.log(userToUpdate);
 
       return await this.userRepository.update(id, userToUpdate);
     } catch (error) {

@@ -26,6 +26,7 @@ export class UserRepository implements IUserRepository {
         authProvider: user.authProvider,
         cpf: user.cpf,
         rg: user.rg,
+        cnh: user.cnh,
         birthDate: user.birthDate,
         phone: user.phone,
         address: user.address,
@@ -33,6 +34,9 @@ export class UserRepository implements IUserRepository {
         city: user.city,
         state: user.state,
         userType: user.userType,
+        vehicle_model: user.vehicle_model,
+        vehicle_color: user.vehicle_color,
+        license_plate: user.license_plate,
       },
       select: {
         id: true,
@@ -42,6 +46,7 @@ export class UserRepository implements IUserRepository {
         imgUrl: true,
         cpf: true,
         rg: true,
+        cnh: true,
         birthDate: true,
         phone: true,
         address: true,
@@ -53,6 +58,9 @@ export class UserRepository implements IUserRepository {
         isActive: true,
         authProvider: false,
         password: false,
+        vehicle_model: true,
+        vehicle_color: true,
+        license_plate: true,
       },
     });
 
@@ -70,6 +78,7 @@ export class UserRepository implements IUserRepository {
       authProvider: user.authProvider,
       cpf: user.cpf,
       rg: user.rg,
+      cnh: user.cnh,
       birthDate: user.birthDate,
       phone: user.phone,
       address: user.address,
@@ -77,6 +86,9 @@ export class UserRepository implements IUserRepository {
       city: user.city,
       state: user.state,
       userType: user.userType,
+      vehicle_model: user.vehicle_model,
+      vehicle_color: user.vehicle_color,
+      license_plate: user.license_plate,
     };
 
     if (user.password) {

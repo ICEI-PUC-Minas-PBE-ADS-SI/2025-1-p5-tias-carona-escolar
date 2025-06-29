@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller, Get, Param,
-  Post,
-  Put,
-  Query
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { CreateUserUseCase } from '@/src/user/core/use-cases/create-user.use-case';
 import { UserRequestDto } from '../dto/user-request.dto';
 import { UserResponseDto } from '../dto/user-response.dto';
@@ -49,5 +43,4 @@ export class UserController {
   ) {
     return await this.findAllUseCase.execute({ name, page, limit });
   }
-
 }
