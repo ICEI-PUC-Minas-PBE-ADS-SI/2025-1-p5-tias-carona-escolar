@@ -19,7 +19,13 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter, useGlobalSearchParams } from "expo-router";
 import { getStoredToken } from "@/src/services/token.service";
 import { removeTokens } from "@/src/services/token.service";
-import { getStoredUserID, getUser } from "@/src/services/user.service";
+import {
+  getStoredUserID,
+  getUser,
+  createDependent,
+  removeDependent as removeDependentService,
+  IDependentData,
+} from "@/src/services/user.service";
 
 interface Guardian {
   id: string;
@@ -76,18 +82,21 @@ const UserDetailsScreen = () => {
   const [showAllDependents, setShowAllDependents] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editableUserData, setEditableUserData] = useState<UserData | null>(null);
+  const [editableUserData, setEditableUserData] = useState<UserData | null>(
+    null
+  );
 
   // Estados do Modal
   const [showAddDependentModal, setShowAddDependentModal] = useState(false);
   const [addingDependent, setAddingDependent] = useState(false);
+  const [isBirthDateValid, setIsBirthDateValid] = useState(true);
   const [dependentForm, setDependentForm] = useState({
     name: "",
     username: "",
     email: "",
     phone: "",
     birthDate: "",
-    relationship: "CHILD", // CHILD, SIBLING, OTHER
+    relationship: "PARENT", // PARENT, LEGAL_GUARDIAN, RELATIVE, AUTHORIZED_ADULT
     address: "",
     city: "",
     state: "",
@@ -148,7 +157,6 @@ const UserDetailsScreen = () => {
 
       const apiUrl = `https://auth.${process.env.EXPO_PUBLIC_BASE_DOMAIN}/users/${userId}`;
 
-
       const requestBody = {
         name: editableUserData.name,
         email: editableUserData.email,
@@ -163,10 +171,10 @@ const UserDetailsScreen = () => {
       };
 
       const response = await fetch(apiUrl, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
         // Enviamos o objeto completo
         body: JSON.stringify(requestBody),
@@ -174,7 +182,7 @@ const UserDetailsScreen = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Falha ao atualizar o perfil.');
+        throw new Error(errorData.message || "Falha ao atualizar o perfil.");
       }
 
       const updatedUser = await response.json();
@@ -185,11 +193,13 @@ const UserDetailsScreen = () => {
       setEditableUserData(updatedUser);
       setIsEditing(false);
 
-      Alert.alert('Sucesso!', 'Seu perfil foi atualizado.');
-
+      Alert.alert("Sucesso!", "Seu perfil foi atualizado.");
     } catch (error: any) {
       console.error("Erro ao salvar o perfil:", error);
-      Alert.alert('Erro', error.message || 'Não foi possível salvar as alterações.');
+      Alert.alert(
+        "Erro",
+        error.message || "Não foi possível salvar as alterações."
+      );
     } finally {
       setLoading(false);
     }
@@ -206,12 +216,13 @@ const UserDetailsScreen = () => {
       email: "",
       phone: "",
       birthDate: "",
-      relationship: "CHILD",
+      relationship: "PARENT",
       address: "",
       city: "",
       state: "",
       cep: "",
     });
+    setIsBirthDateValid(true);
   };
 
   const handleCloseModal = () => {
@@ -234,33 +245,44 @@ const UserDetailsScreen = () => {
       return;
     }
 
+    // Validação da data de nascimento
+    const birthDateValidation = validateBirthDate(dependentForm.birthDate);
+    if (!birthDateValidation.isValid) {
+      Alert.alert(
+        "Erro",
+        birthDateValidation.error || "Data de nascimento inválida"
+      );
+      return;
+    }
+
     try {
       setAddingDependent(true);
 
-      const response = await fetch("/api/dependents", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...dependentForm,
-          guardianId: userId,
-        }),
-      });
+      const dependentData: IDependentData = {
+        name: dependentForm.name,
+        email: dependentForm.email,
+        username: dependentForm.username,
+        phone: dependentForm.phone,
+        birthDate: dependentForm.birthDate,
+        relationship: dependentForm.relationship,
+        address: dependentForm.address,
+        city: dependentForm.city,
+        state: dependentForm.state,
+        cep: dependentForm.cep,
+      };
 
-      if (response.ok) {
-        Alert.alert("Sucesso", "Dependente adicionado com sucesso");
-        handleCloseModal();
-        fetchUserData(); // Recarrega os dados
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erro ao adicionar dependente");
-      }
+      await createDependent(dependentData, userId);
+
+      Alert.alert("Sucesso", "Dependente adicionado com sucesso");
+      handleCloseModal();
+      fetchUserData(); // Recarrega os dados
     } catch (error: any) {
       console.error("Erro ao adicionar dependente:", error);
       Alert.alert(
         "Erro",
-        error.message || "Não foi possível adicionar o dependente"
+        error.response?.data?.message ||
+          error.message ||
+          "Não foi possível adicionar o dependente"
       );
     } finally {
       setAddingDependent(false);
@@ -268,11 +290,10 @@ const UserDetailsScreen = () => {
   };
 
   const getRelationshipOptions = () => [
-    { value: "CHILD", label: "Filho(a)" },
-    { value: "SIBLING", label: "Irmão/Irmã" },
-    { value: "NEPHEW", label: "Sobrinho(a)" },
-    { value: "GRANDCHILD", label: "Neto(a)" },
-    { value: "OTHER", label: "Outro" },
+    { value: "PARENT", label: "Pai/Mãe" },
+    { value: "LEGAL_GUARDIAN", label: "Responsável Legal" },
+    { value: "RELATIVE", label: "Parente" },
+    { value: "AUTHORIZED_ADULT", label: "Adulto Autorizado" },
   ];
 
   const handleEditDependent = (dependentId: string) => {
@@ -291,27 +312,25 @@ const UserDetailsScreen = () => {
         {
           text: "Remover",
           style: "destructive",
-          onPress: () => removeDependent(dependentId),
+          onPress: () => performRemoveDependent(dependentId),
         },
       ]
     );
   };
 
-  const removeDependent = async (dependentId: string) => {
+  const performRemoveDependent = async (dependentId: string) => {
     try {
-      const response = await fetch(`/api/dependents/${dependentId}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        fetchUserData(); // Recarrega os dados
-        Alert.alert("Sucesso", "Dependente removido com sucesso");
-      } else {
-        throw new Error("Erro ao remover dependente");
-      }
-    } catch (error) {
+      await removeDependentService(userId, dependentId);
+      fetchUserData(); // Recarrega os dados
+      Alert.alert("Sucesso", "Dependente removido com sucesso");
+    } catch (error: any) {
       console.error("Erro ao remover dependente:", error);
-      Alert.alert("Erro", "Não foi possível remover o dependente");
+      Alert.alert(
+        "Erro",
+        error.response?.data?.message ||
+          error.message ||
+          "Não foi possível remover o dependente"
+      );
     }
   };
 
@@ -334,8 +353,68 @@ const UserDetailsScreen = () => {
     return new Date(dateString).toLocaleDateString("pt-BR");
   };
 
+  // Função para validar data de nascimento
+  const validateBirthDate = (
+    dateString: string
+  ): { isValid: boolean; error?: string } => {
+    if (!dateString || dateString.length === 0) {
+      return { isValid: true }; // Data é opcional
+    }
+
+    // Verifica formato DD/MM/YYYY
+    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (!dateRegex.test(dateString)) {
+      return { isValid: false, error: "Data deve estar no formato DD/MM/AAAA" };
+    }
+
+    const parts = dateString.split("/");
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+
+    // Validação básica de limites
+    if (day < 1 || day > 31) {
+      return { isValid: false, error: "Dia deve estar entre 01 e 31" };
+    }
+    if (month < 1 || month > 12) {
+      return { isValid: false, error: "Mês deve estar entre 01 e 12" };
+    }
+    if (year < 1900 || year > new Date().getFullYear()) {
+      return {
+        isValid: false,
+        error: "Ano deve estar entre 1900 e o ano atual",
+      };
+    }
+
+    // Validação de data real (verifica se a data existe)
+    const date = new Date(year, month - 1, day);
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return { isValid: false, error: "Data inválida" };
+    }
+
+    // // Verifica se não é uma data futura
+    // if (date > new Date()) {
+    //   return {
+    //     isValid: false,
+    //     error: "Data de nascimento não pode ser no futuro",
+    //   };
+    // }
+
+    // Verifica se a pessoa tem pelo menos 1 ano
+    const age = new Date().getFullYear() - year;
+    if (age < 1) {
+      return { isValid: false, error: "Data de nascimento inválida" };
+    }
+
+    return { isValid: true };
+  };
+
   const getRelationshipLabel = (relationship: string) => {
-    const relationships = {
+    const relationships: { [key: string]: string } = {
       PARENT: "Pai/Mãe",
       GUARDIAN: "Responsável",
       RELATIVE: "Parente",
@@ -360,7 +439,7 @@ const UserDetailsScreen = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
           <Feather name="alert-circle" size={48} color="#666" />
-          <Text style={styles.errorText}>Usuário não encontrado</Text>
+          <Text style={styles.errorContainerText}>Usuário não encontrado</Text>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={() => router.back()}
@@ -453,24 +532,31 @@ const UserDetailsScreen = () => {
 
           {isEditing ? (
             // Botões SALVAR e CANCELAR (no modo de edição)
-            <View style={{ flexDirection: 'row', gap: 15 }}>
-              <TouchableOpacity onPress={() => {
-                setIsEditing(false);
-                setEditableUserData(userData); // Descarta alterações
-              }}>
-                <Text style={{ color: '#D9534F', fontWeight: '600' }}>Cancelar</Text>
+            <View style={{ flexDirection: "row", gap: 15 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setIsEditing(false);
+                  setEditableUserData(userData); // Descarta alterações
+                }}
+              >
+                <Text style={{ color: "#D9534F", fontWeight: "600" }}>
+                  Cancelar
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleSaveChanges()}>
-                <Text style={{ color: '#4A80F0', fontWeight: '600' }}>Salvar</Text>
+                <Text style={{ color: "#4A80F0", fontWeight: "600" }}>
+                  Salvar
+                </Text>
               </TouchableOpacity>
             </View>
           ) : (
             // Botão EDITAR (no modo de visualização)
             <TouchableOpacity onPress={() => setIsEditing(true)}>
-              <Text style={{ color: '#4A80F0', fontWeight: '600' }}>Editar</Text>
+              <Text style={{ color: "#4A80F0", fontWeight: "600" }}>
+                Editar
+              </Text>
             </TouchableOpacity>
           )}
-
 
           <View style={styles.infoRow}>
             <View style={styles.infoIconContainer}>
@@ -481,9 +567,11 @@ const UserDetailsScreen = () => {
               {isEditing ? (
                 <TextInput
                   style={styles.textInput} // Reutilizando o estilo do modal
-                  value={editableUserData?.name || ''}
+                  value={editableUserData?.name || ""}
                   onChangeText={(text) =>
-                    setEditableUserData(prev => prev ? { ...prev, name: text } : null)
+                    setEditableUserData((prev) =>
+                      prev ? { ...prev, name: text } : null
+                    )
                   }
                 />
               ) : (
@@ -511,13 +599,19 @@ const UserDetailsScreen = () => {
               {isEditing ? (
                 <TextInput
                   style={styles.textInput}
-                  value={editableUserData?.phone || ''}
+                  value={editableUserData?.phone || ""}
                   placeholder="Não informado"
                   keyboardType="phone-pad"
-                  onChangeText={(text) => setEditableUserData(prev => prev ? { ...prev, phone: text } : null)}
+                  onChangeText={(text) =>
+                    setEditableUserData((prev) =>
+                      prev ? { ...prev, phone: text } : null
+                    )
+                  }
                 />
               ) : (
-                <Text style={styles.infoValue}>{userData.phone || "Não informado"}</Text>
+                <Text style={styles.infoValue}>
+                  {userData.phone || "Não informado"}
+                </Text>
               )}
             </View>
           </View>
@@ -533,36 +627,54 @@ const UserDetailsScreen = () => {
                   <TextInput
                     style={[styles.textInput, { marginBottom: 8 }]}
                     placeholder="Endereço, número"
-                    value={editableUserData?.address || ''}
-                    onChangeText={(text) => setEditableUserData(prev => prev ? { ...prev, address: text } : null)}
+                    value={editableUserData?.address || ""}
+                    onChangeText={(text) =>
+                      setEditableUserData((prev) =>
+                        prev ? { ...prev, address: text } : null
+                      )
+                    }
                   />
                   <TextInput
                     style={[styles.textInput, { marginBottom: 8 }]}
                     placeholder="CEP"
                     keyboardType="numeric"
-                    value={editableUserData?.cep || ''}
-                    onChangeText={(text) => setEditableUserData(prev => prev ? { ...prev, cep: text } : null)}
+                    value={editableUserData?.cep || ""}
+                    onChangeText={(text) =>
+                      setEditableUserData((prev) =>
+                        prev ? { ...prev, cep: text } : null
+                      )
+                    }
                   />
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <View style={{ flexDirection: "row", gap: 8 }}>
                     <TextInput
                       style={[styles.textInput, { flex: 2 }]}
                       placeholder="Cidade"
-                      value={editableUserData?.city || ''}
-                      onChangeText={(text) => setEditableUserData(prev => prev ? { ...prev, city: text } : null)}
+                      value={editableUserData?.city || ""}
+                      onChangeText={(text) =>
+                        setEditableUserData((prev) =>
+                          prev ? { ...prev, city: text } : null
+                        )
+                      }
                     />
                     <TextInput
                       style={[styles.textInput, { flex: 1 }]}
                       placeholder="Estado"
                       maxLength={2}
                       autoCapitalize="characters"
-                      value={editableUserData?.state || ''}
-                      onChangeText={(text) => setEditableUserData(prev => prev ? { ...prev, state: text } : null)}
+                      value={editableUserData?.state || ""}
+                      onChangeText={(text) =>
+                        setEditableUserData((prev) =>
+                          prev ? { ...prev, state: text } : null
+                        )
+                      }
                     />
                   </View>
                 </View>
               ) : (
                 <>
-                  <Text style={styles.infoValue}>{fullAddress || "Não informado"}</Text>
+                  <Text style={styles.infoValue}>
+                    {fullAddress || "Não informado"}
+                  </Text>
                   {userData.cep && (
                     <Text style={styles.infoSubValue}>CEP: {userData.cep}</Text>
                   )}
@@ -614,34 +726,46 @@ const UserDetailsScreen = () => {
               <>
                 {userData.minors
                   ?.slice(0, showAllDependents ? userData.minors.length : 2)
-                  ?.map((minor) => (
-                    <View key={minor.id} style={styles.dependentCard}>
+                  ?.map((relationship) => (
+                    <View key={relationship.id} style={styles.dependentCard}>
                       <View style={styles.dependentHeader}>
                         <View style={styles.dependentIconContainer}>
                           <Feather name="user" size={16} color="#fff" />
                         </View>
                         <View style={styles.dependentInfo}>
-                          <Text style={styles.dependentName}>{minor.name}</Text>
-                          <Text style={styles.dependentUsername}>
-                            @{minor.username}
+                          <Text style={styles.dependentName}>
+                            {relationship.minor.name}
                           </Text>
-                          {minor.birthDate && (
+                          <Text style={styles.dependentUsername}>
+                            @{relationship.minor.username}
+                          </Text>
+                          {relationship.minor.birthDate && (
                             <Text style={styles.dependentAge}>
-                              Nascimento: {formatDate(minor.birthDate)}
+                              Nascimento:{" "}
+                              {formatDate(relationship.minor.birthDate)}
                             </Text>
                           )}
+                          <Text style={styles.dependentRelationship}>
+                            Relação:{" "}
+                            {getRelationshipLabel(relationship.relationship)}
+                          </Text>
                         </View>
                         <View style={styles.dependentActions}>
                           <TouchableOpacity
                             style={styles.editButton}
-                            onPress={() => handleEditDependent(minor.id)}
+                            onPress={() =>
+                              handleEditDependent(relationship.minor.id)
+                            }
                           >
                             <Feather name="edit-2" size={16} color="#4A80F0" />
                           </TouchableOpacity>
                           <TouchableOpacity
                             style={styles.removeButton}
                             onPress={() =>
-                              handleRemoveDependent(minor.id, minor.name)
+                              handleRemoveDependent(
+                                relationship.id,
+                                relationship.minor.name
+                              )
                             }
                           >
                             <Feather name="trash-2" size={16} color="#D9534F" />
@@ -876,14 +1000,80 @@ const UserDetailsScreen = () => {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Data de Nascimento</Text>
                   <TextInput
-                    style={styles.textInput}
+                    style={[
+                      styles.textInput,
+                      !isBirthDateValid &&
+                        dependentForm.birthDate.length > 0 &&
+                        styles.textInputError,
+                    ]}
                     value={dependentForm.birthDate}
-                    onChangeText={(text) =>
-                      setDependentForm((prev) => ({ ...prev, birthDate: text }))
-                    }
+                    onChangeText={(text) => {
+                      // Remove todos os caracteres não numéricos
+                      const numbers = text.replace(/\D/g, "");
+
+                      // Aplica a máscara DD/MM/YYYY
+                      let formatted = "";
+                      if (numbers.length >= 1) {
+                        formatted += numbers.slice(0, 2);
+                        if (numbers.length >= 3) {
+                          formatted += "/" + numbers.slice(2, 4);
+                          if (numbers.length >= 5) {
+                            formatted += "/" + numbers.slice(4, 8);
+                          }
+                        }
+                      }
+
+                      // Validação em tempo real
+                      if (formatted.length > 0) {
+                        const parts = formatted.split("/");
+                        if (parts.length >= 1 && parts[0]) {
+                          const day = parseInt(parts[0], 10);
+                          if (day > 31) {
+                            formatted =
+                              "31" +
+                              (parts[1] ? "/" + parts[1] : "") +
+                              (parts[2] ? "/" + parts[2] : "");
+                          }
+                        }
+                        if (parts.length >= 2 && parts[1]) {
+                          const month = parseInt(parts[1], 10);
+                          if (month > 12) {
+                            formatted =
+                              parts[0] +
+                              "/12" +
+                              (parts[2] ? "/" + parts[2] : "");
+                          }
+                        }
+                        if (parts.length >= 3 && parts[2]) {
+                          const year = parseInt(parts[2], 10);
+                          const currentYear = new Date().getFullYear();
+                          if (year > currentYear) {
+                            formatted =
+                              parts[0] + "/" + parts[1] + "/" + currentYear;
+                          }
+                        }
+                      }
+
+                      setDependentForm((prev) => ({
+                        ...prev,
+                        birthDate: formatted,
+                      }));
+
+                      // Validação em tempo real
+                      if (formatted.length === 10) {
+                        const validation = validateBirthDate(formatted);
+                        setIsBirthDateValid(validation.isValid);
+                      } else {
+                        setIsBirthDateValid(true);
+                      }
+                    }}
                     placeholder="DD/MM/AAAA"
                     keyboardType="numeric"
+                    maxLength={10}
                   />
+                  {!isBirthDateValid && dependentForm.birthDate.length > 0 && (
+                    <Text style={styles.inputErrorText}>Data inválida</Text>
+                  )}
                 </View>
               </View>
 
@@ -897,7 +1087,7 @@ const UserDetailsScreen = () => {
                       style={[
                         styles.relationshipOption,
                         dependentForm.relationship === option.value &&
-                        styles.relationshipOptionSelected,
+                          styles.relationshipOptionSelected,
                       ]}
                       onPress={() =>
                         setDependentForm((prev) => ({
@@ -910,7 +1100,7 @@ const UserDetailsScreen = () => {
                         style={[
                           styles.relationshipOptionText,
                           dependentForm.relationship === option.value &&
-                          styles.relationshipOptionTextSelected,
+                            styles.relationshipOptionTextSelected,
                         ]}
                       >
                         {option.label}
@@ -991,7 +1181,7 @@ const UserDetailsScreen = () => {
           </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
-    </SafeAreaView >
+    </SafeAreaView>
   );
 };
 
@@ -1016,7 +1206,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 32,
   },
-  errorText: {
+  errorContainerText: {
     fontSize: 18,
     color: "#666",
     marginTop: 16,
@@ -1442,6 +1632,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#888",
     fontStyle: "italic",
+  },
+  textInputError: {
+    borderColor: "#D9534F",
+    backgroundColor: "#FFF5F5",
+  },
+  inputErrorText: {
+    fontSize: 12,
+    color: "#D9534F",
+    marginTop: 4,
+    marginLeft: 4,
   },
 });
 
