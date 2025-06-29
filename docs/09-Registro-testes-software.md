@@ -22,6 +22,12 @@
 | Requisito associado | RF-004 - Criação e Gerenciamento de Rotas (Motorista): O sistema deve permitir que o "Motorista" cadastre suas rotas de ou para a escola Educare. |
 | Registro de evidência | [one-drive/ct-004](https://sgapucminasbr-my.sharepoint.com/personal/1434009_sga_pucminas_br/_layouts/15/guestaccess.aspx?share=ESC35BZM74dGrvUNCUUxjtgBsS8D-ZME3cvAqZyFHUdTKg&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=LEZ3pU) |
 
+| **Caso de teste** | **CT-006 – Solicitar agendamento de carona (Responsável)** |
+|:---:|:---:|
+| **Requisito associado** | RF-006 - Agendamento de Carona (Responsável): O sistema deve permitir que o "Responsável" solicite e agende uma carona para um aluno com um motorista compatível. |
+| **Registro de evidência** | [one-drive/ct-006](https://sgapucminasbr-my.sharepoint.com/personal/1434009_sga_pucminas_br/_layouts/15/stream.aspx?id=%2Fpersonal%2F1434009%5Fsga%5Fpucminas%5Fbr%2FDocuments%2FSTRADA%20%28TIAS%29%20%2D%20Registros%20de%20testes%20de%20software%2FSolicitando%20carona%2Emp4&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&ga=1&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2Ed0d1a752%2D33b9%2D4a5a%2Dba72%2D4d7bd6e4a720) |
+
+
 | **Caso de teste** 	| **CT-007 – Editar informações do perfil** 	|
 |:---:	|:---:	|
 | Requisito associado | RF-007 - Gestão de Perfil do Usuário: O sistema deve permitir que os usuários editem informações básicas de seus perfis. |
