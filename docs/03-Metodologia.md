@@ -105,6 +105,27 @@ Atualizado em: 11/05/2025
 
 
 
+#### Sprint 4
+
+Atualizado em: 29/06/2025
+
+| Responsável   | Tarefa/Requisito | Iniciado em    | Prazo      | Status | Terminado em    |
+| :----         |    :----         |      :----:    | :----:     | :----: | :----:          |
+| Vinicius | Preechimento parcial do relatório | 10/05/2025 | 11/05/2025 | ✔️ | 11/05/2025 |
+| Vinicius | Alterações na screen OfferRideView e no serviço de usuários | 05/05/2025 | 11/05/2025 | ✔️ | 11/05/2025 |
+
+
+
+#### Sprint 5
+
+Atualizado em: 29/06/2025
+
+| Responsável   | Tarefa/Requisito | Iniciado em    | Prazo      | Status | Terminado em    |
+| :----         |    :----         |      :----:    | :----:     | :----: | :----:          |
+| Vinicius | Casos de teste CT-001, CT-002, CT-004 |22/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
+| Vinicius | Envio do relatório final via APC |29/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
+
+
 Legenda:
 - ✔️: terminado
 - 📝: em execução
