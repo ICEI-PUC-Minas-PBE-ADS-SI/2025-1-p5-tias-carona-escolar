@@ -14,11 +14,11 @@
 
 | **Caso de teste** | **CT-002 – Validar documentação para se tornar "Motorista"** |
 | :---: | :---: |
-| **Requisito associado** | RF-002 - Validação de Segurança do Motorista: O sistema deve ter um processo de validação de identidade e da CNH (Carteira Nacional de Habilitação) quando um usuário se candidata a "Motorista". |
-| **Objetivo do teste** | Verificar se o usuário com perfil "Responsável" consegue submeter seus documentos (identidade e CNH) para validação. |
-| **Passos** | |
-| **Critério de êxito** | |
-| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+| **Requisito associado** | RF-002 - Validação de Segurança do Motorista: O sistema deve ter um processo de validação da CNH (Carteira Nacional de Habilitação) quando um usuário se candidata a "Motorista". |
+| **Objetivo do teste** | Verificar se o usuário com perfil "Responsável" consegue submeter seus documentos (CNH) para validação. |
+| **Passos** | - Acessar a aplicação mobile. <br> - Clicar em "Vamos começar" <br> - Perpassar o carrosel de boas-vindas. <br> - Clicar em "Entrar agora". <br> - Fazer login com a conta de usuário  <br> - Clicar em "Oferecer". <br> - Clicar em "Adicionar dados do Veículo e da CNH". <br> - Informar uma CNH válida (terminada em 1). <br> - Clicar em "Validar". |
+| **Critério de êxito** | - O sistema exibe a mensagem "Válida". |
+| **Responsável pela elaboração do caso de teste** | Vinicius Henrique Alves. |
 
 <br>
 
