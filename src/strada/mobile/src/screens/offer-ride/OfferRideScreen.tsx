@@ -26,6 +26,9 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import polyline from "@mapbox/polyline";
 import { getStoredUserID } from "@/src/services/user.service";
 import { createRide } from "@/src/services/ride.service";
+// --- MODIFICAÇÃO 1: Importar as coordenadas ---
+import { educareCoordinates } from "@/src/constants/coordinates";
+
 
 // Tipos para os dados
 interface LocationDto {
@@ -64,7 +67,16 @@ interface CreateRideData {
   routePath: RoutePoint[];
 }
 
-const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+const Maps_API_KEY = process.env.EXPO_PUBLIC_Maps_API_KEY || "";
+
+// --- MODIFICAÇÃO 2: Criar um objeto de destino fixo ---
+const fixedDestination: LocationDto = {
+  latitude: educareCoordinates.latitude,
+  longitude: educareCoordinates.longitude,
+  name: "Educare",
+  address: "Educare - Centro, Betim" // Você pode ajustar o endereço conforme necessário
+};
+
 
 const OfferRideScreen = () => {
   const insets = useSafeAreaInsets();
@@ -74,8 +86,9 @@ const OfferRideScreen = () => {
   const [originLocation, setOriginLocation] = useState<LocationDto | null>(
     null
   );
+  // --- MODIFICAÇÃO 3: Usar o objeto fixo como estado inicial ---
   const [destinationLocation, setDestinationLocation] =
-    useState<LocationDto | null>(null);
+    useState<LocationDto | null>(fixedDestination); //
   const [startDate, setstartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
@@ -155,7 +168,7 @@ const OfferRideScreen = () => {
           method: "POST", // ← faltava isso
           headers: {
             "Content-Type": "application/json",
-            "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
+            "X-Goog-Api-Key": Maps_API_KEY,
             "X-Goog-FieldMask":
               "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline",
           },
@@ -222,45 +235,6 @@ const OfferRideScreen = () => {
       order: index,
     }));
 
-    // const points: RoutePoint[] = [];
-    // let index = 0;
-    // let lat = 0;
-    // let lng = 0;
-
-    // while (index < encoded.length) {
-    //   let b;
-    //   let shift = 0;
-    //   let result = 0;
-
-    //   do {
-    //     b = encoded.charCodeAt(index++) - 63;
-    //     result |= (b & 0x1f) << shift;
-    //     shift += 5;
-    //   } while (b >= 0x20);
-
-    //   const dlat = (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
-    //   lat += dlat;
-
-    //   shift = 0;
-    //   result = 0;
-
-    //   do {
-    //     b = encoded.charCodeAt(index++) - 63;
-    //     result |= (b & 0x1f) << shift;
-    //     shift += 5;
-    //   } while (b >= 0x20);
-
-    //   const dlng = (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
-    //   lng += dlng;
-
-    //   points.push({
-    //     latitude: lat / 1e5,
-    //     longitude: lng / 1e5,
-    //     order: points.length,
-    //   });
-    // }
-
-    // return points;
   };
 
   // Função para criar a corrida
@@ -611,6 +585,7 @@ const OfferRideScreen = () => {
   );
 };
 
+// ... (seus estilos permanecem os mesmos)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -960,5 +935,4 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
 });
-
 export default OfferRideScreen;
