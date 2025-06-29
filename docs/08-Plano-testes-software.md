@@ -1,25 +1,5 @@
 # Plano de testes de software
 
-<span style="color:red">Pré-requisitos: <a href="02-Especificacao.md"> Especificação do projeto</a></span>, <a href="05-Projeto-interface.md"> Projeto de interface</a>
-
-O plano de testes de software é gerado a partir da especificação do sistema e consiste em casos de teste que deverão ser executados quando a implementação estiver parcial ou totalmente pronta. Apresente os cenários de teste utilizados na realização dos testes da sua aplicação. Escolha cenários de teste que demonstrem os requisitos sendo satisfeitos.
-
-Enumere quais cenários de testes foram selecionados para teste. Neste tópico, o grupo deve detalhar quais funcionalidades foram avaliadas, o grupo de usuários que foi escolhido para participar do teste e as ferramentas utilizadas.
-
-Não deixe de enumerar os casos de teste de forma sequencial e garantir que o(s) requisito(s) associado(s) a cada um deles esteja(m) correto(s) — de acordo com o que foi definido na <a href="02-Especificacao.md">Especificação do projeto</a>.
-
-Por exemplo:
-
-| **Caso de teste**  | **CT-001 – Cadastrar perfil**  |
-|:---: |:---: |
-| Requisito associado | RF-00X - A aplicação deve apresentar, na página principal, a funcionalidade de cadastro de usuários para que estes consigam criar e gerenciar seu perfil. |
-| Objetivo do teste | Verificar se o usuário consegue se cadastrar na aplicação. |
-| Passos | - Acessar o navegador <br> - Informar o endereço do site https://adota-pet.herokuapp.com/src/index.html <br> - Clicar em "Criar conta" <br> - Preencher os campos obrigatórios (e-mail, nome, sobrenome, celular, CPF, senha, confirmação de senha) <br> - Aceitar os termos de uso <br> - Clicar em "Registrar" |
-| Critério de êxito | - O cadastro foi realizado com sucesso. |
-| Responsável pela elaboração do caso de teste | Nome do integrante da equipe. |
-
------
-
 ### **Casos de Teste para os Requisitos Funcionais**
 
 | **Caso de teste** | **CT-001 – Cadastrar novo usuário** |
@@ -106,9 +86,9 @@ Por exemplo:
 | :---: | :---: |
 | **Requisito associado** | RF-009 - Sistema de Avaliação e Feedback: O sistema deve permitir que responsáveis e motoristas se avaliem mutuamente após a conclusão de uma carona. |
 | **Objetivo do teste** | Verificar se, após uma carona ser marcada como concluída, o "Responsável" consegue avaliar o "Motorista". |
-| **Passos** | |
-| **Critério de êxito** | |
-| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+| **Passos** | - Na tela inicial do aplicativo, clicar na aba "Minhas". <br/> - Na tela "Histórico de Caronas", <br/>  - Clique na carona com status "Concluída". <br/> Arraste o modal no fim da tela para cima <br/>- Role a tela para baixo até encontrar a opção "Avaliar Corrida". <br/> - Clique em "Avaliar Corrida". <br/> - Na janela pop-up "Avaliar Corrida", selecione a quantidade de estrelas para aquela corrida. <br/>  - Caso queira adicionar complementar a avaliação, adicione uma mensagem ao campo "Comentário" <br/> - Clique em "Enviar Avaliação". <br/> - Na janela "Avaliação Enviada", clique em "OK". |
+| **Critério de êxito** | A avaliação do usuário é enviada com sucesso. <br/> O sistema exibe uma mensagem de agradecimento pela avaliação |
+| **Responsável pela elaboração do caso de teste** | Guilherme Siqueira Ramos |
 
 <br>
 
@@ -126,19 +106,6 @@ Por exemplo:
 | :---: | :---: |
 | **Requisito associado** | RF-011 - Histórico de Caronas: O sistema deve oferecer um histórico simplificado das caronas realizadas para cada usuário. |
 | **Objetivo do teste** | Verificar se o usuário consegue acessar e visualizar a lista de caronas passadas (concluídas ou canceladas). |
-| **Passos** | |
-| **Critério de êxito** | |
-| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
-
-
-## Ferramentas de testes (opcional)
-
-Comente sobre as ferramentas de testes utilizadas.
- 
-> **Links úteis**:
-> - [IBM - criação e geração de planos de teste](https://www.ibm.com/developerworks/br/local/rational/criacao_geracao_planos_testes_software/index.html)
-> - [Práticas e técnicas de testes ágeis](http://assiste.serpro.gov.br/serproagil/Apresenta/slides.pdf)
-> - [Teste de software: conceitos e tipos de testes](https://blog.onedaytesting.com.br/teste-de-software/)
-> - [Criação e geração de planos de teste de software](https://www.ibm.com/developerworks/br/local/rational/criacao_geracao_planos_testes_software/index.html)
-> - [Ferramentas de teste para JavaScript](https://geekflare.com/javascript-unit-testing/)
-> - [UX Tools](https://uxdesign.cc/ux-user-research-and-user-testing-tools-2d339d379dc7)
+| **Passos** | - Na tela inicial do aplicativo, clicar na aba "Minhas". <br/> - Na tela "Histórico de Caronas", |
+| **Critério de êxito** | Caso o usuário já tenha realizado uma caronas, o sistema deverá listar todas caronas agendadas ou concluídas |
+| **Responsável pela elaboração do caso de teste** | Guilherme Siqueira Ramos |
