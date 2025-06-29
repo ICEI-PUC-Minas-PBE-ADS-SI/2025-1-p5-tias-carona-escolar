@@ -13,7 +13,7 @@ Para cada caso de teste definido no <a href="08-Plano-testes-software.md"> Plano
 
 | **Caso de teste** 	| **CT-009 – Avaliar uma carona concluída** 	|
 |:---:	|:---:	|
-| Requisito associado | RF-008 - Gestão de Perfil do Usuário: O sistema deve permitir que os usuários editem informações básicas de seus perfis. |
+| Requisito associado | RF-009 - Sistema de Avaliação e Feedback: O sistema deve permitir que responsáveis e motoristas se avaliem mutuamente após a conclusão de uma carona. |
 | Registro de evidência | [one-drive/ct-002](https://sgapucminasbr-my.sharepoint.com/personal/1284883_sga_pucminas_br/_layouts/15/guestaccess.aspx?share=EalAVk2cqT5DuoTtrV-mzxwBC-C0nrs42xiUIo8JOTWgjw&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=Cs6gxb) |
 
 | **Caso de teste** 	| **CT-011 – Visualizar histórico de caronas** 	|
