@@ -16,6 +16,11 @@ Para cada caso de teste definido no <a href="08-Plano-testes-software.md"> Plano
 | Requisito associado | RF-002 - Validação de Segurança do Motorista: O sistema deve ter um processo de validação da CNH (Carteira Nacional de Habilitação) quando um usuário se candidata a "Motorista". |
 | Registro de evidência | [one-drive/ct-002](https://sgapucminasbr-my.sharepoint.com/personal/1434009_sga_pucminas_br/_layouts/15/guestaccess.aspx?share=EV6YSJVzwrlMgUXzs-CkBbIBJOiFj_18OorZDgmRQzpD9Q&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=jfIsIU) |
 
+| **Caso de teste** 	| **CT-004 – Cadastrar nova rota de carona (Motorista)**	|
+|:---:	|:---:	|
+| Requisito associado | RF-004 - Criação e Gerenciamento de Rotas (Motorista): O sistema deve permitir que o "Motorista" cadastre suas rotas de ou para a escola Educare. |
+| Registro de evidência | [one-drive/ct-004](https://sgapucminasbr-my.sharepoint.com/personal/1434009_sga_pucminas_br/_layouts/15/guestaccess.aspx?share=ESC35BZM74dGrvUNCUUxjtgBsS8D-ZME3cvAqZyFHUdTKg&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=LEZ3pU) |
+
 | **Caso de teste** 	| **CT-009 – Avaliar uma carona concluída** 	|
 |:---:	|:---:	|
 | Requisito associado | RF-009 - Sistema de Avaliação e Feedback: O sistema deve permitir que responsáveis e motoristas se avaliem mutuamente após a conclusão de uma carona. |
