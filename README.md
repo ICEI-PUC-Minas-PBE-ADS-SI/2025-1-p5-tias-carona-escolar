@@ -52,6 +52,20 @@ npm install
 
 npm run start
 
+# Ride Service
+Em um terminal:
+
+cd src/strada/ride-service
+npm install
+npm run start
+
+# Auth Service
+Em um terminal:
+
+cd src/strada/auth-service
+npm install
+npm run start
+
 ### Frontend (React Native com Expo):
 Entre na pasta do app mobile:
 
