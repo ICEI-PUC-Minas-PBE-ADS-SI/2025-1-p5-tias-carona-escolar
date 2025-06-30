@@ -48,7 +48,7 @@
 | **Objetivo do teste** | Verificar se o "Responsável" consegue buscar e encontrar rotas que atendam às suas necessidades de local e horário. |
 | **Passos** | - Acessar a aplicação mobile. <br> - Clicar em "Vamos começar" <br> - Perpassar o carrosel de boas-vindas. <br> - Clicar em "Entrar agora". <br> - Fazer login com a conta de usuário  <br> - Clicar no campo de pesquisa. <br> - Escolher ponto de partida. <br> - Pesquisar. |
 | **Critério de êxito** | As caronas disponíveis são exibidas em ordem de proximidade com a localização que o usuário escolheu |
-| **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
+| **Responsável pela elaboração do caso de teste** | Otávio Gonçalves Rocha |
 
 <br>
 
