@@ -106,7 +106,7 @@ Atualizado em: 11/05/2025
 | Walyson     | Diagrama ER                        | 11/05/2025  | 11/05/2025 | ✔️    |              |
 | Guilherme     | Adição dos protótipos de telas                        | 11/05/2025  | 11/05/2025 | ✔️    ||
 | Tiago    | Diagrama de fluxo e user flow                        | 11/05/2025  | 11/05/2025 | ✔️    ||
-
+| Luísa | Documentação inicial do projeto | 11/05/2025 | 11/05/2025 | ✔️ | 11/05/2025 |
 
 #### Sprint 4
 
@@ -124,6 +124,7 @@ Atualizado em: 29/06/2025
 | Guilherme     | Adição da funcionalidade de sair | 04/06/2025 | 08/06/2025 | ✔️ | 04/06/2025 |
 | Tiago     | Elaboração da apresentação | 08/06/2025 | 08/06/2025 | ✔️ | 08/06/2025 |
 | Tiago     | Ajustes no serviço de autenticação | 05/06/2025 | 08/06/2025 | ✔️ | 06/06/2025 |
+| Luísa | Elaboração do Plano de Testes de Usabilidade | 05/06/2025 | 08/06/2025 | ✔️ | 08/06/2025 |
 
 #### Sprint 5
 
@@ -145,7 +146,7 @@ Atualizado em: 29/06/2025
 | Luísa | Registro de testes de usabilidade | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
 | Luísa | Preenchimento do CITATION | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
 | Luísa | Gravação do vídeo de apresentação | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
-| Luísa | Caso de teste CT-005 | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
+| Luísa | Caso de teste CT-006 | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
 
 
 Legenda:
