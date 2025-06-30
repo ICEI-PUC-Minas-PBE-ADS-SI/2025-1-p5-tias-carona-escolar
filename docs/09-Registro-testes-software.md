@@ -22,6 +22,11 @@
 | Requisito associado | RF-004 - Criação e Gerenciamento de Rotas (Motorista): O sistema deve permitir que o "Motorista" cadastre suas rotas de ou para a escola Educare. |
 | Registro de evidência | [one-drive/ct-004](https://sgapucminasbr-my.sharepoint.com/personal/1434009_sga_pucminas_br/_layouts/15/guestaccess.aspx?share=ESC35BZM74dGrvUNCUUxjtgBsS8D-ZME3cvAqZyFHUdTKg&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=LEZ3pU) |
 
+| **Caso de teste** 	| CT-005 – Buscar rotas compatíveis (Responsável)|
+|:---:	|:---:	|
+| Requisito associado | RF-005 - Busca e Correspondência de Rotas (Responsável): O sistema deve permitir que o "Responsável" busque por motoristas cujas rotas sejam compatíveis com a necessidade do aluno. |
+| Registro de evidência | [one-drive/ct-005](https://sgapucminasbr-my.sharepoint.com/personal/1434009_sga_pucminas_br/_layouts/15/guestaccess.aspx?share=EaLckaTxkhFEm04OP2Qyww0BjQNzL_1XAfpYXb-4Kpj1Ug&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=LhDKcw) |
+
 | **Caso de teste** | **CT-006 – Solicitar agendamento de carona (Responsável)** |
 |:---:|:---:|
 | **Requisito associado** | RF-006 - Agendamento de Carona (Responsável): O sistema deve permitir que o "Responsável" solicite e agende uma carona para um aluno com um motorista compatível. |
