@@ -140,7 +140,12 @@ Atualizado em: 29/06/2025
 | Guilherme | Casos de teste CT-009, CT-008 | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
 | Tiago | Caso de teste CT-007 | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
 | Tiago | Adicão da funcionalidade de editar perfil | 26/06/2025 | 29/06/2025 | ✔️ | 28/06/2025 |
-
+| Luísa | Preenchimento do README - Instruções de utilização | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
+| Luísa | Plano de testes de usabilidade | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
+| Luísa | Registro de testes de usabilidade | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
+| Luísa | Preenchimento do CITATION | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
+| Luísa | Gravação do vídeo de apresentação | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
+| Luísa | Caso de teste CT-005 | 28/06/2025 | 29/06/2025 | ✔️ | 29/06/2025 |
 
 
 Legenda:
