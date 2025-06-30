@@ -46,15 +46,15 @@
 | :---: | :---: |
 | **Requisito associado** | RF-005 - Busca e Correspondência de Rotas (Responsável): O sistema deve permitir que o "Responsável" busque por motoristas cujas rotas sejam compatíveis com a necessidade do aluno. |
 | **Objetivo do teste** | Verificar se o "Responsável" consegue buscar e encontrar rotas que atendam às suas necessidades de local e horário. |
-| **Passos** | |
-| **Critério de êxito** | |
+| **Passos** | - Acessar a aplicação mobile. <br> - Clicar em "Vamos começar" <br> - Perpassar o carrosel de boas-vindas. <br> - Clicar em "Entrar agora". <br> - Fazer login com a conta de usuário  <br> - Clicar no campo de pesquisa. <br> - Escolher ponto de partida. <br> - Pesquisar. |
+| **Critério de êxito** | As caronas disponíveis são exibidas em ordem de proximidade com a localização que o usuário escolheu |
 | **Responsável pela elaboração do caso de teste** | Nome do integrante da equipe. |
 
 <br>
 
-| **Caso de teste** | **CT-006 – Solicitar agendamento de carona (Responsável)** |
+| **Caso de teste** | **CT-006 – Solicitar carona (Responsável)** |
 | :---: | :---: |
-| **Requisito associado** | RF-006 - Agendamento de Carona (Responsável): O sistema deve permitir que o "Responsável" solicite e agende uma carona para um aluno com um motorista compatível. |
+| **Requisito associado** | RF-006 - Agendamento de Carona (Responsável): O sistema deve permitir que o "Responsável" solicite uma carona para um aluno com um motorista compatível. |
 | **Objetivo do teste** | Verificar se o "Responsável" consegue solicitar uma vaga na rota de um motorista para um de seus alunos. |
 | **Passos** | - Fazer login no aplicativo com uma conta do tipo "Responsável".<br> - Acessar a aba "Minhas".<br> - Selecionar uma carona disponível na lista do histórico.<br> - Visualizar os detalhes da carona.<br> - Clicar no botão "Reservar".<br> - Escolher a rota, ponto de saída e destino desejados.<br> - Clicar em "Solicitar Carona".<br> - Acompanhar o status da solicitação no mapa da aplicação. |
 | **Critério de êxito** | - A solicitação é realizada com sucesso.<br> - A rota solicitada aparece no mapa para acompanhamento em tempo real.<br> - A solicitação é registrada e exibida no histórico de caronas. |
